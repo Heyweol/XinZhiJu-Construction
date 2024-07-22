@@ -8,7 +8,7 @@ It's written in Java with JavaFX and FXGL. Build with maven. It's planned to be 
 - [x] Add background, side pane
 - [x] Implement item placement and removal
 - [ ] Change the background image to cleaner one
-- [ ] Replace items with images
+- [x] Replace items with images
 - [ ] Implement item rotation
 - [ ] Implement view setting
 - [ ] Better UI with CSS
