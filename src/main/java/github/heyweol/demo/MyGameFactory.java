@@ -6,13 +6,23 @@ import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
 
-import com.almasb.fxgl.inventory.ItemStack;
 import com.almasb.fxgl.texture.Texture;
-import github.heyweol.demo.components.DraggableComponent;
+import github.heyweol.demo.components.GridVisualizerComponent;
+import github.heyweol.demo.components.InteractiveItemComponent;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
 public class MyGameFactory implements EntityFactory {
+  
+  private IsometricGrid isometricGrid;
+  private GridVisualizerComponent gridVisualizerComponent;
+  
+  public MyGameFactory(IsometricGrid isometricGrid, GridVisualizerComponent gridVisualizerComponent) {
+    this.isometricGrid = isometricGrid;
+    this.gridVisualizerComponent = gridVisualizerComponent;
+  }
+  
+  
   @Spawns("furniture")
   public Entity spawnFurniture(SpawnData data) {
     return entityBuilder(data)
@@ -36,7 +46,11 @@ public class MyGameFactory implements EntityFactory {
     return entityBuilder(data)
             .type(EntityType.PLACED_ITEM)
             .viewWithBBox(texture)
-            .with(new DraggableComponent())
+//            .with(new SelectableComponent())
+//            .with(new DraggableComponent())
+            .with(new InteractiveItemComponent(isometricGrid,gridVisualizerComponent))
+            .with("itemWidth", item.getWidth())
+            .with("itemLength", item.getLength())
             .build();
   }
   

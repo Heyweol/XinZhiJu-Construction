@@ -1,7 +1,7 @@
 package github.heyweol.demo;
 
 public enum EntityType {
-  ESSENTIAL,
+  HANGING,
   FURNITURE,
   PLANT,
   DECOR,

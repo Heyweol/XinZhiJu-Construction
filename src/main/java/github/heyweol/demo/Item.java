@@ -9,12 +9,16 @@ public class Item {
   private int cost;
   private Image image;
   private String imagePath;
+  private int width;
+  private int length;
   
   
-  public Item(String name, String imageName, int cost) {
+  public Item(String name, String imageName, int cost,int width, int length) {
     this.name = name;
     this.imageName = imageName;
     this.cost = cost;
+    this.width = width;
+    this.length = length;
     this.imagePath = "/assets/textures/" + imageName;
     loadImage();
   }
@@ -49,6 +53,14 @@ public class Item {
   
   public String getImagePath() {
     return imagePath;
+  }
+  
+  public int getWidth() {
+    return width;
+  }
+  
+  public int getLength() {
+    return length;
   }
   
 }

@@ -44,7 +44,7 @@ public class FileUtils {
                   if (matcher.matches()) {
                     String number = matcher.group(3);
                     String relativePath = "s2/" + name + "/" + type + "/" + file.getName();
-                    Item item = new Item(name + "-" + number, relativePath, 50); // Default cost 50
+                    Item item = new Item(name + "-" + number, relativePath, 50,2,2); // Default cost 50
                     itemsForName.add(item);
                     System.out.println("Added item: " + item.getName() + " with path: " + item.getImagePath());
                   } else {
