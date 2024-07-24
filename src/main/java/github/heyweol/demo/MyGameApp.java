@@ -53,7 +53,7 @@ public class MyGameApp extends GameApplication {
   protected void initGame() {
     
     
-    isometricGrid = new IsometricGrid(40, 40, 64, 32,300,0);
+    isometricGrid = new IsometricGrid(40, 40, 64, 32,200,0);
     
     Entity background = entityBuilder()
             .at(200, 0)
@@ -62,8 +62,6 @@ public class MyGameApp extends GameApplication {
     
     gridVisualizerComponent = new GridVisualizerComponent(isometricGrid,200,0);
     background.addComponent(gridVisualizerComponent);
-    
-
     
     FXGL.getGameWorld().addEntityFactory(new MyGameFactory(isometricGrid, gridVisualizerComponent));
     
@@ -78,14 +76,17 @@ public class MyGameApp extends GameApplication {
             .buildAndAttach();
     
     itemBar = new ItemBar(200, 500);
-    Map<String, List<Item>> organizedItems = FileUtils.scanAndOrganizeItems();
+    Map<String, Map<String, List<Item>>> organizedItems = FileUtils.scanAndOrganizeItems();
     
-    itemBar.setOnMouseClicked(e -> {
-      InteractiveItemComponent.deselectAll();
-    });
+//    itemBar.setOnMouseClicked(e -> {
+//      InteractiveItemComponent.deselectAll();
+//    });
     
-    for (Map.Entry<String, List<Item>> entry : organizedItems.entrySet()) {
-      itemBar.addItemType(entry.getKey(), entry.getValue());
+    for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
+      String character = characterEntry.getKey();
+      for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
+        itemBar.addItemType(character, typeEntry.getKey(), typeEntry.getValue());
+      }
     }
     
     FXGL.addUINode(itemBar, 0, 0);

@@ -14,66 +14,66 @@ public class FileUtils {
   private static final String ASSETS_PATH = "src/main/resources/assets/textures/s2/";
   private static final Pattern FILE_PATTERN = Pattern.compile("s2_(.+)_(.+)_(\\d+)\\.png");
   
-  public static Map<String, List<Item>> scanAndOrganizeItems() {
-    Map<String, List<Item>> organizedItems = new HashMap<>();
+  public static Map<String, Map<String, List<Item>>> scanAndOrganizeItems() {
+    Map<String, Map<String, List<Item>>> organizedItems = new HashMap<>();
     File s2Dir = new File(ASSETS_PATH);
     
-    System.out.println("Scanning directory: " + s2Dir.getAbsolutePath());
-    
     if (s2Dir.exists() && s2Dir.isDirectory()) {
-      System.out.println("S2 directory exists and is a directory");
-      File[] nameDirs = s2Dir.listFiles(File::isDirectory);
-      if (nameDirs != null) {
-        System.out.println("Found " + nameDirs.length + " name directories");
-        for (File nameDir : nameDirs) {
-          String name = nameDir.getName();
-          System.out.println("Processing name directory: " + name);
-          List<Item> itemsForName = new ArrayList<>();
+      File[] characterDirs = s2Dir.listFiles(File::isDirectory);
+      if (characterDirs != null) {
+        for (File characterDir : characterDirs) {
+          String character = characterDir.getName();
+          Map<String, List<Item>> itemsByType = new HashMap<>();
           
-          File[] typeDirs = nameDir.listFiles(File::isDirectory);
+          File[] typeDirs = characterDir.listFiles(File::isDirectory);
           if (typeDirs != null) {
             for (File typeDir : typeDirs) {
               String type = typeDir.getName();
-              System.out.println("Processing type directory: " + type);
+              List<Item> itemsForType = new ArrayList<>();
               
               File[] files = typeDir.listFiles((dir, fileName) -> fileName.toLowerCase().endsWith(".png"));
               if (files != null) {
-                System.out.println("Found " + files.length + " PNG files in " + type);
                 for (File file : files) {
                   Matcher matcher = FILE_PATTERN.matcher(file.getName());
                   if (matcher.matches()) {
                     String number = matcher.group(3);
-                    String relativePath = "s2/" + name + "/" + type + "/" + file.getName();
-                    Item item = new Item(name + "-" + number, relativePath, 50,1,1); // Default cost 50
-                    itemsForName.add(item);
-                    System.out.println("Added item: " + item.getName() + " with path: " + item.getImagePath());
-                  } else {
-                    System.out.println("File doesn't match pattern: " + file.getName());
+                    String relativePath = "s2/" + character + "/" + type + "/" + file.getName();
+                    String itemType = convertItemType(type);
+                    Item item = new Item(character + "-" + itemType + "-" + number, relativePath, 50, 1, 1);
+                    itemsForType.add(item);
                   }
                 }
-              } else {
-                System.out.println("No PNG files found in " + type);
+              }
+              
+              if (!itemsForType.isEmpty()) {
+                itemsByType.put(convertItemType(type), itemsForType);
               }
             }
-          } else {
-            System.out.println("No type directories found in " + name);
           }
           
-          if (!itemsForName.isEmpty()) {
-            organizedItems.put(name, itemsForName);
-            System.out.println("Added " + itemsForName.size() + " items for " + name);
-          } else {
-            System.out.println("No items found for " + name);
+          if (!itemsByType.isEmpty()) {
+            organizedItems.put(character, itemsByType);
           }
         }
-      } else {
-        System.out.println("No name directories found");
       }
-    } else {
-      System.out.println("S2 directory does not exist or is not a directory");
     }
     
-    System.out.println("Total categories found: " + organizedItems.size());
     return organizedItems;
   }
+  
+  private static String convertItemType(String originalType) {
+    switch (originalType) {
+      case "guajia":
+        return "hanging";
+      case "qiju":
+        return "furniture";
+      case "zhiwu":
+        return "plant";
+      case "zhuangshi":
+        return "decor";
+      default:
+        return originalType;
+    }
+  }
+  
 }
