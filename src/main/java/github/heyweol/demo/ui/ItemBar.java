@@ -44,7 +44,7 @@ public class ItemBar extends VBox {
     CHARACTER_NAMES.put("lb", "LB");
     CHARACTER_NAMES.put("sc", "SC");
     CHARACTER_NAMES.put("yj", "YJ");
-    CHARACTER_NAMES.put("zc", "ZC");
+    CHARACTER_NAMES.put("zc", "Z");
   }
   
   public ItemBar(double width, double height) {
