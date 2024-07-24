@@ -29,6 +29,7 @@ public class InteractiveItemComponent extends Component {
   private List<Consumer<Boolean>> longPressListeners = new ArrayList<>();
   
   private IsometricGrid isometricGrid;
+  private GridVisualizerComponent gridVisualizerComponent;
   
   static {
     selectionEffect = new DropShadow();
@@ -36,7 +37,6 @@ public class InteractiveItemComponent extends Component {
     selectionEffect.setRadius(10);
   }
   
-  private GridVisualizerComponent gridVisualizerComponent;
   
   public InteractiveItemComponent(IsometricGrid grid, GridVisualizerComponent gridVisualizerComponent) {
     this.isometricGrid = grid;
@@ -66,13 +66,16 @@ public class InteractiveItemComponent extends Component {
   
   private void onMouseDragged(MouseEvent e) {
     if (isDragging) {
-      double newX = e.getSceneX() - dragOffset.getX();
-      double newY = e.getSceneY() - dragOffset.getY();
+      double newX = e.getSceneX();
+      double newY = e.getSceneY();
       Point2D gridPos = isometricGrid.getGridPosition(newX, newY);
       if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(),
               entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
         Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
         entity.setPosition(isoPos);
+        
+        // Trigger z-index update
+        entity.getComponent(ZIndexComponent.class).onUpdate(0);
       }
     }
     e.consume();
@@ -84,6 +87,11 @@ public class InteractiveItemComponent extends Component {
     
     if (isLongPress) {
       notifyLongPressListeners(false);
+      // Update the item's position in the grid
+      Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+      isometricGrid.removeItem(entity);
+      isometricGrid.placeItem(entity, (int) gridPos.getX(), (int) gridPos.getY(),
+              entity.getInt("itemWidth"), entity.getInt("itemLength"));
     } else {
       // Handle click (selection)
       if (selectedEntity != entity) {

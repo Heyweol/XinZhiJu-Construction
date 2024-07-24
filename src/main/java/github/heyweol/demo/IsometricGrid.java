@@ -9,22 +9,31 @@ public class IsometricGrid {
   private final double tileWidth;
   private final double tileHeight;
   private final Entity[][] grid;
+  private final double offsetX;
+  private final double offsetY;
   
-  public IsometricGrid(int width, int length, double tileWidth, double tileHeight) {
+  public IsometricGrid(int width, int length, double tileWidth, double tileHeight, double offsetX, double offsetY) {
     this.gridWidth = width;
     this.gridLength = length;
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
     this.grid = new Entity[width][length];
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
   }
   
   public Point2D getIsometricPosition(int gridX, int gridY) {
-    double x = (gridX - gridY) * (tileWidth / 2);
-    double y = (gridX + gridY) * (tileHeight / 2);
+    double x = offsetX + (gridX - gridY) * (tileWidth / 2);
+    double y = offsetY + (gridX + gridY) * (tileHeight / 2);
     return new Point2D(x, y);
   }
   
-  public Point2D getGridPosition(double x, double y) {
+  public Point2D getGridPosition(double screenX, double screenY) {
+    // Adjust for offset
+    double x = screenX - offsetX;
+    double y = screenY - offsetY;
+    
+    // Convert screen coordinates to grid coordinates
     int gridX = (int) Math.round((x / (tileWidth / 2) + y / (tileHeight / 2)) / 2);
     int gridY = (int) Math.round((y / (tileHeight / 2) - x / (tileWidth / 2)) / 2);
     return new Point2D(gridX, gridY);
@@ -64,20 +73,12 @@ public class IsometricGrid {
     }
   }
   
-  public double getTileWidth() {
-    return tileWidth;
-  }
-  
-  public double getTileHeight() {
-    return tileHeight;
-  }
-  
-  public int getGridWidth() {
-    return gridWidth;
-  }
-  
-  public int getGridLength() {
-    return gridLength;
-  }
+  // Getters
+  public double getTileWidth() { return tileWidth; }
+  public double getTileHeight() { return tileHeight; }
+  public int getGridWidth() { return gridWidth; }
+  public int getGridLength() { return gridLength; }
+  public double getOffsetX() { return offsetX; }
+  public double getOffsetY() { return offsetY; }
   
 }

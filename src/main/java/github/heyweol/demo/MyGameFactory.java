@@ -9,6 +9,7 @@ import com.almasb.fxgl.entity.Spawns;
 import com.almasb.fxgl.texture.Texture;
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
+import github.heyweol.demo.components.ZIndexComponent;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
@@ -49,6 +50,7 @@ public class MyGameFactory implements EntityFactory {
 //            .with(new SelectableComponent())
 //            .with(new DraggableComponent())
             .with(new InteractiveItemComponent(isometricGrid,gridVisualizerComponent))
+            .with(new ZIndexComponent())
             .with("itemWidth", item.getWidth())
             .with("itemLength", item.getLength())
             .build();

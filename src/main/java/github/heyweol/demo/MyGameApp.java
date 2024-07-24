@@ -8,6 +8,7 @@ import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.UserAction;
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
+import github.heyweol.demo.components.ZIndexComponent;
 import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.utils.FileUtils;
@@ -17,7 +18,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,14 +53,14 @@ public class MyGameApp extends GameApplication {
   protected void initGame() {
     
     
-    isometricGrid = new IsometricGrid(20, 20, 64, 32);
+    isometricGrid = new IsometricGrid(40, 40, 64, 32,300,0);
     
     Entity background = entityBuilder()
             .at(200, 0)
             .view(new javafx.scene.shape.Rectangle(500, 500, javafx.scene.paint.Color.TRANSPARENT))
             .buildAndAttach();
     
-    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid);
+    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid,200,0);
     background.addComponent(gridVisualizerComponent);
     
 
@@ -86,8 +89,9 @@ public class MyGameApp extends GameApplication {
     }
     
     FXGL.addUINode(itemBar, 0, 0);
-    
     InteractiveItemComponent.addGlobalSelectionListener(this::handleGlobalSelection);
+    
+    getGameTimer().runAtInterval(this::updateZIndices, Duration.millis(50));
   }
   
   @Override
@@ -256,6 +260,12 @@ public class MyGameApp extends GameApplication {
             .filter(entity -> entity.hasComponent(InteractiveItemComponent.class))
             .findFirst()
             .orElse(null);
+  }
+  
+  private void updateZIndices() {
+    getGameWorld().getEntitiesCopy().stream()
+            .filter(e -> e.hasComponent(InteractiveItemComponent.class))
+            .forEach(e -> e.setZIndex((int) (e.getY() * 100)));
   }
 
 }
