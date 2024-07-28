@@ -25,6 +25,7 @@ public class InteractiveItemComponent extends Component {
   private boolean isDragging = false;
   
   private static List<Runnable> globalSelectionListeners = new ArrayList<>();
+  private static List<Runnable> materialUpdateListeners = new ArrayList<>();
   private List<Runnable> selectionListeners = new ArrayList<>();
   private List<Consumer<Boolean>> longPressListeners = new ArrayList<>();
   
@@ -92,6 +93,7 @@ public class InteractiveItemComponent extends Component {
       isometricGrid.removeItem(entity);
       isometricGrid.placeItem(entity, (int) gridPos.getX(), (int) gridPos.getY(),
               entity.getInt("itemWidth"), entity.getInt("itemLength"));
+      notifyMaterialUpdateListeners();
     } else {
       // Handle click (selection)
       if (selectedEntity != entity) {
@@ -152,6 +154,8 @@ public class InteractiveItemComponent extends Component {
     if (selectedEntity != null) {
       clearSelectionEffect(selectedEntity);
       selectedEntity = null;
+      notifyGlobalSelectionListeners();
+      notifyMaterialUpdateListeners();
     }
   }
   
@@ -171,7 +175,13 @@ public class InteractiveItemComponent extends Component {
     longPressListeners.forEach(listener -> listener.accept(isLongPressActive));
   }
   
+  public static void addMaterialUpdateListener(Runnable listener) {
+    materialUpdateListeners.add(listener);
+  }
   
+  private static void notifyMaterialUpdateListeners() {
+    materialUpdateListeners.forEach(Runnable::run);
+  }
   
   public static void addGlobalSelectionListener(Runnable listener) {
     globalSelectionListeners.add(listener);

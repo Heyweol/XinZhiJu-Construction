@@ -12,9 +12,7 @@ import github.heyweol.demo.components.InteractiveItemComponent;
 import github.heyweol.demo.components.ZIndexComponent;
 import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
-import github.heyweol.demo.utils.FileUtils;
-import github.heyweol.demo.utils.JsonLoader;
-
+import github.heyweol.demo.ui.MaterialSummaryWindow;
 import github.heyweol.demo.utils.ResourceManager;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
@@ -24,20 +22,15 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
-
-
 public class MyGameApp extends GameApplication {
-
   
   private static final Logger LOGGER = Logger.getLogger(MyGameApp.class.getName());
   
@@ -49,34 +42,31 @@ public class MyGameApp extends GameApplication {
   private ItemBar itemBar;
   private List<Entity> placedItems;
   private HBox currentToolbar = null;
-  private  IsometricGrid isometricGrid;
+  private IsometricGrid isometricGrid;
   private GridVisualizerComponent gridVisualizerComponent;
   private List<Item> allItems;
   private Map<String, Integer> materialPrices;
+  private MaterialSummaryWindow materialSummaryWindow;
+  private Map<String, Integer> totalMaterials = new HashMap<>();
   
   @Override
   protected void initSettings(GameSettings settings) {
-//    settings.setWidth(800);
     settings.setHeight(500);
     settings.setPreserveResizeRatio(true);
     settings.setTitle("心纸居");
     settings.setVersion("v0.1");
-    
   }
-  
   
   @Override
   protected void initGame() {
-    
-    
-    isometricGrid = new IsometricGrid(40, 40, 64, 32,200,0);
+    isometricGrid = new IsometricGrid(40, 40, 64, 32, 200, 0);
     
     Entity background = entityBuilder()
             .at(200, 0)
             .view(new javafx.scene.shape.Rectangle(500, 500, javafx.scene.paint.Color.TRANSPARENT))
             .buildAndAttach();
     
-    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid,200,0);
+    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid, 200, 0);
     background.addComponent(gridVisualizerComponent);
     
     FXGL.getGameWorld().addEntityFactory(new MyGameFactory(isometricGrid, gridVisualizerComponent));
@@ -92,55 +82,6 @@ public class MyGameApp extends GameApplication {
             .buildAndAttach();
     
     itemBar = new ItemBar(200, 500);
-//    Map<String, Map<String, List<Item>>> organizedItems = FileUtils.scanAndOrganizeItems();
-//
-////    itemBar.setOnMouseClicked(e -> {
-////      InteractiveItemComponent.deselectAll();
-////    });
-//
-//    for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
-//      String character = characterEntry.getKey();
-//      for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
-//        itemBar.addItemType(character, typeEntry.getKey(), typeEntry.getValue());
-//      }
-//    }
-    
-//    try {
-//      List<Item> allItems = JsonLoader.loadItems();
-//      LOGGER.info("Loaded " + allItems.size() + " items");
-//
-//      // Group items by character and type
-//      Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
-//              .collect(Collectors.groupingBy(
-//                      item -> item.getFilename().split("_")[1],
-//                      Collectors.groupingBy(item -> {
-//                        String[] parts = item.getFilename().split("_");
-//                        switch(parts[2]) {
-//                          case "guajian": return "hanging";
-//                          case "qiju": return "furniture";
-//                          case "zhiwu": return "plant";
-//                          case "zhuangshi": return "decor";
-//                          default: return "other";
-//                        }
-//                      })
-//              ));
-//
-//      LOGGER.info("Organized items into " + organizedItems.size() + " characters");
-//
-//      for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
-//        String character = characterEntry.getKey();
-//        for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
-//          String type = typeEntry.getKey();
-//          List<Item> items = typeEntry.getValue();
-//          LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
-//          itemBar.addItemType(character, type, items);
-//        }
-//      }
-//    } catch (IOException e) {
-//      LOGGER.severe("Error loading items: " + e.getMessage());
-//      e.printStackTrace();
-//    }
-    
     List<Item> allItems = ResourceManager.loadItems();
     
     Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
@@ -169,7 +110,13 @@ public class MyGameApp extends GameApplication {
     }
     
     FXGL.addUINode(itemBar, 0, 0);
+    
+    materialSummaryWindow = new MaterialSummaryWindow();
+    FXGL.addUINode(materialSummaryWindow, FXGL.getAppWidth() - 200, 20);
+    materialSummaryWindow.setVisible(true);
+    
     InteractiveItemComponent.addGlobalSelectionListener(this::handleGlobalSelection);
+    InteractiveItemComponent.addMaterialUpdateListener(this::updateMaterialSummary);
     
     getGameTimer().runAtInterval(this::updateZIndices, Duration.millis(50));
   }
@@ -191,6 +138,7 @@ public class MyGameApp extends GameApplication {
             Entity placedItem = spawn("placedItem", new SpawnData(isoPos.getX(), isoPos.getY())
                     .put("item", selectedItem));
             isometricGrid.placeItem(placedItem, (int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength());
+            updateMaterialSummary();
           }
           
           itemBar.deselectItem();
@@ -221,23 +169,24 @@ public class MyGameApp extends GameApplication {
   
   @Override
   protected void initPhysics() {
-  
   }
   
   @Override
   protected void initGameVars(Map<String, Object> vars) {
     super.initGameVars(vars);
-
   }
   
-  
+  @Override
+  protected void onUpdate(double tpf) {
+    super.onUpdate(tpf);
+  }
   
   public static void main(String[] args) {
     launch(args);
   }
   
   private void addInteractionButtons(Entity placedItem) {
-    HBox toolbar = new HBox(5); // 5 pixels spacing between buttons
+    HBox toolbar = new HBox(5);
     toolbar.setStyle("-fx-background-color: rgba(200, 200, 200, 0.7); -fx-padding: 5; -fx-background-radius: 5;");
     
     Button rotateBtn = createButton("Rotate");
@@ -246,8 +195,8 @@ public class MyGameApp extends GameApplication {
     removeBtn.setOnAction(e -> {
       placedItem.removeFromWorld();
       Item item = placedItem.getObject("item");
-//      updateTotalCost(-item.getCost());
       FXGL.removeUINode(toolbar);
+      updateMaterialSummary();
     });
     
     rotateBtn.setOnAction(e -> {
@@ -269,7 +218,6 @@ public class MyGameApp extends GameApplication {
       });
     });
     
-    // Add a listener to update toolbar position when the item moves
     placedItem.xProperty().addListener((obs, old, newX) -> updateToolbarPosition(placedItem, toolbar));
     placedItem.yProperty().addListener((obs, old, newY) -> updateToolbarPosition(placedItem, toolbar));
   }
@@ -286,6 +234,7 @@ public class MyGameApp extends GameApplication {
       Item item = placedItem.getObject("item");
       isometricGrid.removeItem(placedItem);
       removeCurrentToolbar();
+      updateMaterialSummary();
     });
     
     rotateBtn.setOnAction(e -> {
@@ -325,6 +274,18 @@ public class MyGameApp extends GameApplication {
       FXGL.addUINode(currentToolbar);
       updateToolbarPosition(selectedEntity, currentToolbar);
     }
+    updateMaterialSummary();
+  }
+  
+  private void updateMaterialSummary() {
+    totalMaterials.clear();
+    getGameWorld().getEntitiesByType(EntityType.PLACED_ITEM).forEach(entity -> {
+      Item item = entity.getObject("item");
+      for (Map.Entry<String, Integer> entry : item.getMaterialList().entrySet()) {
+        totalMaterials.merge(entry.getKey(), entry.getValue(), Integer::sum);
+      }
+    });
+    materialSummaryWindow.updateMaterials(totalMaterials);
   }
   
   private void removeCurrentToolbar() {
@@ -347,5 +308,4 @@ public class MyGameApp extends GameApplication {
             .filter(e -> e.hasComponent(InteractiveItemComponent.class))
             .forEach(e -> e.setZIndex((int) (e.getY() * 100)));
   }
-
 }
