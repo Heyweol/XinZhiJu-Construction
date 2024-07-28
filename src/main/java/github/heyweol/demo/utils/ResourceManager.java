@@ -8,16 +8,23 @@ import github.heyweol.demo.Item;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ResourceManager {
   private static final Logger LOGGER = Logger.getLogger(ResourceManager.class.getName());
   private static final Map<String, Image> imageCache = new HashMap<>();
   private static final ObjectMapper objectMapper = new ObjectMapper()
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  
+  private static List<Item> loadedItems;
+  private static Map<String, List<Item>> itemsByBaseName;
+  
+  public static void initialize() {
+    loadItems();
+    preloadImages();
+  }
   
   public static Image getImage(String path) {
     return imageCache.computeIfAbsent(path, k -> {
@@ -34,23 +41,39 @@ public class ResourceManager {
     });
   }
   
-  public static List<Item> loadItems() {
+  public static void loadItems() {
     try (InputStream is = ResourceManager.class.getResourceAsStream("/assets/data/items.json")) {
       if (is == null) {
         LOGGER.severe("Cannot find items.json");
-        return List.of();
+        loadedItems = new ArrayList<>();
+        return;
       }
-      List<Item> items = objectMapper.readValue(is, new TypeReference<List<Item>>() {});
-      // Preload images for all items
-      for (Item item : items) {
-        getImage(item.getImageName());
-      }
-      return items;
+      loadedItems = objectMapper.readValue(is, new TypeReference<List<Item>>() {});
+      LOGGER.info("Loaded " + loadedItems.size() + " items");
+      
+      // Organize items by base name
+      itemsByBaseName = loadedItems.stream()
+              .collect(Collectors.groupingBy(item -> item.getName().split("·")[0]));
+      
     } catch (IOException e) {
       LOGGER.severe("Failed to load items: " + e.getMessage());
-      e.printStackTrace(); // Add this line for more detailed error information
-      return List.of();
+      e.printStackTrace();
+      loadedItems = new ArrayList<>();
     }
+  }
+  
+  private static void preloadImages() {
+    for (Item item : loadedItems) {
+      getImage(item.getImageName());
+    }
+  }
+  
+  public static List<Item> getAllItems() {
+    return new ArrayList<>(loadedItems);
+  }
+  
+  public static List<Item> getItemsByBaseName(String baseName) {
+    return itemsByBaseName.getOrDefault(baseName, new ArrayList<>());
   }
   
   public static void clearCache() {

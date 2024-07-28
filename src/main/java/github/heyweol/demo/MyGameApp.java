@@ -84,7 +84,8 @@ public class MyGameApp extends GameApplication {
             .buildAndAttach();
     
     itemBar = new ItemBar(200, 500);
-    List<Item> allItems = ResourceManager.loadItems();
+    ResourceManager.initialize();
+    List<Item> allItems = ResourceManager.getAllItems();
     
     Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
             .collect(Collectors.groupingBy(
@@ -277,14 +278,7 @@ public class MyGameApp extends GameApplication {
   }
   
   private void handleGlobalSelection() {
-    removeCurrentToolbar();
-    
     Entity selectedEntity = InteractiveItemComponent.getSelectedEntity();
-    if (selectedEntity != null) {
-      currentToolbar = createToolbar(selectedEntity);
-      FXGL.addUINode(currentToolbar);
-      updateToolbarPosition(selectedEntity, currentToolbar);
-    }
     updateMaterialSummary();
   }
   
