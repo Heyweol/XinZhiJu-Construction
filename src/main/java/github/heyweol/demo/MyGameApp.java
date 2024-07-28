@@ -15,6 +15,7 @@ import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.utils.FileUtils;
 import github.heyweol.demo.utils.JsonLoader;
 
+import github.heyweol.demo.utils.ResourceManager;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -104,40 +105,67 @@ public class MyGameApp extends GameApplication {
 //      }
 //    }
     
-    try {
-      List<Item> allItems = JsonLoader.loadItems();
-      LOGGER.info("Loaded " + allItems.size() + " items");
-      
-      // Group items by character and type
-      Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
-              .collect(Collectors.groupingBy(
-                      item -> item.getFilename().split("_")[1],
-                      Collectors.groupingBy(item -> {
-                        String[] parts = item.getFilename().split("_");
-                        switch(parts[2]) {
-                          case "guajian": return "hanging";
-                          case "qiju": return "furniture";
-                          case "zhiwu": return "plant";
-                          case "zhuangshi": return "decor";
-                          default: return "other";
-                        }
-                      })
-              ));
-      
-      LOGGER.info("Organized items into " + organizedItems.size() + " characters");
-      
-      for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
-        String character = characterEntry.getKey();
-        for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
-          String type = typeEntry.getKey();
-          List<Item> items = typeEntry.getValue();
-          LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
-          itemBar.addItemType(character, type, items);
-        }
+//    try {
+//      List<Item> allItems = JsonLoader.loadItems();
+//      LOGGER.info("Loaded " + allItems.size() + " items");
+//
+//      // Group items by character and type
+//      Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
+//              .collect(Collectors.groupingBy(
+//                      item -> item.getFilename().split("_")[1],
+//                      Collectors.groupingBy(item -> {
+//                        String[] parts = item.getFilename().split("_");
+//                        switch(parts[2]) {
+//                          case "guajian": return "hanging";
+//                          case "qiju": return "furniture";
+//                          case "zhiwu": return "plant";
+//                          case "zhuangshi": return "decor";
+//                          default: return "other";
+//                        }
+//                      })
+//              ));
+//
+//      LOGGER.info("Organized items into " + organizedItems.size() + " characters");
+//
+//      for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
+//        String character = characterEntry.getKey();
+//        for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
+//          String type = typeEntry.getKey();
+//          List<Item> items = typeEntry.getValue();
+//          LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
+//          itemBar.addItemType(character, type, items);
+//        }
+//      }
+//    } catch (IOException e) {
+//      LOGGER.severe("Error loading items: " + e.getMessage());
+//      e.printStackTrace();
+//    }
+    
+    List<Item> allItems = ResourceManager.loadItems();
+    
+    Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
+            .collect(Collectors.groupingBy(
+                    item -> item.getFilename().split("_")[1],
+                    Collectors.groupingBy(item -> {
+                      String[] parts = item.getFilename().split("_");
+                      switch(parts[2]) {
+                        case "guajian": return "hanging";
+                        case "qiju": return "furniture";
+                        case "zhiwu": return "plant";
+                        case "zhuangshi": return "decor";
+                        default: return "other";
+                      }
+                    })
+            ));
+    
+    for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
+      String character = characterEntry.getKey();
+      for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
+        String type = typeEntry.getKey();
+        List<Item> items = typeEntry.getValue();
+        LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
+        itemBar.addItemType(character, type, items);
       }
-    } catch (IOException e) {
-      LOGGER.severe("Error loading items: " + e.getMessage());
-      e.printStackTrace();
     }
     
     FXGL.addUINode(itemBar, 0, 0);

@@ -1,10 +1,14 @@
 package github.heyweol.demo;
 
-import com.almasb.fxgl.dsl.FXGL;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import github.heyweol.demo.utils.ResourceManager;
 import javafx.scene.image.Image;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Item {
   private String filename;
@@ -14,27 +18,55 @@ public class Item {
   private boolean canBePlacedOutside;
   private Map<String, Integer> materialList;
   private String unicode;
+  
+  @JsonIgnore
   private Image image;
   
-  public Item(String filename, String name, String imageName, List<Integer> size, boolean canBePlacedOutside, Map<String, Integer> materialList, String unicode) {
+  @JsonCreator
+  public Item(@JsonProperty("filename") String filename,
+              @JsonProperty("name") String name,
+              @JsonProperty("size") String sizeString,
+              @JsonProperty("outside") String outside,
+              @JsonProperty("material_list") List<String> materialListStrings) {
     this.filename = filename;
     this.name = name;
-    this.imageName = imageName;
-    this.size = size;
-    this.canBePlacedOutside = canBePlacedOutside;
-    this.materialList = materialList;
-    this.unicode = unicode;
-    loadImage();
+    this.imageName = constructImagePath(filename);
+    this.size = parseSize(sizeString);
+    this.canBePlacedOutside = "Y".equals(outside);
+    this.materialList = parseMaterialList(materialListStrings);
+    this.unicode = determineUnicode(filename);
   }
   
-  private void loadImage() {
-    try {
-      this.image = FXGL.image(imageName);
-    } catch (Exception e) {
-      System.err.println("Failed to load image: " + imageName);
-      e.printStackTrace();
-      this.image = null;
+  private String constructImagePath(String filename) {
+    String[] parts = filename.split("_");
+    if (parts.length < 4) {
+      throw new IllegalArgumentException("Invalid filename format: " + filename);
     }
+    String characterName = parts[1];
+    String itemType = parts[2];
+    return "s2/" + characterName + "/" + itemType + "/" + filename;
+  }
+  
+  private List<Integer> parseSize(String sizeString) {
+    String[] sizes = sizeString.replaceAll("[\\[\\]]", "").split(",");
+    return List.of(Integer.parseInt(sizes[0].trim()), Integer.parseInt(sizes[1].trim()));
+  }
+  
+  private Map<String, Integer> parseMaterialList(List<String> materialListStrings) {
+    return materialListStrings.stream()
+            .map(s -> s.replaceAll("\"", "").split(":"))
+            .collect(Collectors.toMap(
+                    parts -> parts[0].trim(),
+                    parts -> Integer.parseInt(parts[1].trim())
+            ));
+  }
+  
+  private String determineUnicode(String filename) {
+    if (filename.contains("guajian")) return "\u1F3A8";
+    else if (filename.contains("qiju")) return "\u1F6CB";
+    else if (filename.contains("zhiwu")) return "\u1F331";
+    else if (filename.contains("zhuangshi")) return "\u1F381";
+    else return "\u2753";
   }
   
   // Getters
@@ -45,15 +77,21 @@ public class Item {
   public boolean canBePlacedOutside() { return canBePlacedOutside; }
   public Map<String, Integer> getMaterialList() { return materialList; }
   public String getUnicode() { return unicode; }
-  public Image getImage() { return image; }
   
   public int getWidth() { return size.get(0); }
   public int getLength() { return size.get(1); }
   
-  // Method to calculate total cost based on material prices
-  public int calculateCost(Map<String, Integer> materialPrices) {
+  @JsonIgnore
+  public Image getImage() {
+    if (image == null) {
+      image = ResourceManager.getImage(imageName);
+    }
+    return image;
+  }
+  
+  public String getMaterialsAsString() {
     return materialList.entrySet().stream()
-            .mapToInt(entry -> entry.getValue() * materialPrices.getOrDefault(entry.getKey(), 0))
-            .sum();
+            .map(entry -> entry.getKey() + ": " + entry.getValue())
+            .collect(Collectors.joining(", "));
   }
 }

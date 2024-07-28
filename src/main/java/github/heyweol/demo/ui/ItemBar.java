@@ -2,6 +2,7 @@ package github.heyweol.demo.ui;
 
 import com.almasb.fxgl.dsl.FXGL;
 import github.heyweol.demo.Item;
+import github.heyweol.demo.utils.ResourceManager;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
@@ -14,6 +15,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.materialdesign2.MaterialDesignA;
@@ -104,7 +106,7 @@ public class ItemBar extends VBox {
     VBox card = new VBox(5);
     card.setStyle("-fx-background-color: #E0E0E0; -fx-padding: 5; -fx-background-radius: 5;");
     
-    ImageView imageView = new ImageView(item.getImage());
+    ImageView imageView = new ImageView(ResourceManager.getImage(item.getImageName()));
     imageView.setFitWidth(50);
     imageView.setFitHeight(50);
     imageView.setPreserveRatio(true);
@@ -114,21 +116,11 @@ public class ItemBar extends VBox {
     nameLabel.setWrapText(true);
     nameLabel.setMaxWidth(60);
     
-    FontIcon icon = new FontIcon(FontAwesomeSolid.QUESTION);
-    icon.setIconSize(20);
+    Text materialsText = new Text(item.getMaterialsAsString());
+    materialsText.setFont(Font.font("System", 8));
+    materialsText.setWrappingWidth(60);
     
-    // Set the icon based on the item type
-    if (item.getFilename().contains("guajian")) {
-      icon.setIconCode(FontAwesomeSolid.IMAGE);
-    } else if (item.getFilename().contains("qiju")) {
-      icon.setIconCode(FontAwesomeSolid.COUCH);
-    } else if (item.getFilename().contains("zhiwu")) {
-      icon.setIconCode(FontAwesomeSolid.LEAF);
-    } else if (item.getFilename().contains("zhuangshi")) {
-      icon.setIconCode(FontAwesomeSolid.PAINT_BRUSH);
-    }
-    
-    card.getChildren().addAll(imageView, nameLabel, icon);
+    card.getChildren().addAll(imageView, nameLabel, materialsText);
     
     // Set up drag-and-drop
     card.setOnDragDetected(event -> {

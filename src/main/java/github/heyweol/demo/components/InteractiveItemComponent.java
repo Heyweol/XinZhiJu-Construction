@@ -136,8 +136,12 @@ public class InteractiveItemComponent extends Component {
   }
   
   private static void clearSelectionEffect(Entity entity) {
-    Texture texture = (Texture) entity.getViewComponent().getChildren().get(0);
-    texture.setEffect(null);
+    if (entity != null && entity.isActive()) {
+      entity.getViewComponent().getChildren().stream()
+              .filter(node -> node instanceof Texture)
+              .findFirst()
+              .ifPresent(texture -> ((Texture) texture).setEffect(null));
+    }
   }
   
   public static Entity getSelectedEntity() {
