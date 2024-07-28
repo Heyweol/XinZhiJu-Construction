@@ -31,6 +31,7 @@ public class InteractiveItemComponent extends Component {
   
   private IsometricGrid isometricGrid;
   private GridVisualizerComponent gridVisualizerComponent;
+  private boolean isMirrored = false;
   
   static {
     selectionEffect = new DropShadow();
@@ -130,6 +131,16 @@ public class InteractiveItemComponent extends Component {
       selectedEntity = null;
       notifyGlobalSelectionListeners();
     }
+  }
+  
+  public void mirror() {
+    isMirrored = !isMirrored;
+    Texture texture = (Texture) entity.getViewComponent().getChildren().get(0);
+    texture.setScaleX(isMirrored ? -1 : 1);
+  }
+  
+  public boolean isMirrored() {
+    return isMirrored;
   }
   
   private void applySelectionEffect(Entity entity) {

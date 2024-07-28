@@ -21,6 +21,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.HashMap;
 import java.util.List;
@@ -226,8 +228,8 @@ public class MyGameApp extends GameApplication {
     HBox toolbar = new HBox(5);
     toolbar.setStyle("-fx-background-color: rgba(200, 200, 200, 0.7); -fx-padding: 5; -fx-background-radius: 5;");
     
-    Button rotateBtn = createButton("Rotate");
-    Button removeBtn = createButton("Remove");
+    Button mirrorBtn = createButton("", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
+    Button removeBtn = createButton("", new FontIcon(FontAwesomeSolid.TRASH));
     
     removeBtn.setOnAction(e -> {
       placedItem.removeFromWorld();
@@ -237,17 +239,26 @@ public class MyGameApp extends GameApplication {
       updateMaterialSummary();
     });
     
-    rotateBtn.setOnAction(e -> {
-      placedItem.rotateBy(90);
+    mirrorBtn.setOnAction(e -> {
+      InteractiveItemComponent itemComponent = placedItem.getComponent(InteractiveItemComponent.class);
+      itemComponent.mirror();
     });
     
-    toolbar.getChildren().addAll(rotateBtn, removeBtn);
+    toolbar.getChildren().addAll(mirrorBtn, removeBtn);
     
     return toolbar;
   }
   
   private Button createButton(String text) {
     Button button = new Button(text);
+    button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;");
+    button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: lightgray; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
+    button.setOnMouseExited(e -> button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
+    return button;
+  }
+  
+  private Button createButton(String text, FontIcon icon) {
+    Button button = new Button(text, icon);
     button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;");
     button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: lightgray; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
     button.setOnMouseExited(e -> button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
