@@ -29,10 +29,14 @@ import java.util.Map;
 import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
+
+
 public class MyGameApp extends GameApplication {
+
   
   private static final Logger LOGGER = Logger.getLogger(MyGameApp.class.getName());
   
@@ -56,6 +60,7 @@ public class MyGameApp extends GameApplication {
     settings.setPreserveResizeRatio(true);
     settings.setTitle("心纸居");
     settings.setVersion("v0.1");
+    
   }
   
   
@@ -100,7 +105,7 @@ public class MyGameApp extends GameApplication {
 //    }
     
     try {
-      allItems = JsonLoader.loadItems();
+      List<Item> allItems = JsonLoader.loadItems();
       LOGGER.info("Loaded " + allItems.size() + " items");
       
       // Group items by character and type

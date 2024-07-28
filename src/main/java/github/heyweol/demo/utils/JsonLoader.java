@@ -6,9 +6,10 @@ import github.heyweol.demo.Item;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.logging.Logger;
 
 public class JsonLoader {
@@ -16,18 +17,30 @@ public class JsonLoader {
   
   public static List<Item> loadItems() throws IOException {
     ObjectMapper mapper = new ObjectMapper();
-    InputStream inputStream = JsonLoader.class.getResourceAsStream("/assets/data/items.json");
-    if (inputStream == null) {
-      LOGGER.severe("Could not find items.json file");
-      return List.of();
+    String resourcePath = "/assets/data/items.json";
+    try (InputStream is = JsonLoader.class.getResourceAsStream(resourcePath)) {
+      if (is == null) {
+        LOGGER.severe("Cannot find resource: " + resourcePath);
+        throw new IOException("Cannot find items.json. Ensure it's in the resources/assets/data/ directory.");
+      }
+      
+      List<Map<String, Object>> itemsData = mapper.readValue(is, new TypeReference<List<Map<String, Object>>>() {});
+      List<Item> items = new ArrayList<>();
+      
+      for (Map<String, Object> data : itemsData) {
+        try {
+          Item item = convertMapToItem(data);
+          items.add(item);
+        } catch (Exception e) {
+          LOGGER.warning("Failed to parse item: " + data.get("name") + ". Error: " + e.getMessage());
+          LOGGER.warning("Item data: " + data);
+          e.printStackTrace();
+        }
+      }
+      
+      LOGGER.info("Loaded " + items.size() + " items");
+      return items;
     }
-    List<Map<String, Object>> itemsData = mapper.readValue(inputStream, new TypeReference<List<Map<String, Object>>>(){});
-    
-    LOGGER.info("Loaded " + itemsData.size() + " items from JSON");
-    
-    List<Item> items = itemsData.stream().map(JsonLoader::convertMapToItem).collect(Collectors.toList());
-    LOGGER.info("Converted " + items.size() + " items");
-    return items;
   }
   
   private static Item convertMapToItem(Map<String, Object> map) {
@@ -37,15 +50,27 @@ public class JsonLoader {
     List<Integer> size = parseSize((String) map.get("size"));
     boolean canBePlacedOutside = "Y".equals(map.get("outside"));
     Map<String, Integer> materialList = parseMaterialList((List<String>) map.get("material_list"));
-    String unicode = (String) map.get("unicode");
+    String unicode = determineUnicode(filename);
     
     LOGGER.fine("Converted item: " + name + ", Image path: " + imageName);
     
     return new Item(filename, name, imageName, size, canBePlacedOutside, materialList, unicode);
   }
   
+  private static Map<String, Integer> parseMaterialList(List<String> materialListStrings) {
+    Map<String, Integer> materialList = new HashMap<>();
+    for (String materialString : materialListStrings) {
+      String[] parts = materialString.replaceAll("\"", "").split(":");
+      if (parts.length == 2) {
+        String material = parts[0].trim();
+        int quantity = Integer.parseInt(parts[1].trim());
+        materialList.put(material, quantity);
+      }
+    }
+    return materialList;
+  }
+  
   private static String constructImagePath(String filename) {
-    // filename format: s2_<charactername>_<itemtype>_<number>.png
     String[] parts = filename.split("_");
     if (parts.length < 4) {
       LOGGER.warning("Invalid filename format: " + filename);
@@ -58,15 +83,34 @@ public class JsonLoader {
   
   private static List<Integer> parseSize(String sizeString) {
     String[] sizes = sizeString.replaceAll("[\\[\\]]", "").split(",");
-    return List.of(Integer.parseInt(sizes[0]), Integer.parseInt(sizes[1]));
+    return List.of(Integer.parseInt(sizes[0].trim()), Integer.parseInt(sizes[1].trim()));
   }
   
-  private static Map<String, Integer> parseMaterialList(List<String> materialListStrings) {
-    return materialListStrings.stream()
-            .map(s -> s.replaceAll("\"", "").split(":"))
-            .collect(Collectors.toMap(
-                    arr -> arr[0],
-                    arr -> Integer.parseInt(arr[1])
-            ));
+  private static Map<String, Integer> parseMaterialList(String materialListString) {
+    Map<String, Integer> materialList = new HashMap<>();
+    String[] materials = materialListString.split(",");
+    for (String material : materials) {
+      String[] parts = material.replaceAll("\"", "").split(":");
+      if (parts.length == 2) {
+        String materialName = parts[0].trim();
+        int quantity = Integer.parseInt(parts[1].trim());
+        materialList.put(materialName, quantity);
+      }
+    }
+    return materialList;
+  }
+  
+  private static String determineUnicode(String filename) {
+    if (filename.contains("guajian")) {
+      return "fas-image"; // FontAwesome Solid image icon
+    } else if (filename.contains("qiju")) {
+      return "mdi-chair-rolling"; // Material Design chair icon
+    } else if (filename.contains("zhiwu")) {
+      return "fas-leaf"; // FontAwesome Solid leaf icon
+    } else if (filename.contains("zhuangshi")) {
+      return "fas-image"; // FontAwesome Solid palette icon
+    } else {
+      return "fas-question"; // FontAwesome Solid question icon
+    }
   }
 }
