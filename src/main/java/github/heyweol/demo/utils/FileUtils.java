@@ -39,8 +39,8 @@ public class FileUtils {
                     String number = matcher.group(3);
                     String relativePath = "s2/" + character + "/" + type + "/" + file.getName();
                     String itemType = convertItemType(type);
-                    Item item = new Item(character + "-" + itemType + "-" + number, relativePath, 50, 1, 1);
-                    itemsForType.add(item);
+//                    Item item = new Item(character + "-" + itemType + "-" + number, relativePath, 50, 1, 1);
+//                    itemsForType.add(item);
                   }
                 }
               }

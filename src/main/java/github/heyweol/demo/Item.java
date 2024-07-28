@@ -2,69 +2,58 @@ package github.heyweol.demo;
 
 import com.almasb.fxgl.dsl.FXGL;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+
+import java.util.List;
+import java.util.Map;
 
 public class Item {
+  private String filename;
   private String name;
   private String imageName;
-  private int cost;
+  private List<Integer> size;
+  private boolean canBePlacedOutside;
+  private Map<String, Integer> materialList;
+  private String unicode;
   private Image image;
-  private String imagePath;
-  private int width;
-  private int length;
   
-  
-  public Item(String name, String imageName, int cost,int width, int length) {
+  public Item(String filename, String name, String imageName, List<Integer> size, boolean canBePlacedOutside, Map<String, Integer> materialList, String unicode) {
+    this.filename = filename;
     this.name = name;
     this.imageName = imageName;
-    this.cost = cost;
-    this.width = width;
-    this.length = length;
-    this.imagePath = "/assets/textures/" + imageName;
+    this.size = size;
+    this.canBePlacedOutside = canBePlacedOutside;
+    this.materialList = materialList;
+    this.unicode = unicode;
     loadImage();
   }
   
   private void loadImage() {
     try {
-      this.image = FXGL.getAssetLoader().loadImage(imageName);
+      this.image = FXGL.image(imageName);
     } catch (Exception e) {
       System.err.println("Failed to load image: " + imageName);
-      System.err.println("Full path attempted: " + FXGL.getAssetLoader().getClass().getResource("/" + imageName));
       e.printStackTrace();
-      // Load a placeholder image or set to null
       this.image = null;
     }
   }
   
-  public String getName() {
-    return name;
-  }
+  // Getters
+  public String getFilename() { return filename; }
+  public String getName() { return name; }
+  public String getImageName() { return imageName; }
+  public List<Integer> getSize() { return size; }
+  public boolean canBePlacedOutside() { return canBePlacedOutside; }
+  public Map<String, Integer> getMaterialList() { return materialList; }
+  public String getUnicode() { return unicode; }
+  public Image getImage() { return image; }
   
-  public String getImageName() {
-    return imageName;
-  }
+  public int getWidth() { return size.get(0); }
+  public int getLength() { return size.get(1); }
   
-  public Image getImage() {
-    return image;
+  // Method to calculate total cost based on material prices
+  public int calculateCost(Map<String, Integer> materialPrices) {
+    return materialList.entrySet().stream()
+            .mapToInt(entry -> entry.getValue() * materialPrices.getOrDefault(entry.getKey(), 0))
+            .sum();
   }
-  
-  public int getCost() {
-    return cost;
-  }
-  
-  public String getImagePath() {
-    return imagePath;
-  }
-  
-  public int getWidth() {
-    return width;
-  }
-  
-  public int getLength() {
-    return length;
-  }
-  
 }

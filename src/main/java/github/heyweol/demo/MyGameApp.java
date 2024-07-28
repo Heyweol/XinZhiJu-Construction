@@ -6,12 +6,15 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.UserAction;
+
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
 import github.heyweol.demo.components.ZIndexComponent;
 import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.utils.FileUtils;
+import github.heyweol.demo.utils.JsonLoader;
+
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -23,10 +26,15 @@ import javafx.util.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.io.IOException;
+import java.util.stream.Collectors;
+import java.util.logging.Logger;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class MyGameApp extends GameApplication {
+  
+  private static final Logger LOGGER = Logger.getLogger(MyGameApp.class.getName());
   
   private static final int GAME_WIDTH = 800;
   private static final int GAME_HEIGHT = 600;
@@ -38,6 +46,8 @@ public class MyGameApp extends GameApplication {
   private HBox currentToolbar = null;
   private  IsometricGrid isometricGrid;
   private GridVisualizerComponent gridVisualizerComponent;
+  private List<Item> allItems;
+  private Map<String, Integer> materialPrices;
   
   @Override
   protected void initSettings(GameSettings settings) {
@@ -76,17 +86,53 @@ public class MyGameApp extends GameApplication {
             .buildAndAttach();
     
     itemBar = new ItemBar(200, 500);
-    Map<String, Map<String, List<Item>>> organizedItems = FileUtils.scanAndOrganizeItems();
+//    Map<String, Map<String, List<Item>>> organizedItems = FileUtils.scanAndOrganizeItems();
+//
+////    itemBar.setOnMouseClicked(e -> {
+////      InteractiveItemComponent.deselectAll();
+////    });
+//
+//    for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
+//      String character = characterEntry.getKey();
+//      for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
+//        itemBar.addItemType(character, typeEntry.getKey(), typeEntry.getValue());
+//      }
+//    }
     
-//    itemBar.setOnMouseClicked(e -> {
-//      InteractiveItemComponent.deselectAll();
-//    });
-    
-    for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
-      String character = characterEntry.getKey();
-      for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
-        itemBar.addItemType(character, typeEntry.getKey(), typeEntry.getValue());
+    try {
+      allItems = JsonLoader.loadItems();
+      LOGGER.info("Loaded " + allItems.size() + " items");
+      
+      // Group items by character and type
+      Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
+              .collect(Collectors.groupingBy(
+                      item -> item.getFilename().split("_")[1],
+                      Collectors.groupingBy(item -> {
+                        String[] parts = item.getFilename().split("_");
+                        switch(parts[2]) {
+                          case "guajian": return "hanging";
+                          case "qiju": return "furniture";
+                          case "zhiwu": return "plant";
+                          case "zhuangshi": return "decor";
+                          default: return "other";
+                        }
+                      })
+              ));
+      
+      LOGGER.info("Organized items into " + organizedItems.size() + " characters");
+      
+      for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
+        String character = characterEntry.getKey();
+        for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
+          String type = typeEntry.getKey();
+          List<Item> items = typeEntry.getValue();
+          LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
+          itemBar.addItemType(character, type, items);
+        }
       }
+    } catch (IOException e) {
+      LOGGER.severe("Error loading items: " + e.getMessage());
+      e.printStackTrace();
     }
     
     FXGL.addUINode(itemBar, 0, 0);

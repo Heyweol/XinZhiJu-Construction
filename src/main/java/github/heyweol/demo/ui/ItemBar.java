@@ -1,75 +1,37 @@
 package github.heyweol.demo.ui;
 
 import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.entity.Entity;
-import com.almasb.fxgl.input.UserAction;
+import github.heyweol.demo.Item;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-
+import javafx.scene.paint.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import github.heyweol.demo.Item;
-import javafx.scene.paint.Color;
-import javafx.util.StringConverter;
-
-import static com.almasb.fxgl.dsl.FXGL.*;
+import java.util.logging.Logger;
 
 public class ItemBar extends VBox {
+  private static final Logger LOGGER = Logger.getLogger(ItemBar.class.getName());
+  
   private TabPane tabPane;
-  private Map<String, List<Item>> items;
-  private Entity draggedEntity;
-  private Item selectedItem;
-  private ImageView selectedImageView;
-  private boolean isDragging = false;
   private ComboBox<String> characterSelector;
   private Map<String, Map<String, List<Item>>> itemsByCharacter;
-  
-  private static final Map<String, String> CHARACTER_NAMES = new HashMap<>();
-  static {
-    CHARACTER_NAMES.put("fr", "FR");
-    CHARACTER_NAMES.put("lb", "LB");
-    CHARACTER_NAMES.put("sc", "SC");
-    CHARACTER_NAMES.put("yj", "YJ");
-    CHARACTER_NAMES.put("zc", "ZC");
-  }
+  private Item selectedItem;
+  private ImageView selectedImageView;
   
   public ItemBar(double width, double height) {
     this.setPrefSize(width, height);
     this.setStyle("-fx-background-color: lightgray;");
     
     characterSelector = new ComboBox<>();
-    characterSelector.getItems().addAll(CHARACTER_NAMES.keySet());
     characterSelector.setPromptText("Select Character");
-    characterSelector.setConverter(new StringConverter<String>() {
-      @Override
-      public String toString(String initial) {
-        return CHARACTER_NAMES.getOrDefault(initial, initial);
-      }
-      
-      @Override
-      public String fromString(String fullName) {
-        for (Map.Entry<String, String> entry : CHARACTER_NAMES.entrySet()) {
-          if (entry.getValue().equals(fullName)) {
-            return entry.getKey();
-          }
-        }
-        return fullName;
-      }
-    });
     characterSelector.setOnAction(e -> updateItemDisplay());
     
     tabPane = new TabPane();
@@ -77,18 +39,21 @@ public class ItemBar extends VBox {
     itemsByCharacter = new HashMap<>();
     
     this.getChildren().addAll(characterSelector, tabPane);
-  }
-  
-  public Item getSelectedItem() {
-    return selectedItem;
+    
+    LOGGER.info("ItemBar initialized");
   }
   
   public void addItemType(String character, String type, List<Item> itemList) {
+    LOGGER.info("Adding " + itemList.size() + " items for character " + character + " and type " + type);
     itemsByCharacter.computeIfAbsent(character, k -> new HashMap<>()).put(type, itemList);
+    if (!characterSelector.getItems().contains(character)) {
+      characterSelector.getItems().add(character);
+    }
   }
   
   private void updateItemDisplay() {
     String selectedCharacter = characterSelector.getValue();
+    LOGGER.info("Updating display for character: " + selectedCharacter);
     if (selectedCharacter != null && itemsByCharacter.containsKey(selectedCharacter)) {
       tabPane.getTabs().clear();
       Map<String, List<Item>> characterItems = itemsByCharacter.get(selectedCharacter);
@@ -98,30 +63,21 @@ public class ItemBar extends VBox {
     }
   }
   
-  public void addItemType(String type, List<Item> itemList) {
-    items.put(type, itemList);
+  private void createTab(String type, List<Item> itemList) {
+    LOGGER.info("Creating tab for type " + type + " with " + itemList.size() + " items");
     Tab tab = new Tab(type);
     ScrollPane scrollPane = new ScrollPane();
     TilePane tilePane = new TilePane();
     tilePane.setPrefColumns(3);
-    tilePane.setHgap(2);
-    tilePane.setVgap(2);
-    tilePane.setPadding(new Insets(2));
-    tilePane.setAlignment(Pos.TOP_CENTER);
+    tilePane.setHgap(5);
+    tilePane.setVgap(5);
+    tilePane.setPadding(new Insets(5));
     
     for (Item item : itemList) {
-      ImageView imageView = new ImageView(FXGL.image(item.getImageName()));
-      imageView.setFitWidth(45);
-      imageView.setPreserveRatio(true);
-      imageView.setId(item.getName());
-      imageView.setOnMouseClicked(event -> {
-        if (event.getButton() == MouseButton.PRIMARY) {
-          selectItem(imageView, item);
-          event.consume();
-        }
-      });
-      
-      tilePane.getChildren().add(imageView);
+      ImageView imageView = createImageViewForItem(item);
+      if (imageView != null) {
+        tilePane.getChildren().add(imageView);
+      }
     }
     
     scrollPane.setContent(tilePane);
@@ -130,35 +86,33 @@ public class ItemBar extends VBox {
     tabPane.getTabs().add(tab);
   }
   
-  private void createTab(String type, List<Item> itemList) {
-    Tab tab = new Tab(type);
-    ScrollPane scrollPane = new ScrollPane();
-    TilePane tilePane = new TilePane();
-    tilePane.setPrefColumns(3);
-    tilePane.setHgap(2);
-    tilePane.setVgap(2);
-    tilePane.setPadding(new Insets(2));
-    tilePane.setAlignment(Pos.TOP_CENTER);
-    
-    for (Item item : itemList) {
-      ImageView imageView = new ImageView(FXGL.image(item.getImageName()));
-      imageView.setFitWidth(45);
-      imageView.setPreserveRatio(true);
-      imageView.setId(item.getName());
-      imageView.setOnMouseClicked(event -> {
-        if (event.getButton() == MouseButton.PRIMARY) {
-          selectItem(imageView, item);
-          event.consume();
-        }
-      });
-      
-      tilePane.getChildren().add(imageView);
+  private ImageView createImageViewForItem(Item item) {
+    if (item.getImage() == null) {
+      LOGGER.warning("No image available for item: " + item.getName());
+      return null;
     }
     
-    scrollPane.setContent(tilePane);
-    scrollPane.setFitToWidth(true);
-    tab.setContent(scrollPane);
-    tabPane.getTabs().add(tab);
+    ImageView imageView = new ImageView(item.getImage());
+    imageView.setFitWidth(50);
+    imageView.setFitHeight(50);
+    imageView.setPreserveRatio(true);
+    
+    // Set up drag-and-drop
+    imageView.setOnDragDetected(event -> {
+      Dragboard db = imageView.startDragAndDrop(TransferMode.ANY);
+      ClipboardContent content = new ClipboardContent();
+      content.putString(item.getName());
+      db.setContent(content);
+      event.consume();
+    });
+    
+    // Set up selection
+    imageView.setOnMouseClicked(event -> {
+      selectItem(imageView, item);
+      event.consume();
+    });
+    
+    return imageView;
   }
   
   private void selectItem(ImageView imageView, Item item) {
@@ -171,7 +125,7 @@ public class ItemBar extends VBox {
     dropShadow.setColor(Color.BLUE);
     dropShadow.setRadius(10);
     selectedImageView.setEffect(dropShadow);
-    System.out.println("Selected item: " + item.getName());
+    LOGGER.info("Selected item: " + item.getName());
   }
   
   public void deselectItem() {
@@ -180,8 +134,10 @@ public class ItemBar extends VBox {
     }
     selectedImageView = null;
     selectedItem = null;
-    System.out.println("Deselected item");
+    LOGGER.info("Deselected item");
   }
   
-  
+  public Item getSelectedItem() {
+    return selectedItem;
+  }
 }
