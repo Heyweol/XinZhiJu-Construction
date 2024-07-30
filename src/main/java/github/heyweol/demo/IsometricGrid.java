@@ -36,15 +36,14 @@ public class IsometricGrid {
     return new Point2D(gridX, gridY);
   }
   
+  
   public boolean canPlaceItem(int gridX, int gridY, int itemWidth, int itemLength) {
     if (gridX < 0 || gridY < 0 || gridX + itemWidth > gridWidth || gridY + itemLength > gridLength) {
       return false;
     }
     for (int x = gridX; x < gridX + itemWidth; x++) {
-      for (int y = gridY; y < gridY + itemLength; y++) {
-        if (grid[x][y] != null) {
-          return false;
-        }
+      if (grid[x][gridY] != null) {
+        return false;
       }
     }
     return true;
@@ -52,12 +51,10 @@ public class IsometricGrid {
   
   public void placeItem(Entity item, int gridX, int gridY, int itemWidth, int itemLength) {
     if (!canPlaceItem(gridX, gridY, itemWidth, itemLength)) {
-      return; // Don't place the item if it's not allowed
+      return;
     }
     for (int x = gridX; x < gridX + itemWidth; x++) {
-      for (int y = gridY; y < gridY + itemLength; y++) {
-        grid[x][y] = item;
-      }
+      grid[x][gridY] = item;
     }
     Point2D isoPos = getIsometricPosition(gridX, gridY);
     item.setPosition(isoPos);

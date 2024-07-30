@@ -14,12 +14,16 @@ import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.ui.MaterialSummaryWindow;
 import github.heyweol.demo.utils.ResourceManager;
+import github.heyweol.demo.utils.SceneManager;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -55,7 +59,7 @@ public class MyGameApp extends GameApplication {
   // Add these as class variables
   private WallGrid leftWallGrid;
   private WallGrid rightWallGrid;
-  
+  private ComboBox<String> saveSelector;
   
   private static final int game_height = 600;
   
@@ -78,6 +82,12 @@ public class MyGameApp extends GameApplication {
   
   @Override
   protected void initGame() {
+    initSaveModule();
+    
+    // Register a scene load listener to update the material list
+    SceneManager.addSceneLoadListener(this::updateMaterialSummary);
+    
+    
     // Create the isometric grid with the new parameters
     isometricGrid = new IsometricGrid(15, 15, 34, 17, GRID_TOP_X, GRID_TOP_Y);
     leftWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - 95, true);
@@ -269,5 +279,54 @@ public class MyGameApp extends GameApplication {
     updateMaterialSummary();
   }
   
+  private void initSaveModule() {
+    saveSelector = new ComboBox<>();
+    updateSaveList();
+    
+    Button saveButton = new Button("Save Scene");
+    saveButton.setOnAction(e -> {
+      TextInputDialog dialog = new TextInputDialog();
+      dialog.setTitle("Save Scene");
+      dialog.setHeaderText("Enter a name for your save:");
+      dialog.setContentText("Save name:");
+      
+      dialog.showAndWait().ifPresent(saveName -> {
+        SceneManager.saveScene(saveName);
+        updateSaveList();
+      });
+    });
+    
+    Button loadButton = new Button("Load Scene");
+    loadButton.setOnAction(e -> {
+      String selectedSave = saveSelector.getValue();
+      if (selectedSave != null) {
+        SceneManager.loadScene(selectedSave);
+      }
+    });
+    
+    Button deleteButton = new Button("Delete Save");
+    deleteButton.setOnAction(e -> {
+      String selectedSave = saveSelector.getValue();
+      if (selectedSave != null) {
+        SceneManager.deleteSave(selectedSave);
+        updateSaveList();
+      }
+    });
+    
+    HBox buttonBox = new HBox(10, saveButton, loadButton, deleteButton);
+    VBox saveBox = new VBox(10, saveSelector, buttonBox);
+    saveBox.setTranslateX(ITEM_BAR_WIDTH);
+    saveBox.setTranslateY(10);
+    
+    FXGL.addUINode(saveBox);
+  }
+  
+  private void updateSaveList() {
+    List<String> saveFiles = SceneManager.getSaveFiles();
+    saveSelector.getItems().setAll(saveFiles);
+    if (!saveFiles.isEmpty()) {
+      saveSelector.setValue(saveFiles.get(0));
+    }
+  }
   
 }

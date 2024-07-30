@@ -223,7 +223,7 @@ public class InteractiveItemComponent extends Component {
     return ResourceManager.getItemsByBaseName(baseName);
   }
   
-  private void changeVariant(Item newVariant) {
+  public void changeVariant(Item newVariant) {
     Item currentItem = entity.getObject("item");
     entity.setProperty("item", newVariant);
     

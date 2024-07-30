@@ -76,6 +76,20 @@ public class ResourceManager {
     return itemsByBaseName.getOrDefault(baseName, new ArrayList<>());
   }
   
+  public static Item getItemByName(String name) {
+    return loadedItems.stream()
+            .filter(item -> item.getName().equals(name))
+            .findFirst()
+            .orElse(null);
+  }
+  
+  public static Item getItemByFilename(String filename) {
+    return loadedItems.stream()
+            .filter(item -> item.getFilename().equals(filename))
+            .findFirst()
+            .orElse(null);
+  }
+  
   public static void clearCache() {
     imageCache.clear();
   }
