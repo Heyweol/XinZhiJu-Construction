@@ -18,6 +18,9 @@ public class Item {
   private boolean canBePlacedOutside;
   private Map<String, Integer> materialList;
   private String unicode;
+  private int baseOffsetX;
+  private int baseOffsetY;
+  
   
   @JsonIgnore
   private Image image;
@@ -35,6 +38,8 @@ public class Item {
     this.canBePlacedOutside = "Y".equals(outside);
     this.materialList = parseMaterialList(materialListStrings);
     this.unicode = determineUnicode(filename);
+    this.baseOffsetX = 0;
+    this.baseOffsetY = 0;
   }
   
   private String constructImagePath(String filename) {
@@ -94,4 +99,21 @@ public class Item {
             .map(entry -> entry.getKey() + ": " + entry.getValue())
             .collect(Collectors.joining(", "));
   }
+  
+  public int getBaseOffsetX() {
+    return baseOffsetX;
+  }
+  
+  public void setBaseOffsetX(int baseOffsetX) {
+    this.baseOffsetX = baseOffsetX;
+  }
+  
+  public int getBaseOffsetY() {
+    return baseOffsetY;
+  }
+  
+  public void setBaseOffsetY(int baseOffsetY) {
+    this.baseOffsetY = baseOffsetY;
+  }
+  
 }

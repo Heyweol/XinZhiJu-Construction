@@ -1,6 +1,7 @@
 package github.heyweol.demo.components;
 
 import com.almasb.fxgl.entity.component.Component;
+import github.heyweol.demo.Item;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.Group;
@@ -8,12 +9,15 @@ import javafx.geometry.Point2D;
 
 import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.WallGrid;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 
 public class GridVisualizerComponent extends Component {
   private IsometricGrid floorGrid;
   private WallGrid leftWallGrid;
   private WallGrid rightWallGrid;
   private Group gridLines;
+  private Group itemBaseHighlight;
   private double offsetX;
   private double offsetY;
   
@@ -22,6 +26,7 @@ public class GridVisualizerComponent extends Component {
     this.leftWallGrid = leftWallGrid;
     this.rightWallGrid = rightWallGrid;
     this.gridLines = new Group();
+    this.itemBaseHighlight = new Group();
     this.offsetX = offsetX;
     this.offsetY = offsetY;
   }
@@ -30,7 +35,9 @@ public class GridVisualizerComponent extends Component {
   public void onAdded() {
     drawGrids();
     gridLines.setVisible(false);
+    itemBaseHighlight.setVisible(false);
     entity.getViewComponent().addChild(gridLines);
+    entity.getViewComponent().addChild(itemBaseHighlight);
   }
   
   private void drawGrids() {
@@ -87,6 +94,68 @@ public class GridVisualizerComponent extends Component {
       line.setStroke(color);
       gridLines.getChildren().add(line);
     }
+  }
+  
+  public void showItemBase(Item item, int gridX, int gridY, boolean isWallItem, boolean isLeftWall) {
+    itemBaseHighlight.getChildren().clear();
+    
+    if (isWallItem) {
+      showWallItemBase(item, gridX, gridY, isLeftWall);
+    } else {
+      showFloorItemBase(item, gridX, gridY);
+    }
+    
+    itemBaseHighlight.setVisible(true);
+  }
+  
+  private void showFloorItemBase(Item item, int gridX, int gridY) {
+    double tileWidth = floorGrid.getTileWidth();
+    double tileHeight = floorGrid.getTileHeight();
+    
+    for (int x = 0; x < item.getWidth(); x++) {
+      for (int y = 0; y < item.getLength(); y++) {
+        Point2D topLeft = floorGrid.getIsometricPosition(gridX + x, gridY + y);
+        Point2D topRight = floorGrid.getIsometricPosition(gridX + x + 1, gridY + y);
+        Point2D bottomLeft = floorGrid.getIsometricPosition(gridX + x, gridY + y + 1);
+        Point2D bottomRight = floorGrid.getIsometricPosition(gridX + x + 1, gridY + y + 1);
+        
+        Polygon diamond = new Polygon(
+                topLeft.getX() - offsetX, topLeft.getY() - offsetY,
+                topRight.getX() - offsetX, topRight.getY() - offsetY,
+                bottomRight.getX() - offsetX, bottomRight.getY() - offsetY,
+                bottomLeft.getX() - offsetX, bottomLeft.getY() - offsetY
+        );
+        
+        diamond.setFill(Color.LIGHTGREEN.deriveColor(0, 1, 1, 0.5));
+        diamond.setStroke(Color.GREEN);
+        itemBaseHighlight.getChildren().add(diamond);
+      }
+    }
+  }
+  
+  private void showWallItemBase(Item item, int gridX, int gridY, boolean isLeftWall) {
+    WallGrid wallGrid = isLeftWall ? leftWallGrid : rightWallGrid;
+    double tileWidth = wallGrid.getTileWidth();
+    double tileHeight = wallGrid.getTileHeight();
+    
+    for (int x = 0; x < item.getWidth(); x++) {
+      for (int y = 0; y < item.getLength(); y++) {
+        Point2D pos = wallGrid.getWallPosition(gridX + x, gridY + y);
+        Polygon diamond = new Polygon(
+                pos.getX() - offsetX, pos.getY() - offsetY,
+                pos.getX() + tileWidth / 2 - offsetX, pos.getY() + tileHeight / 2 - offsetY,
+                pos.getX() - offsetX, pos.getY() + tileHeight - offsetY,
+                pos.getX() - tileWidth / 2 - offsetX, pos.getY() + tileHeight / 2 - offsetY
+        );
+        diamond.setFill(Color.LIGHTBLUE.deriveColor(0, 1, 1, 0.5));
+        diamond.setStroke(Color.BLUE);
+        itemBaseHighlight.getChildren().add(diamond);
+      }
+    }
+  }
+  
+  public void hideItemBase() {
+    itemBaseHighlight.setVisible(false);
   }
   
   public void show() {
