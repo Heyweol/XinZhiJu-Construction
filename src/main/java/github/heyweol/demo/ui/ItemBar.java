@@ -3,6 +3,7 @@ package github.heyweol.demo.ui;
 import com.almasb.fxgl.dsl.FXGL;
 import github.heyweol.demo.Item;
 import github.heyweol.demo.utils.ResourceManager;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
@@ -71,6 +72,7 @@ public class ItemBar extends VBox {
       for (Map.Entry<String, List<Item>> entry : characterItems.entrySet()) {
         createTab(entry.getKey(), entry.getValue());
       }
+
     }
   }
   

@@ -23,19 +23,16 @@ public class IsometricGrid {
   }
   
   public Point2D getIsometricPosition(int gridX, int gridY) {
-    double x = offsetX + (gridX - gridY) * (tileWidth / 2);
-    double y = offsetY + (gridX + gridY) * (tileHeight / 2);
+    double x = offsetX + (gridX - gridY) * (tileWidth / 2.0);
+    double y = offsetY + (gridX + gridY) * (tileHeight / 2.0);
     return new Point2D(x, y);
   }
   
   public Point2D getGridPosition(double screenX, double screenY) {
-    // Adjust for offset
     double x = screenX - offsetX;
     double y = screenY - offsetY;
-    
-    // Convert screen coordinates to grid coordinates
-    int gridX = (int) Math.round((x / (tileWidth / 2) + y / (tileHeight / 2)) / 2);
-    int gridY = (int) Math.round((y / (tileHeight / 2) - x / (tileWidth / 2)) / 2);
+    int gridX = (int) Math.round((x / (tileWidth / 2.0) + y / (tileHeight / 2.0)) / 2.0);
+    int gridY = (int) Math.round((y / (tileHeight / 2.0) - x / (tileWidth / 2.0)) / 2.0);
     return new Point2D(gridX, gridY);
   }
   
@@ -54,6 +51,9 @@ public class IsometricGrid {
   }
   
   public void placeItem(Entity item, int gridX, int gridY, int itemWidth, int itemLength) {
+    if (!canPlaceItem(gridX, gridY, itemWidth, itemLength)) {
+      return; // Don't place the item if it's not allowed
+    }
     for (int x = gridX; x < gridX + itemWidth; x++) {
       for (int y = gridY; y < gridY + itemLength; y++) {
         grid[x][y] = item;
@@ -80,5 +80,4 @@ public class IsometricGrid {
   public int getGridLength() { return gridLength; }
   public double getOffsetX() { return offsetX; }
   public double getOffsetY() { return offsetY; }
-  
 }

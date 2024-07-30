@@ -1,23 +1,26 @@
 package github.heyweol.demo.components;
 
 import com.almasb.fxgl.entity.component.Component;
-import com.almasb.fxgl.dsl.FXGL;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.Group;
+import javafx.geometry.Point2D;
 
 import github.heyweol.demo.IsometricGrid;
+import github.heyweol.demo.WallGrid;
 
 public class GridVisualizerComponent extends Component {
-  private IsometricGrid grid;
+  private IsometricGrid floorGrid;
+  private WallGrid leftWallGrid;
+  private WallGrid rightWallGrid;
   private Group gridLines;
   private double offsetX;
   private double offsetY;
   
-  public GridVisualizerComponent(IsometricGrid grid, double offsetX, double offsetY) {
-    this.grid = grid;
-    this.gridLines = new Group();
-    this.grid = grid;
+  public GridVisualizerComponent(IsometricGrid floorGrid, WallGrid leftWallGrid, WallGrid rightWallGrid, double offsetX, double offsetY) {
+    this.floorGrid = floorGrid;
+    this.leftWallGrid = leftWallGrid;
+    this.rightWallGrid = rightWallGrid;
     this.gridLines = new Group();
     this.offsetX = offsetX;
     this.offsetY = offsetY;
@@ -25,36 +28,63 @@ public class GridVisualizerComponent extends Component {
   
   @Override
   public void onAdded() {
-    drawGrid();
+    drawGrids();
     gridLines.setVisible(false);
     entity.getViewComponent().addChild(gridLines);
   }
   
-  private void drawGrid() {
-    double tileWidth = grid.getTileWidth();
-    double tileHeight = grid.getTileHeight();
-    int gridWidth = grid.getGridWidth();
-    int gridLength = grid.getGridLength();
+  private void drawGrids() {
+    drawFloorGrid();
+    drawWallGrid(leftWallGrid, Color.LIGHTBLUE);
+    drawWallGrid(rightWallGrid, Color.LIGHTGREEN);
+  }
+  
+  private void drawFloorGrid() {
+    int gridWidth = floorGrid.getGridWidth();
+    int gridLength = floorGrid.getGridLength();
     
     // Draw horizontal lines
     for (int y = 0; y <= gridLength; y++) {
-      Line line = new Line();
-      line.setStartX(offsetX + (0 - y) * tileWidth / 2);
-      line.setStartY(offsetY + y * tileHeight / 2);
-      line.setEndX(offsetX + (gridWidth - y) * tileWidth / 2);
-      line.setEndY(offsetY + (y + gridWidth) * tileHeight / 2);
+      Point2D start = floorGrid.getIsometricPosition(0, y);
+      Point2D end = floorGrid.getIsometricPosition(gridWidth, y);
+      Line line = new Line(start.getX() - offsetX, start.getY() - offsetY,
+              end.getX() - offsetX, end.getY() - offsetY);
       line.setStroke(Color.LIGHTGRAY);
       gridLines.getChildren().add(line);
     }
     
     // Draw vertical lines
     for (int x = 0; x <= gridWidth; x++) {
-      Line line = new Line();
-      line.setStartX(offsetX + x * tileWidth / 2);
-      line.setStartY(offsetY);
-      line.setEndX(offsetX + (x - gridLength) * tileWidth / 2);
-      line.setEndY(offsetY + gridLength * tileHeight / 2);
+      Point2D start = floorGrid.getIsometricPosition(x, 0);
+      Point2D end = floorGrid.getIsometricPosition(x, gridLength);
+      Line line = new Line(start.getX() - offsetX, start.getY() - offsetY,
+              end.getX() - offsetX, end.getY() - offsetY);
       line.setStroke(Color.LIGHTGRAY);
+      gridLines.getChildren().add(line);
+    }
+  }
+  
+  private void drawWallGrid(WallGrid wallGrid, Color color) {
+    int gridWidth = wallGrid.getGridWidth();
+    int gridHeight = wallGrid.getGridHeight();
+    
+    // Draw horizontal lines
+    for (int y = 0; y <= gridHeight; y++) {
+      Point2D start = wallGrid.getWallPosition(0, y);
+      Point2D end = wallGrid.getWallPosition(gridWidth, y);
+      Line line = new Line(start.getX() - offsetX, start.getY() - offsetY,
+              end.getX() - offsetX, end.getY() - offsetY);
+      line.setStroke(color);
+      gridLines.getChildren().add(line);
+    }
+    
+    // Draw vertical lines
+    for (int x = 0; x <= gridWidth; x++) {
+      Point2D start = wallGrid.getWallPosition(x, 0);
+      Point2D end = wallGrid.getWallPosition(x, gridHeight);
+      Line line = new Line(start.getX() - offsetX, start.getY() - offsetY,
+              end.getX() - offsetX, end.getY() - offsetY);
+      line.setStroke(color);
       gridLines.getChildren().add(line);
     }
   }

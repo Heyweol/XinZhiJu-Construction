@@ -36,54 +36,75 @@ public class MyGameApp extends GameApplication {
   
   private static final Logger LOGGER = Logger.getLogger(MyGameApp.class.getName());
   
-  private static final int GAME_WIDTH = 800;
-  private static final int GAME_HEIGHT = 600;
-  private static final int ITEM_BAR_HEIGHT = 100;
+  
+  
+  private static final int ITEM_BAR_WIDTH = 260;
+  private static final int BG_WIDTH = 1063;
+  private static final int BG_HEIGHT = 1111;
+ 
   
   private MainGameScene mainGameScene;
   private ItemBar itemBar;
   private List<Entity> placedItems;
-  private HBox currentToolbar = null;
   private IsometricGrid isometricGrid;
   private GridVisualizerComponent gridVisualizerComponent;
   private List<Item> allItems;
   private Map<String, Integer> materialPrices;
   private MaterialSummaryWindow materialSummaryWindow;
   private Map<String, Integer> totalMaterials = new HashMap<>();
+  // Add these as class variables
+  private WallGrid leftWallGrid;
+  private WallGrid rightWallGrid;
+  
+  
+  private static final int game_height = 600;
+  
+  private static double scale_factor = (double) game_height / BG_HEIGHT;
+  private static int bg_height = game_height;
+  private static int bg_width = (int) (BG_WIDTH * scale_factor);
+  private static int game_width = bg_width + ITEM_BAR_WIDTH;
+  
+  private static int GRID_TOP_X = ITEM_BAR_WIDTH + bg_width / 2; // 528
+  private static int GRID_TOP_Y = (int) (451*scale_factor);
   
   @Override
   protected void initSettings(GameSettings settings) {
-    settings.setHeight(500);
-    settings.setPreserveResizeRatio(true);
+    settings.setHeight(game_height);
+//    settings.setPreserveResizeRatio(true);
+    settings.setWidth(game_width);
     settings.setTitle("心纸居");
     settings.setVersion("v0.1");
   }
   
   @Override
   protected void initGame() {
-    isometricGrid = new IsometricGrid(40, 40, 64, 32, 200, 0);
+    // Create the isometric grid with the new parameters
+    isometricGrid = new IsometricGrid(15, 15, 34, 17, GRID_TOP_X, GRID_TOP_Y);
+    leftWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - 95, true);
+    rightWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - 95, false);
+    
     
     Entity background = entityBuilder()
-            .at(200, 0)
-            .view(new javafx.scene.shape.Rectangle(500, 500, javafx.scene.paint.Color.TRANSPARENT))
+            .at(ITEM_BAR_WIDTH, 0)
+            .view(new javafx.scene.shape.Rectangle(bg_width, bg_height, javafx.scene.paint.Color.TRANSPARENT))
             .buildAndAttach();
     
-    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid, 200, 0);
+    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid, leftWallGrid, rightWallGrid, ITEM_BAR_WIDTH, 0);
     background.addComponent(gridVisualizerComponent);
     
-    FXGL.getGameWorld().addEntityFactory(new MyGameFactory(isometricGrid, gridVisualizerComponent));
+    FXGL.getGameWorld().addEntityFactory(new MyGameFactory(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent));
     
-    Image bgImage = new Image(getClass().getResourceAsStream("/assets/textures/bg.png"));
+    Image bgImage = new Image(getClass().getResourceAsStream("/assets/textures/bg15.jpg"));
     ImageView bgView = new ImageView(bgImage);
-    bgView.setFitHeight(500);
+    bgView.setFitHeight(game_height);
     bgView.setPreserveRatio(true);
-    bgView.setX(200);
+    bgView.setX(ITEM_BAR_WIDTH);
     Entity room = entityBuilder()
             .view(bgView)
             .zIndex(-1)
             .buildAndAttach();
     
-    itemBar = new ItemBar(200, 500);
+    itemBar = new ItemBar(ITEM_BAR_WIDTH , bg_height);
     ResourceManager.initialize();
     List<Item> allItems = ResourceManager.getAllItems();
     
@@ -134,14 +155,27 @@ public class MyGameApp extends GameApplication {
           InteractiveItemComponent.deselectAll();
           Item selectedItem = itemBar.getSelectedItem();
           Point2D mousePos = getInput().getMousePositionWorld();
-          Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
           
-          if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
-            Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
-            Entity placedItem = spawn("placedItem", new SpawnData(isoPos.getX(), isoPos.getY())
-                    .put("item", selectedItem));
-            isometricGrid.placeItem(placedItem, (int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength());
-            updateMaterialSummary();
+          // Determine which grid to use based on the selected item type
+          if (selectedItem.getFilename().contains("guajian")) {
+            // For hanging items, check both wall grids
+            Point2D leftGridPos = leftWallGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+            Point2D rightGridPos = rightWallGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+            
+            if (leftWallGrid.canPlaceItem((int) leftGridPos.getX(), (int) leftGridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
+              Point2D wallPos = leftWallGrid.getWallPosition((int) leftGridPos.getX(), (int) leftGridPos.getY());
+              spawnItem(selectedItem, wallPos, EntityType.HANGING);
+            } else if (rightWallGrid.canPlaceItem((int) rightGridPos.getX(), (int) rightGridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
+              Point2D wallPos = rightWallGrid.getWallPosition((int) rightGridPos.getX(), (int) rightGridPos.getY());
+              spawnItem(selectedItem, wallPos, EntityType.HANGING);
+            }
+          } else {
+            // For other items, use the floor grid
+            Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+            if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
+              Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
+              spawnItem(selectedItem, isoPos, EntityType.PLACED_ITEM);
+            }
           }
           
           itemBar.deselectItem();
@@ -188,89 +222,6 @@ public class MyGameApp extends GameApplication {
     launch(args);
   }
   
-  private void addInteractionButtons(Entity placedItem) {
-    HBox toolbar = new HBox(5);
-    toolbar.setStyle("-fx-background-color: rgba(200, 200, 200, 0.7); -fx-padding: 5; -fx-background-radius: 5;");
-    
-    Button rotateBtn = createButton("Rotate");
-    Button removeBtn = createButton("Remove");
-    
-    removeBtn.setOnAction(e -> {
-      placedItem.removeFromWorld();
-      Item item = placedItem.getObject("item");
-      FXGL.removeUINode(toolbar);
-      updateMaterialSummary();
-    });
-    
-    rotateBtn.setOnAction(e -> {
-      placedItem.rotateBy(90);
-    });
-    
-    toolbar.getChildren().addAll(rotateBtn, removeBtn);
-    toolbar.setVisible(false);
-    
-    FXGL.addUINode(toolbar);
-    
-    placedItem.getComponentOptional(InteractiveItemComponent.class).ifPresent(component -> {
-      component.addSelectionListener(() -> {
-        boolean isSelected = InteractiveItemComponent.getSelectedEntity() == placedItem;
-        toolbar.setVisible(isSelected);
-        if (isSelected) {
-          updateToolbarPosition(placedItem, toolbar);
-        }
-      });
-    });
-    
-    placedItem.xProperty().addListener((obs, old, newX) -> updateToolbarPosition(placedItem, toolbar));
-    placedItem.yProperty().addListener((obs, old, newY) -> updateToolbarPosition(placedItem, toolbar));
-  }
-  
-  private HBox createToolbar(Entity placedItem) {
-    HBox toolbar = new HBox(5);
-    toolbar.setStyle("-fx-background-color: rgba(200, 200, 200, 0.7); -fx-padding: 5; -fx-background-radius: 5;");
-    
-    Button mirrorBtn = createButton("", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
-    Button removeBtn = createButton("", new FontIcon(FontAwesomeSolid.TRASH));
-    
-    removeBtn.setOnAction(e -> {
-      placedItem.removeFromWorld();
-      Item item = placedItem.getObject("item");
-      isometricGrid.removeItem(placedItem);
-      removeCurrentToolbar();
-      updateMaterialSummary();
-    });
-    
-    mirrorBtn.setOnAction(e -> {
-      InteractiveItemComponent itemComponent = placedItem.getComponent(InteractiveItemComponent.class);
-      itemComponent.mirror();
-    });
-    
-    toolbar.getChildren().addAll(mirrorBtn, removeBtn);
-    
-    return toolbar;
-  }
-  
-  private Button createButton(String text) {
-    Button button = new Button(text);
-    button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;");
-    button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: lightgray; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
-    button.setOnMouseExited(e -> button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
-    return button;
-  }
-  
-  private Button createButton(String text, FontIcon icon) {
-    Button button = new Button(text, icon);
-    button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;");
-    button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: lightgray; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
-    button.setOnMouseExited(e -> button.setStyle("-fx-background-color: white; -fx-text-fill: black; -fx-border-color: black; -fx-border-radius: 3;"));
-    return button;
-  }
-  
-  private void updateToolbarPosition(Entity item, HBox toolbar) {
-    toolbar.setTranslateX(item.getX() - toolbar.getWidth() / 2 + item.getWidth() / 2);
-    toolbar.setTranslateY(item.getY() - toolbar.getHeight() - 10);
-  }
-  
   private boolean isClickOnItem() {
     return FXGL.getGameWorld().getEntitiesAt(getInput().getMousePositionWorld())
             .stream()
@@ -293,13 +244,6 @@ public class MyGameApp extends GameApplication {
     materialSummaryWindow.updateMaterials(totalMaterials);
   }
   
-  private void removeCurrentToolbar() {
-    if (currentToolbar != null) {
-      FXGL.removeUINode(currentToolbar);
-      currentToolbar = null;
-    }
-  }
-  
   private Entity getEntityAtMouse() {
     return FXGL.getGameWorld().getEntitiesAt(getInput().getMousePositionWorld())
             .stream()
@@ -313,4 +257,17 @@ public class MyGameApp extends GameApplication {
             .filter(e -> e.hasComponent(InteractiveItemComponent.class))
             .forEach(e -> e.setZIndex((int) (e.getY() * 100)));
   }
+  
+  private void spawnItem(Item selectedItem, Point2D position, EntityType type) {
+    String entityType = (type == EntityType.HANGING) ? "hangingItem" : "placedItem";
+    Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
+            .put("item", selectedItem)
+            .put("type", type));
+    if (type == EntityType.PLACED_ITEM) {
+      isometricGrid.placeItem(placedItem, (int) position.getX(), (int) position.getY(), selectedItem.getWidth(), selectedItem.getLength());
+    }
+    updateMaterialSummary();
+  }
+  
+  
 }

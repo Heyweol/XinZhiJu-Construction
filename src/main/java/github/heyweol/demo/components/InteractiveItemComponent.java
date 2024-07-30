@@ -4,8 +4,10 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.texture.Texture;
+import github.heyweol.demo.EntityType;
 import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.Item;
+import github.heyweol.demo.WallGrid;
 import github.heyweol.demo.utils.ResourceManager;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
@@ -35,6 +37,8 @@ public class InteractiveItemComponent extends Component {
   private boolean isMirrored = false;
   
   private static HBox toolbar;
+  private WallGrid leftWallGrid;
+  private WallGrid rightWallGrid;
   
   static {
     selectionEffect = new DropShadow();
@@ -42,8 +46,10 @@ public class InteractiveItemComponent extends Component {
     selectionEffect.setRadius(10);
   }
   
-  public InteractiveItemComponent(IsometricGrid grid, GridVisualizerComponent gridVisualizerComponent) {
-    this.isometricGrid = grid;
+  public InteractiveItemComponent(IsometricGrid isometricGrid, WallGrid leftWallGrid, WallGrid rightWallGrid, GridVisualizerComponent gridVisualizerComponent) {
+    this.isometricGrid = isometricGrid;
+    this.leftWallGrid = leftWallGrid;
+    this.rightWallGrid = rightWallGrid;
     this.gridVisualizerComponent = gridVisualizerComponent;
   }
   
@@ -63,6 +69,17 @@ public class InteractiveItemComponent extends Component {
     double dragDistance = new Point2D(e.getSceneX() - (entity.getX() + dragOffset.getX()),
             e.getSceneY() - (entity.getY() + dragOffset.getY())).magnitude();
     if (dragDistance > 5 || isDragging) {
+      if (!isDragging) {
+        // Remove the item from the appropriate grid when dragging starts
+        EntityType type = (EntityType) entity.getType();
+        if (type == EntityType.HANGING) {
+          // For wall items, we don't remove them from a grid
+          // Instead, we might want to mark them as being dragged
+          entity.setProperty("isDragging", true);
+        } else {
+          isometricGrid.removeItem(entity);
+        }
+      }
       isDragging = true;
       hideToolbar();
       gridVisualizerComponent.show();
@@ -71,13 +88,33 @@ public class InteractiveItemComponent extends Component {
     if (isDragging) {
       double newX = e.getSceneX() - dragOffset.getX();
       double newY = e.getSceneY() - dragOffset.getY();
-      Point2D gridPos = isometricGrid.getGridPosition(newX, newY);
-      if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(),
-              entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
-        Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
-        entity.setPosition(isoPos);
-        entity.getComponent(ZIndexComponent.class).onUpdate(0);
+      
+      EntityType type = (EntityType) entity.getType();
+      if (type == EntityType.HANGING) {
+        // Handle hanging items (wall placement)
+        Point2D leftGridPos = leftWallGrid.getGridPosition(newX, newY);
+        Point2D rightGridPos = rightWallGrid.getGridPosition(newX, newY);
+        
+        if (leftWallGrid.canPlaceItem((int) leftGridPos.getX(), (int) leftGridPos.getY(),
+                entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
+          Point2D wallPos = leftWallGrid.getWallPosition((int) leftGridPos.getX(), (int) leftGridPos.getY());
+          entity.setPosition(wallPos);
+        } else if (rightWallGrid.canPlaceItem((int) rightGridPos.getX(), (int) rightGridPos.getY(),
+                entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
+          Point2D wallPos = rightWallGrid.getWallPosition((int) rightGridPos.getX(), (int) rightGridPos.getY());
+          entity.setPosition(wallPos);
+        }
+      } else {
+        // Handle floor items (existing code)
+        Point2D gridPos = isometricGrid.getGridPosition(newX, newY);
+        if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(),
+                entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
+          Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
+          entity.setPosition(isoPos);
+        }
       }
+      
+      entity.getComponent(ZIndexComponent.class).onUpdate(0);
     }
     e.consume();
   }
@@ -86,10 +123,28 @@ public class InteractiveItemComponent extends Component {
     gridVisualizerComponent.hide();
     
     if (isDragging) {
-      Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
-      isometricGrid.removeItem(entity);
-      isometricGrid.placeItem(entity, (int) gridPos.getX(), (int) gridPos.getY(),
-              entity.getInt("itemWidth"), entity.getInt("itemLength"));
+      EntityType type = (EntityType) entity.getType();
+      if (type == EntityType.HANGING) {
+        // For wall items, determine which wall it's on and update its position
+        Point2D leftGridPos = leftWallGrid.getGridPosition(entity.getX(), entity.getY());
+        Point2D rightGridPos = rightWallGrid.getGridPosition(entity.getX(), entity.getY());
+        
+        if (leftWallGrid.canPlaceItem((int) leftGridPos.getX(), (int) leftGridPos.getY(),
+                entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
+          Point2D wallPos = leftWallGrid.getWallPosition((int) leftGridPos.getX(), (int) leftGridPos.getY());
+          entity.setPosition(wallPos);
+        } else if (rightWallGrid.canPlaceItem((int) rightGridPos.getX(), (int) rightGridPos.getY(),
+                entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
+          Point2D wallPos = rightWallGrid.getWallPosition((int) rightGridPos.getX(), (int) rightGridPos.getY());
+          entity.setPosition(wallPos);
+        }
+        entity.setProperty("isDragging", false);
+      } else {
+        // For floor items (existing code)
+        Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+        isometricGrid.placeItem(entity, (int) gridPos.getX(), (int) gridPos.getY(),
+                entity.getInt("itemWidth"), entity.getInt("itemLength"));
+      }
       notifyMaterialUpdateListeners();
     } else {
       if (selectedEntity != entity) {

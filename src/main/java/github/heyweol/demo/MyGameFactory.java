@@ -16,25 +16,36 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 public class MyGameFactory implements EntityFactory {
   
   private IsometricGrid isometricGrid;
+  private WallGrid leftWallGrid;
+  private WallGrid rightWallGrid;
   private GridVisualizerComponent gridVisualizerComponent;
   
-  public MyGameFactory(IsometricGrid isometricGrid, GridVisualizerComponent gridVisualizerComponent) {
+  public MyGameFactory(IsometricGrid isometricGrid, WallGrid leftWallGrid, WallGrid rightWallGrid, GridVisualizerComponent gridVisualizerComponent) {
     this.isometricGrid = isometricGrid;
+    this.leftWallGrid = leftWallGrid;
+    this.rightWallGrid = rightWallGrid;
     this.gridVisualizerComponent = gridVisualizerComponent;
   }
   
-  
-  @Spawns("furniture")
-  public Entity spawnFurniture(SpawnData data) {
+  @Spawns("hangingItem")
+  public Entity newHangingItem(SpawnData data) {
+    Item item = data.get("item");
+    Texture texture = FXGL.texture(item.getImageName());
+    
+    // Calculate the width based on the item's dimensions and the wall grid's tile width
+    double tileWidth = leftWallGrid.getTileWidth(); // Assuming both wall grids have the same tile width
+    double itemWidth = tileWidth * item.getWidth();
+    
+    texture.setFitWidth(itemWidth);
+    texture.setPreserveRatio(true);
+    
     return entityBuilder(data)
-            .view(data.get("itemName") + ".png")
-            .build();
-  }
-  
-  @Spawns("decor")
-  public Entity spawnDecor(SpawnData data) {
-    return entityBuilder(data)
-            .view(data.get("itemName") + ".png")
+            .type(EntityType.HANGING)
+            .viewWithBBox(texture)
+            .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
+            .with(new ZIndexComponent())
+            .with("itemWidth", item.getWidth())
+            .with("itemLength", item.getLength())
             .build();
   }
   
@@ -42,14 +53,18 @@ public class MyGameFactory implements EntityFactory {
   public Entity newPlacedItem(SpawnData data) {
     Item item = data.get("item");
     Texture texture = FXGL.texture(item.getImageName());
-    texture.setFitWidth(60);
+    
+    // Calculate the width based on the item's dimensions and the grid's tile width
+    double tileWidth = isometricGrid.getTileWidth();
+    double itemWidth = tileWidth + (item.getWidth() - 1 + item.getLength() - 1) * (tileWidth / 2);
+    
+    texture.setFitWidth(itemWidth);
     texture.setPreserveRatio(true);
+    
     return entityBuilder(data)
             .type(EntityType.PLACED_ITEM)
             .viewWithBBox(texture)
-//            .with(new SelectableComponent())
-//            .with(new DraggableComponent())
-            .with(new InteractiveItemComponent(isometricGrid,gridVisualizerComponent))
+            .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
             .with(new ZIndexComponent())
             .with("itemWidth", item.getWidth())
             .with("itemLength", item.getLength())
