@@ -24,6 +24,7 @@ public class ResourceManager {
   public static void initialize() {
     loadItems();
     preloadImages();
+    organizeItemsByBaseName();
   }
   
   public static Image getImage(String path) {
@@ -51,9 +52,11 @@ public class ResourceManager {
       loadedItems = objectMapper.readValue(is, new TypeReference<List<Item>>() {});
       LOGGER.info("Loaded " + loadedItems.size() + " items");
       
-      // Organize items by base name
-      itemsByBaseName = loadedItems.stream()
-              .collect(Collectors.groupingBy(item -> item.getName().split("·")[0]));
+      // Log the unique characters found
+      Set<String> characters = loadedItems.stream()
+              .map(item -> item.getFilename().split("_")[1])
+              .collect(Collectors.toSet());
+      LOGGER.info("Found characters: " + characters);
       
     } catch (IOException e) {
       LOGGER.severe("Failed to load items: " + e.getMessage());
@@ -66,6 +69,11 @@ public class ResourceManager {
     for (Item item : loadedItems) {
       getImage(item.getImageName());
     }
+  }
+  
+  private static void organizeItemsByBaseName() {
+    itemsByBaseName = loadedItems.stream()
+            .collect(Collectors.groupingBy(item -> item.getName().split("·")[0]));
   }
   
   public static List<Item> getAllItems() {

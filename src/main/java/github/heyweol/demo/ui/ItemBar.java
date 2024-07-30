@@ -51,7 +51,6 @@ public class ItemBar extends VBox {
   }
   
   public void addItemType(String character, String type, List<Item> itemList) {
-    LOGGER.info("Adding " + itemList.size() + " items for character " + character + " and type " + type);
     itemsByCharacter.computeIfAbsent(character, k -> new HashMap<>()).put(type, itemList);
     if (!characterSelector.getItems().contains(character)) {
       characterSelector.getItems().add(character);
@@ -65,14 +64,12 @@ public class ItemBar extends VBox {
   
   private void updateItemDisplay() {
     String selectedCharacter = characterSelector.getValue();
-    LOGGER.info("Updating display for character: " + selectedCharacter);
     if (selectedCharacter != null && itemsByCharacter.containsKey(selectedCharacter)) {
       tabPane.getTabs().clear();
       Map<String, List<Item>> characterItems = itemsByCharacter.get(selectedCharacter);
       for (Map.Entry<String, List<Item>> entry : characterItems.entrySet()) {
         createTab(entry.getKey(), entry.getValue());
       }
-
     }
   }
   

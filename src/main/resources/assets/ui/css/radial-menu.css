@@ -1,0 +1,11 @@
+.radial-menu-center, .radial-menu-item {
+    -fx-background-color: #a4dda6;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px;
+    -fx-background-radius: 50%;
+}
+
+.radial-menu-center:hover, .radial-menu-item:hover {
+    -fx-background-color: #c4bad5;
+}

@@ -13,15 +13,19 @@ import github.heyweol.demo.components.ZIndexComponent;
 import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.ui.MaterialSummaryWindow;
+import github.heyweol.demo.ui.RadialMenu;
 import github.heyweol.demo.utils.ResourceManager;
 import github.heyweol.demo.utils.SceneManager;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
@@ -31,6 +35,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
 
@@ -71,22 +76,26 @@ public class MyGameApp extends GameApplication {
   private static int GRID_TOP_X = ITEM_BAR_WIDTH + bg_width / 2; // 528
   private static int GRID_TOP_Y = (int) (451*scale_factor);
   
+  private RadialMenu radialMenu;
+  
   @Override
   protected void initSettings(GameSettings settings) {
     settings.setHeight(game_height);
 //    settings.setPreserveResizeRatio(true);
     settings.setWidth(game_width);
     settings.setTitle("心纸居");
-    settings.setVersion("v0.1");
+    settings.setVersion("0.1");
+    
+    settings.getCSSList().add("radial-menu.css");
   }
   
   @Override
   protected void initGame() {
-    initSaveModule();
+    radialMenu = new RadialMenu();
+    FXGL.addUINode(radialMenu, 300, 100);
     
     // Register a scene load listener to update the material list
     SceneManager.addSceneLoadListener(this::updateMaterialSummary);
-    
     
     // Create the isometric grid with the new parameters
     isometricGrid = new IsometricGrid(15, 15, 34, 17, GRID_TOP_X, GRID_TOP_Y);
@@ -327,6 +336,26 @@ public class MyGameApp extends GameApplication {
     if (!saveFiles.isEmpty()) {
       saveSelector.setValue(saveFiles.get(0));
     }
+  }
+  
+  private void adjustItemPosition(Entity item, double dx, double dy, double scale) {
+    // Adjust position
+    item.translateX(dx);
+    item.translateY(dy);
+    
+    // Adjust scale
+    item.setScaleX(scale);
+    item.setScaleY(scale);
+    
+    // Update grid position if necessary
+    if (item.getType() == EntityType.PLACED_ITEM) {
+      Point2D gridPos = isometricGrid.getGridPosition(item.getX(), item.getY());
+      isometricGrid.placeItem(item, (int) gridPos.getX(), (int) gridPos.getY(),
+              item.getInt("itemWidth"), item.getInt("itemLength"));
+    }
+    
+    // Update z-index
+    item.getComponent(ZIndexComponent.class).onUpdate(0);
   }
   
 }

@@ -8,9 +8,11 @@ import github.heyweol.demo.EntityType;
 import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.Item;
 import github.heyweol.demo.WallGrid;
+import github.heyweol.demo.ui.ItemAdjustmentDialog;
 import github.heyweol.demo.utils.ResourceManager;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -21,6 +23,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class InteractiveItemComponent extends Component {
   private static Entity selectedEntity = null;
@@ -185,6 +188,7 @@ public class InteractiveItemComponent extends Component {
     
     Button mirrorBtn = createButton("", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
     Button removeBtn = createButton("", new FontIcon(FontAwesomeSolid.TRASH));
+    Button adjustBtn = createButton("", new FontIcon(FontAwesomeSolid.SLIDERS_H));
     
     removeBtn.setOnAction(e -> {
       entity.removeFromWorld();
@@ -197,10 +201,27 @@ public class InteractiveItemComponent extends Component {
       mirror();
     });
     
-    toolbar.getChildren().addAll(mirrorBtn, removeBtn);
+    adjustBtn.setOnAction(e -> {
+      ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent);
+      Optional<ButtonType> result = dialog.showAndWait();
+      if (result.isPresent() && result.get() == ButtonType.OK) {
+        updateItemPosition();
+      }
+    });
+    
+    toolbar.getChildren().addAll(mirrorBtn, adjustBtn, removeBtn);
     
     updateToolbarPosition();
     FXGL.addUINode(toolbar);
+  }
+  
+  private void updateItemPosition() {
+    if (entity.getType() == EntityType.PLACED_ITEM) {
+      Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+      isometricGrid.placeItem(entity, (int) gridPos.getX(), (int) gridPos.getY(),
+              entity.getInt("itemWidth"), entity.getInt("itemLength"));
+    }
+    entity.getComponent(ZIndexComponent.class).onUpdate(0);
   }
   
   private Button createVariantButton(Item variant) {

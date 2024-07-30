@@ -7,11 +7,11 @@ It's written in Java with JavaFX and FXGL. Build with maven. It's planned to be 
 - [x] Set up project
 - [x] Add background, side pane
 - [x] Implement item placement and removal
-- [ ] Change the background image to cleaner one
+- [x] Change the background image to cleaner one
 - [x] Replace items with images
-- [ ] Implement item rotation
+- [x] Implement item rotation
 - [ ] Implement view setting
-- [ ] Better UI with CSS
+- [x] Better UI with CSS
 - [ ] Implement screenshot functionality
 - [ ] Host on website with JPro
 - [ ] Implement backend on server side

@@ -17,11 +17,11 @@ public class JsonLoader {
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   
   public static List<Item> loadItems() {
-    String resourcePath = "/assets/data/items.json";
+    String resourcePath = "/assets/data/items_test.json";
     try (InputStream is = JsonLoader.class.getResourceAsStream(resourcePath)) {
       if (is == null) {
         LOGGER.severe("Cannot find resource: " + resourcePath);
-        throw new IOException("Cannot find items.json. Ensure it's in the resources/assets/data/ directory.");
+        throw new IOException("Cannot find items_test.json. Ensure it's in the resources/assets/data/ directory.");
       }
       
       List<Item> items = objectMapper.readValue(is, new TypeReference<List<Item>>() {});
