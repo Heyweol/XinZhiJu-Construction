@@ -11,7 +11,7 @@ public class ZIndexComponent extends Component {
     
     // Calculate z-index based on y-position
     // Items with higher y-value (lower on screen) should have higher z-index
-    int zIndex = (int) (entity.getY() * 100);
+    int zIndex = (int) ((entity.getY()+entity.getHeight()) * 100);
     
     // Set the z-index of the entity's view
     view.setZIndex(zIndex);
