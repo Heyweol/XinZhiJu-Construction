@@ -46,6 +46,9 @@ public class InteractiveItemComponent extends Component {
   private int baseOffsetX = 0;
   private int baseOffsetY = 0;
   
+  private Point2D currentDisplayOffset = new Point2D(0, 0);
+  private Point2D lastGridPos = new Point2D(0, 0);
+  
   static {
     selectionEffect = new DropShadow();
     selectionEffect.setColor(Color.BLUE);
@@ -120,7 +123,14 @@ public class InteractiveItemComponent extends Component {
         if (isometricGrid.canPlaceItem((int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY(),
                 item.getWidth(), item.getLength())) {
           Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY());
+          
+          double displayWidth = item.getNumTileWidth()* isometricGrid.getTileWidth() ;
+          currentDisplayOffset = new Point2D(-displayWidth/4,-displayWidth * item.getRatio()/2 );
+          isoPos = isoPos.add(currentDisplayOffset);
+          lastGridPos = gridPos;
+          
           entity.setPosition(isoPos);
+          gridVisualizerComponent.showAllOccupiedGrids();
           gridVisualizerComponent.showItemBase(item, (int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY(), false, false);
         }
       }
@@ -132,6 +142,7 @@ public class InteractiveItemComponent extends Component {
   
   private void onMouseReleased(MouseEvent e) {
     gridVisualizerComponent.hide();
+    gridVisualizerComponent.hideItemBase();
     
     if (isDragging) {
       EntityType type = (EntityType) entity.getType();
@@ -153,8 +164,13 @@ public class InteractiveItemComponent extends Component {
       } else {
         // For floor items (existing code)
         Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
-        isometricGrid.placeItem(entity, (int) gridPos.getX(), (int) gridPos.getY(),
-                entity.getInt("itemWidth"), entity.getInt("itemLength"));
+        
+        Item item = entity.getObject("item");
+        
+        double displayWidth = item.getNumTileWidth()* isometricGrid.getTileWidth() ;
+
+        isometricGrid.placeItem(entity, (int) lastGridPos.getX(), (int) lastGridPos.getY(),
+                entity.getInt("itemWidth"), entity.getInt("itemLength"),currentDisplayOffset);
       }
       notifyMaterialUpdateListeners();
     } else {

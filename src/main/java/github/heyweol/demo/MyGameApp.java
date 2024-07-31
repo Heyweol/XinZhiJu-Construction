@@ -191,6 +191,8 @@ public class MyGameApp extends GameApplication {
           } else {
             // For other items, use the floor grid
             Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+            System.out.println("gridPos: " + gridPos);
+            System.out.println("Can place item: " + isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength()));
             if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
               Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
               spawnItem(selectedItem, isoPos, EntityType.PLACED_ITEM);
@@ -283,7 +285,10 @@ public class MyGameApp extends GameApplication {
             .put("item", selectedItem)
             .put("type", type));
     if (type == EntityType.PLACED_ITEM) {
-      isometricGrid.placeItem(placedItem, (int) position.getX(), (int) position.getY(), selectedItem.getWidth(), selectedItem.getLength());
+      
+      Point2D gridPosition = isometricGrid.getGridPosition(position.getX() , position.getY()-100);
+//      isometricGrid.placeItem(placedItem,10, 10, selectedItem.getWidth(), selectedItem.getLength());
+      isometricGrid.placeItem(placedItem, (int) ( position.getX()  ), (int) (position.getY()  ), selectedItem.getWidth(), selectedItem.getLength());
     }
     updateMaterialSummary();
   }
@@ -349,7 +354,7 @@ public class MyGameApp extends GameApplication {
     
     // Update grid position if necessary
     if (item.getType() == EntityType.PLACED_ITEM) {
-      Point2D gridPos = isometricGrid.getGridPosition(item.getX(), item.getY());
+      Point2D gridPos = isometricGrid.getGridPosition(item.getX()                                                                                                      , item.getY());
       isometricGrid.placeItem(item, (int) gridPos.getX(), (int) gridPos.getY(),
               item.getInt("itemWidth"), item.getInt("itemLength"));
     }

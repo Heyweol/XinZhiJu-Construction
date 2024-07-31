@@ -96,8 +96,23 @@ public class GridVisualizerComponent extends Component {
     }
   }
   
-  public void showItemBase(Item item, int gridX, int gridY, boolean isWallItem, boolean isLeftWall) {
-    itemBaseHighlight.getChildren().clear();
+//  public void showItemBase(Item item, int gridX, int gridY, boolean isWallItem, boolean isLeftWall) {
+//    itemBaseHighlight.getChildren().clear();
+//
+//    if (isWallItem) {
+//      showWallItemBase(item, gridX, gridY, isLeftWall);
+//    } else {
+//      showFloorItemBase(item, gridX, gridY);
+//    }
+//
+//    itemBaseHighlight.setVisible(true);
+//  }
+  
+  public void showItemBase(Item item, int entityX, int entityY, boolean isWallItem, boolean isLeftWall) {
+//    itemBaseHighlight.getChildren().clear();
+    
+    int gridX = entityX + item.getBaseOffsetX();
+    int gridY = entityY + item.getBaseOffsetY();
     
     if (isWallItem) {
       showWallItemBase(item, gridX, gridY, isLeftWall);
@@ -106,6 +121,33 @@ public class GridVisualizerComponent extends Component {
     }
     
     itemBaseHighlight.setVisible(true);
+  }
+  
+  public void showAllOccupiedGrids() {
+    itemBaseHighlight.getChildren().clear();
+    
+    for (int x = 0; x < floorGrid.getGridWidth(); x++) {
+      for (int y = 0; y < floorGrid.getGridLength(); y++) {
+        if (floorGrid.isOccupied(x, y)) {
+          Point2D pos = floorGrid.getIsometricPosition(x, y);
+          Polygon rect = new Polygon(
+                  pos.getX() - offsetX, pos.getY() - offsetY,
+                  pos.getX() + floorGrid.getTileWidth() / 2 - offsetX, pos.getY() + floorGrid.getTileHeight() / 2 - offsetY,
+                  pos.getX() - offsetX, pos.getY() + floorGrid.getTileHeight() - offsetY,
+                  pos.getX() - floorGrid.getTileWidth() / 2 - offsetX, pos.getY() + floorGrid.getTileHeight() / 2 - offsetY
+          );
+          
+          rect.setFill(Color.LIGHTGREEN.deriveColor(0, 1, 1, 0.5));
+          rect.setStroke(Color.GREEN);
+          itemBaseHighlight.getChildren().add(rect);
+        }
+      }
+    }
+    itemBaseHighlight.setVisible(true);
+  }
+  
+  public void HideAllOccupiedGrids() {
+    itemBaseHighlight.setVisible(false);
   }
   
   private void showFloorItemBase(Item item, int gridX, int gridY) {

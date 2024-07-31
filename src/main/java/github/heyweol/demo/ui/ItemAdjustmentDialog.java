@@ -10,6 +10,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 
+import java.util.Optional;
+
 public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private Slider xSlider;
   private Slider ySlider;
@@ -23,12 +25,12 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private double originalScale;
   private int originalBaseOffsetX;
   private int originalBaseOffsetY;
-  private GridVisualizerComponent gridVisualizer;
+  private GridVisualizerComponent gridVisualizerComponent;
   
   public ItemAdjustmentDialog(Entity entity, GridVisualizerComponent gridVisualizer) {
     this.entity = entity;
     this.item = entity.getObject("item");
-    this.gridVisualizer = gridVisualizer;
+    this.gridVisualizerComponent = gridVisualizer;
     this.originalX = entity.getX();
     this.originalY = entity.getY();
     this.originalScale = entity.getScaleX();
@@ -41,8 +43,8 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     initModality(Modality.APPLICATION_MODAL);
     initOwner(FXGL.getGameScene().getRoot().getScene().getWindow());
     
-    xSlider = createSlider("X Position", -10, 10, 0);
-    ySlider = createSlider("Y Position", -10, 10, 0);
+    xSlider = createSlider("X Position", -30, 30, 0);
+    ySlider = createSlider("Y Position", -30, 30, 0);
     scaleSlider = createSlider("Scale", 0.5, 1.5, 1);
     baseOffsetXSpinner = createSpinner("Base Offset X", -5, 5, item.getBaseOffsetX());
     baseOffsetYSpinner = createSpinner("Base Offset Y", -5, 5, item.getBaseOffsetY());
@@ -108,20 +110,30 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     entity.setScaleY(scaleSlider.getValue());
   }
   
+//  private void updateItemBase() {
+//    int newBaseOffsetX = baseOffsetXSpinner.getValue();
+//    int newBaseOffsetY = baseOffsetYSpinner.getValue();
+//    item.setBaseOffsetX(newBaseOffsetX);
+//    item.setBaseOffsetY(newBaseOffsetY);
+//
+//    // Update the grid visualizer to show the new base
+//    boolean isHanging = entity.getType() == EntityType.HANGING;
+//    boolean isLeftWall = isHanging && entity.getBoolean("isLeftWall");
+//    gridVisualizer.showItemBase(item,
+//            (int)entity.getX() + newBaseOffsetX,
+//            (int)entity.getY() + newBaseOffsetY,
+//            isHanging,
+//            isLeftWall);
+//  }
+  
   private void updateItemBase() {
-    int newBaseOffsetX = baseOffsetXSpinner.getValue();
-    int newBaseOffsetY = baseOffsetYSpinner.getValue();
-    item.setBaseOffsetX(newBaseOffsetX);
-    item.setBaseOffsetY(newBaseOffsetY);
+    item.setBaseOffsetX(baseOffsetXSpinner.getValue());
+    item.setBaseOffsetY(baseOffsetYSpinner.getValue());
     
-    // Update the grid visualizer to show the new base
     boolean isHanging = entity.getType() == EntityType.HANGING;
     boolean isLeftWall = isHanging && entity.getBoolean("isLeftWall");
-    gridVisualizer.showItemBase(item,
-            (int)entity.getX() + newBaseOffsetX,
-            (int)entity.getY() + newBaseOffsetY,
-            isHanging,
-            isLeftWall);
+    
+    gridVisualizerComponent.showItemBase(item, (int) entity.getX(), (int) entity.getY(), isHanging, isLeftWall);
   }
   
   private void resetItemPosition() {
@@ -139,5 +151,16 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   
   public int getBaseOffsetY() {
     return baseOffsetYSpinner.getValue();
+  }
+  
+  private void showBaseAdjustmentDialog() {
+    ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent);
+    Optional<ButtonType> result = dialog.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+      Item item = entity.getObject("item");
+      item.setBaseOffsetX(dialog.getBaseOffsetX());
+      item.setBaseOffsetY(dialog.getBaseOffsetY());
+      updateItemBase();
+    }
   }
 }

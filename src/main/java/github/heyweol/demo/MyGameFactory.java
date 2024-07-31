@@ -34,7 +34,7 @@ public class MyGameFactory implements EntityFactory {
     
     // Calculate the width based on the item's dimensions and the wall grid's tile width
     double tileWidth = leftWallGrid.getTileWidth(); // Assuming both wall grids have the same tile width
-    double itemWidth = tileWidth * item.getWidth();
+    double itemWidth = tileWidth * item.getNumTileWidth();
     
     texture.setFitWidth(itemWidth);
     texture.setPreserveRatio(true);
