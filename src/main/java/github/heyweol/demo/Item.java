@@ -20,7 +20,7 @@ public class Item {
   private String unicode;
   private int baseOffsetX;
   private int baseOffsetY;
-  
+  private double ratio;
   
   @JsonIgnore
   private Image image;
@@ -83,14 +83,32 @@ public class Item {
   public Map<String, Integer> getMaterialList() { return materialList; }
   public String getUnicode() { return unicode; }
   
+  /**
+   *  @deprecated Use {@link #getNumTileWidth()} instead.
+   */
+  @Deprecated
   public int getWidth() { return size.get(0); }
+  
+  /**
+   *  @deprecated Use {@link #getNumTileHeight()} instead.
+   */
+  @Deprecated
   public int getLength() { return size.get(1); }
+  
+  public int getNumTileWidth() { return size.get(0); }
+  public int getNumTileHeight() { return size.get(1); }
   
   @JsonIgnore
   public Image getImage() {
     if (image == null) {
       image = ResourceManager.getImage(imageName);
     }
+    if (image != null) {
+      ratio = image.getHeight() / image.getWidth();
+    } else {
+      ratio = 1.0;
+    }
+    
     return image;
   }
   
@@ -100,20 +118,11 @@ public class Item {
             .collect(Collectors.joining(", "));
   }
   
-  public int getBaseOffsetX() {
-    return baseOffsetX;
-  }
+  public int getBaseOffsetX() { return baseOffsetX; }
+  public void setBaseOffsetX(int baseOffsetX) { this.baseOffsetX = baseOffsetX; }
+  public int getBaseOffsetY() { return baseOffsetY; }
+  public void setBaseOffsetY(int baseOffsetY) { this.baseOffsetY = baseOffsetY; }
+  public double getRatio() { return ratio; }
   
-  public void setBaseOffsetX(int baseOffsetX) {
-    this.baseOffsetX = baseOffsetX;
-  }
-  
-  public int getBaseOffsetY() {
-    return baseOffsetY;
-  }
-  
-  public void setBaseOffsetY(int baseOffsetY) {
-    this.baseOffsetY = baseOffsetY;
-  }
   
 }
