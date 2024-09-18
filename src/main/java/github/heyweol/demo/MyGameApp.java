@@ -17,27 +17,35 @@ import github.heyweol.demo.ui.RadialMenu;
 import github.heyweol.demo.utils.ResourceManager;
 import github.heyweol.demo.utils.SceneManager;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.transform.Transform;
 import javafx.util.Duration;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -91,7 +99,7 @@ public class MyGameApp extends GameApplication {
   
   @Override
   protected void initGame() {
-    radialMenu = new RadialMenu();
+    radialMenu = new RadialMenu(this::takeCustomScreenshot);
     FXGL.addUINode(radialMenu, 300, 100);
     
     // Register a scene load listener to update the material list
@@ -363,4 +371,47 @@ public class MyGameApp extends GameApplication {
     item.getComponent(ZIndexComponent.class).onUpdate(0);
   }
   
+  
+  private void takeCustomScreenshot() {
+    radialMenu.setVisible(false);
+    // Get the main game scene without UI elements
+    Node gameView = FXGL.getGameScene().getContentRoot();
+    
+    // Calculate the scale factor
+    double scaleX = BG_WIDTH / (double)bg_width;
+    double scaleY = BG_HEIGHT / (double)bg_height;
+    
+    // Create a new WritableImage to store the screenshot at full resolution
+    WritableImage screenshot = new WritableImage((int)(bg_width * scaleX), (int)(bg_height * scaleY));
+    
+    // Take the snapshot of the game view
+    SnapshotParameters params = new SnapshotParameters();
+    params.setViewport(new Rectangle2D(ITEM_BAR_WIDTH * scaleX, 0, bg_width * scaleX, bg_height * scaleY));
+    params.setTransform(Transform.scale(scaleX, scaleY));
+    gameView.snapshot(params, screenshot);
+    
+    
+    radialMenu.setVisible(true);
+    // Save the screenshot
+    String fileName = "screenshot_" + System.currentTimeMillis() + ".png";
+    String filePath = System.getProperty("user.home") + "/Desktop/" + fileName;
+    File file = new File(filePath);
+    
+    try {
+      // Use JavaFX's built-in functionality to save the image
+      BufferedImage bufferedImage = new BufferedImage((int)(bg_width * scaleX), (int)(bg_height * scaleY), BufferedImage.TYPE_INT_ARGB);
+      PixelReader pr = screenshot.getPixelReader();
+      for (int x = 0; x < bg_width * scaleX; x++) {
+        for (int y = 0; y < bg_height * scaleY; y++) {
+          bufferedImage.setRGB(x, y, pr.getArgb(x, y));
+        }
+      }
+      ImageIO.write(bufferedImage, "png", file);
+      
+      FXGL.getNotificationService().pushNotification("High-res screenshot saved: " + fileName);
+    } catch (IOException e) {
+      e.printStackTrace();
+      FXGL.getNotificationService().pushNotification("Failed to save screenshot");
+    }
+  }
 }

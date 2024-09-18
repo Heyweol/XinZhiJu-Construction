@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import github.heyweol.demo.utils.ResourceManager;
+import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public class Item {
   private int baseOffsetX;
   private int baseOffsetY;
   private double ratio;
+  private double xOffset;
+  private double yOffset;
   
   @JsonIgnore
   private Image image;
@@ -117,12 +120,18 @@ public class Item {
             .map(entry -> entry.getKey() + ": " + entry.getValue())
             .collect(Collectors.joining(", "));
   }
-  
+  public Point2D calculateDisplayOffset(double tileWidth) {
+    double displayWidth = this.getNumTileWidth() * tileWidth;
+    return new Point2D(-displayWidth / 4, -displayWidth * this.getRatio() / 2);
+  }
   public int getBaseOffsetX() { return baseOffsetX; }
   public void setBaseOffsetX(int baseOffsetX) { this.baseOffsetX = baseOffsetX; }
   public int getBaseOffsetY() { return baseOffsetY; }
   public void setBaseOffsetY(int baseOffsetY) { this.baseOffsetY = baseOffsetY; }
   public double getRatio() { return ratio; }
   
-  
+  public double getXOffset() { return xOffset; }
+  public void setXOffset(double xOffset) { this.xOffset = xOffset; }
+  public double getYOffset() { return yOffset; }
+  public void setYOffset(double yOffset) { this.yOffset = yOffset; }
 }

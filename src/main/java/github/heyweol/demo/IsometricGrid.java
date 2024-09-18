@@ -74,7 +74,7 @@ public class IsometricGrid {
       }
     }
     Point2D isoPos = getIsometricPosition(gridX, gridY);
-    
+    System.out.println("set grid to item");
     item.setPosition(isoPos);
   }
   
@@ -87,8 +87,10 @@ public class IsometricGrid {
         grid[x][y] = item;
       }
     }
+    System.out.println("set grid to item");
     Point2D isoPos = getIsometricPosition(gridX, gridY);
-    
+    Item itemObj = item.getObject("item");
+    isoPos = isoPos.add(itemObj.getXOffset(), itemObj.getYOffset());
     isoPos = isoPos.add(offset);
     
     item.setPosition(isoPos);

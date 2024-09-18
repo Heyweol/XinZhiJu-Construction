@@ -24,8 +24,11 @@ public class RadialMenu extends Pane {
   private boolean isExpanded = false;
   private final double radius = 50;
   private double dragStartX, dragStartY;
+  private Runnable screenshotAction;
   
-  public RadialMenu() {
+  public RadialMenu(Runnable screenshotAction) {
+    this.screenshotAction = screenshotAction;
+    
     centerButton = createButton("", new FontIcon(FontAwesomeSolid.BARS));
     centerButton.getStyleClass().add("radial-menu-center");
     centerButton.setOnAction(e -> {
@@ -37,7 +40,7 @@ public class RadialMenu extends Pane {
     
     addMenuItem("Save", FontAwesomeSolid.SAVE, this::saveScene);
     addMenuItem("Load", FontAwesomeSolid.FOLDER_OPEN, this::loadScene);
-    addMenuItem("Edit", FontAwesomeSolid.EDIT, this::editScene);
+    addMenuItem("Screenshot", FontAwesomeSolid.CAMERA, this::takeScreenshot);
     addMenuItem("Delete", FontAwesomeSolid.TRASH, this::deleteScene);
     
     setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
@@ -61,6 +64,13 @@ public class RadialMenu extends Pane {
     }
     
   }
+  
+  private void takeScreenshot() {
+    if (screenshotAction != null) {
+      screenshotAction.run();
+    }
+  }
+
   
   private void addMenuItem(String text, FontAwesomeSolid icon, Runnable action) {
     Button button = createButton(text, new FontIcon(icon));
