@@ -1,25 +1,23 @@
 package github.heyweol.demo.components;
 
 import com.almasb.fxgl.entity.component.Component;
+import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.Item;
+import github.heyweol.demo.WallGrid;
+import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.Group;
-import javafx.geometry.Point2D;
-
-import github.heyweol.demo.IsometricGrid;
-import github.heyweol.demo.WallGrid;
 import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
 
 public class GridVisualizerComponent extends Component {
-  private IsometricGrid floorGrid;
-  private WallGrid leftWallGrid;
-  private WallGrid rightWallGrid;
-  private Group gridLines;
-  private Group itemBaseHighlight;
-  private double offsetX;
-  private double offsetY;
+  private final IsometricGrid floorGrid;
+  private final WallGrid leftWallGrid;
+  private final WallGrid rightWallGrid;
+  private final Group gridLines;
+  private final Group itemBaseHighlight;
+  private final double offsetX;
+  private final double offsetY;
   
   public GridVisualizerComponent(IsometricGrid floorGrid, WallGrid leftWallGrid, WallGrid rightWallGrid, double offsetX, double offsetY) {
     this.floorGrid = floorGrid;
@@ -96,20 +94,7 @@ public class GridVisualizerComponent extends Component {
     }
   }
   
-//  public void showItemBase(Item item, int gridX, int gridY, boolean isWallItem, boolean isLeftWall) {
-//    itemBaseHighlight.getChildren().clear();
-//
-//    if (isWallItem) {
-//      showWallItemBase(item, gridX, gridY, isLeftWall);
-//    } else {
-//      showFloorItemBase(item, gridX, gridY);
-//    }
-//
-//    itemBaseHighlight.setVisible(true);
-//  }
-  
   public void showItemBase(Item item, int entityX, int entityY, boolean isWallItem, boolean isLeftWall) {
-//    itemBaseHighlight.getChildren().clear();
     
     int gridX = entityX + item.getBaseOffsetX();
     int gridY = entityY + item.getBaseOffsetY();

@@ -28,7 +28,7 @@ public class MyGameFactory implements EntityFactory {
     this.gridVisualizerComponent = gridVisualizerComponent;
   }
   
-  @Spawns("hangingItem")
+  @Spawns("wallItem")
   public Entity newHangingItem(SpawnData data) {
     Item item = data.get("item");
     Texture texture = FXGL.texture(item.getImageName());
@@ -48,7 +48,7 @@ public class MyGameFactory implements EntityFactory {
     double bboxHeight = leftWallGrid.getTileHeight() * item.getNumTileHeight();
 
     return entityBuilder(data)
-            .type(EntityType.HANGING)
+            .type(EntityType.WALL_ITEM)
             .view(texture)
             .bbox(new HitBox(BoundingShape.box(bboxWidth, bboxHeight)))
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
@@ -60,7 +60,7 @@ public class MyGameFactory implements EntityFactory {
             .build();
   }
   
-  @Spawns("placedItem")
+  @Spawns("floorItem")
   public Entity newPlacedItem(SpawnData data) {
     Item item = data.get("item");
     Texture texture = FXGL.texture(item.getImageName());
@@ -73,12 +73,14 @@ public class MyGameFactory implements EntityFactory {
     texture.setPreserveRatio(true);
     
     return entityBuilder(data)
-            .type(EntityType.PLACED_ITEM)
+            .type(EntityType.FLOOR_ITEM)
             .viewWithBBox(texture)
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
             .with(new ZIndexComponent())
-            .with("itemWidth", item.getWidth())
-            .with("itemLength", item.getLength())
+            .with("itemWidth", item.getNumTileWidth())
+            .with("itemLength", item.getNumTileHeight())
+            .with("OffsetX", item.getXOffset())
+            .with("OffsetY", item.getYOffset())
             .build();
   }
   

@@ -191,10 +191,10 @@ public class MyGameApp extends GameApplication {
             
             if (leftWallGrid.canPlaceItem((int) leftGridPos.getX(), (int) leftGridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
               Point2D wallPos = leftWallGrid.getWallPosition((int) leftGridPos.getX(), (int) leftGridPos.getY());
-              spawnItem(selectedItem, wallPos, EntityType.HANGING);
+              spawnItem(selectedItem, wallPos, EntityType.WALL_ITEM);
             } else if (rightWallGrid.canPlaceItem((int) rightGridPos.getX(), (int) rightGridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
               Point2D wallPos = rightWallGrid.getWallPosition((int) rightGridPos.getX(), (int) rightGridPos.getY());
-              spawnItem(selectedItem, wallPos, EntityType.HANGING);
+              spawnItem(selectedItem, wallPos, EntityType.WALL_ITEM);
             }
           } else {
             // For other items, use the floor grid
@@ -203,7 +203,7 @@ public class MyGameApp extends GameApplication {
             System.out.println("Can place item: " + isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength()));
             if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
               Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
-              spawnItem(selectedItem, isoPos, EntityType.PLACED_ITEM);
+              spawnItem(selectedItem, isoPos, EntityType.FLOOR_ITEM);
             }
           }
           
@@ -264,7 +264,7 @@ public class MyGameApp extends GameApplication {
   
   private void updateMaterialSummary() {
     totalMaterials.clear();
-    getGameWorld().getEntitiesByType(EntityType.PLACED_ITEM).forEach(entity -> {
+    getGameWorld().getEntitiesByType(EntityType.FLOOR_ITEM).forEach(entity -> {
       Item item = entity.getObject("item");
       for (Map.Entry<String, Integer> entry : item.getMaterialList().entrySet()) {
         totalMaterials.merge(entry.getKey(), entry.getValue(), Integer::sum);
@@ -288,15 +288,12 @@ public class MyGameApp extends GameApplication {
   }
   
   private void spawnItem(Item selectedItem, Point2D position, EntityType type) {
-    String entityType = (type == EntityType.HANGING) ? "hangingItem" : "placedItem";
+    String entityType = (type == EntityType.WALL_ITEM) ? "wallItem" : "floorItem";
     Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
             .put("item", selectedItem)
             .put("type", type));
-    if (type == EntityType.PLACED_ITEM) {
-      
-      Point2D gridPosition = isometricGrid.getGridPosition(position.getX() , position.getY()-100);
-//      isometricGrid.placeItem(placedItem,10, 10, selectedItem.getWidth(), selectedItem.getLength());
-      isometricGrid.placeItem(placedItem, (int) ( position.getX()  ), (int) (position.getY()  ), selectedItem.getWidth(), selectedItem.getLength());
+    if (type == EntityType.FLOOR_ITEM) {
+      isometricGrid.placeEntity(placedItem, (int) ( position.getX()  ), (int) (position.getY()  ));
     }
     updateMaterialSummary();
   }
@@ -361,9 +358,9 @@ public class MyGameApp extends GameApplication {
     item.setScaleY(scale);
     
     // Update grid position if necessary
-    if (item.getType() == EntityType.PLACED_ITEM) {
+    if (item.getType() == EntityType.FLOOR_ITEM) {
       Point2D gridPos = isometricGrid.getGridPosition(item.getX()                                                                                                      , item.getY());
-      isometricGrid.placeItem(item, (int) gridPos.getX(), (int) gridPos.getY(),
+      isometricGrid.placeEntity(item, (int) gridPos.getX(), (int) gridPos.getY(),
               item.getInt("itemWidth"), item.getInt("itemLength"));
     }
     

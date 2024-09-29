@@ -30,7 +30,7 @@ public class SceneManager {
   public static void saveScene(String saveName) {
     List<SceneState> sceneStates = new ArrayList<>();
     
-    for (Entity entity : FXGL.getGameWorld().getEntitiesByType(EntityType.PLACED_ITEM, EntityType.HANGING)) {
+    for (Entity entity : FXGL.getGameWorld().getEntitiesByType(EntityType.FLOOR_ITEM, EntityType.WALL_ITEM)) {
       Item item = entity.getObject("item");
       InteractiveItemComponent component = entity.getComponent(InteractiveItemComponent.class);
       
@@ -58,14 +58,14 @@ public class SceneManager {
       List<SceneState> sceneStates = (List<SceneState>) ois.readObject();
       
       // Clear existing items
-      FXGL.getGameWorld().getEntitiesByType(EntityType.PLACED_ITEM, EntityType.HANGING)
+      FXGL.getGameWorld().getEntitiesByType(EntityType.FLOOR_ITEM, EntityType.WALL_ITEM)
               .forEach(Entity::removeFromWorld);
       
       for (SceneState state : sceneStates) {
         Item item = ResourceManager.getItemByName(state.getItemName());
         if (item != null) {
-          EntityType type = item.getFilename().contains("guajian") ? EntityType.HANGING : EntityType.PLACED_ITEM;
-          Entity entity = FXGL.spawn(type == EntityType.HANGING ? "hangingItem" : "placedItem",
+          EntityType type = item.getFilename().contains("guajian") ? EntityType.WALL_ITEM : EntityType.FLOOR_ITEM;
+          Entity entity = FXGL.spawn(type == EntityType.WALL_ITEM ? "hangingItem" : "placedItem",
                   new SpawnData(state.getX(), state.getY()).put("item", item));
           
           InteractiveItemComponent component = entity.getComponent(InteractiveItemComponent.class);

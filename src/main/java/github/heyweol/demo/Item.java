@@ -17,7 +17,7 @@ public class Item {
   private String name;
   private String imageName;
   private List<Integer> size;
-  private boolean canBePlacedOutside;
+  private boolean canBePlacedAbove;
   private Map<String, Integer> materialList;
   private String unicode;
   private int baseOffsetX;
@@ -43,7 +43,7 @@ public class Item {
     this.name = name;
     this.imageName = constructImagePath(filename);
     this.size = parseSize(sizeString);
-    this.canBePlacedOutside = "Y".equals(outside);
+    this.canBePlacedAbove = "Y".equals(outside);
     this.materialList = parseMaterialList(materialListStrings);
     this.unicode = determineUnicode(filename);
     this.baseOffsetX = 0;
@@ -90,7 +90,7 @@ public class Item {
   public String getName() { return name; }
   public String getImageName() { return imageName; }
   public List<Integer> getSize() { return size; }
-  public boolean canBePlacedOutside() { return canBePlacedOutside; }
+  public boolean canBePlacedOutside() { return canBePlacedAbove; }
   public Map<String, Integer> getMaterialList() { return materialList; }
   public String getUnicode() { return unicode; }
   
@@ -132,8 +132,11 @@ public class Item {
     double displayWidth = this.getNumTileWidth() * tileWidth;
     return new Point2D(-displayWidth / 4, -displayWidth * this.getRatio() / 2);
   }
+  
+  @Deprecated
   public int getBaseOffsetX() { return baseOffsetX; }
   public void setBaseOffsetX(int baseOffsetX) { this.baseOffsetX = baseOffsetX; }
+  @Deprecated
   public int getBaseOffsetY() { return baseOffsetY; }
   public void setBaseOffsetY(int baseOffsetY) { this.baseOffsetY = baseOffsetY; }
   public double getRatio() { return ratio; }

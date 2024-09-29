@@ -64,25 +64,29 @@ public class IsometricGrid {
     return true;
   }
   
+  public void placeEntity(Entity entity, int gridX, int gridY) {
+    placeEntity(entity, gridX, gridY, entity.getInt("itemWidth"), entity.getInt("itemLength"));
+  }
   
-  public void placeItem(Entity item, int gridX, int gridY, int itemWidth, int itemLength) {
-    placeItem(item, gridX, gridY, itemWidth, itemLength, Point2D.ZERO);
+  
+  public void placeEntity(Entity entity, int gridX, int gridY, int itemWidth, int itemLength) {
+    placeEntity(entity, gridX, gridY, itemWidth, itemLength, Point2D.ZERO);
   }
 
-  public void placeItem(Entity item, int gridX, int gridY, int itemWidth, int itemLength, Point2D offset) {
+  public void placeEntity(Entity entity, int gridX, int gridY, int itemWidth, int itemLength, Point2D offset) {
     if (!canPlaceItem(gridX, gridY, itemWidth, itemLength)) {
       return;
     }
     for (int x = gridX; x < gridX + itemWidth; x++) {
       for (int y = gridY; y < gridY + itemLength; y++) {
-        grid[x][y] = item;
+        grid[x][y] = entity;
       }
     }
     Point2D isoPos = getIsometricPosition(gridX, gridY);
-    Item itemObj = item.getObject("item");
+    Item itemObj = entity.getObject("item");
     isoPos = isoPos.add(itemObj.getXOffset(), itemObj.getYOffset());
     isoPos = isoPos.add(offset);
-    item.setPosition(isoPos);
+    entity.setPosition(isoPos);
   }
   
   /**

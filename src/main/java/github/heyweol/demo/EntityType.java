@@ -1,6 +1,6 @@
 package github.heyweol.demo;
 
 public enum EntityType {
-  HANGING,
-  PLACED_ITEM, ANY
+  WALL_ITEM,
+  FLOOR_ITEM, ANY
 }
