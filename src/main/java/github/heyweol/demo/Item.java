@@ -1,15 +1,16 @@
 package github.heyweol.demo;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import github.heyweol.demo.utils.ResourceManager;
-import javafx.geometry.Point2D;
-import javafx.scene.image.Image;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import github.heyweol.demo.utils.ResourceManager;
+import javafx.geometry.Point2D;
+import javafx.scene.image.Image;
 
 public class Item {
   private String filename;
@@ -22,6 +23,7 @@ public class Item {
   private int baseOffsetX;
   private int baseOffsetY;
   private double ratio;
+  private double scale;
   private double xOffset;
   private double yOffset;
   
@@ -33,7 +35,10 @@ public class Item {
               @JsonProperty("name") String name,
               @JsonProperty("size") String sizeString,
               @JsonProperty("outside") String outside,
-              @JsonProperty("material_list") List<String> materialListStrings) {
+              @JsonProperty("material_list") List<String> materialListStrings,
+              @JsonProperty("xOffset") double xOffset,
+              @JsonProperty("yOffset") double yOffset,
+              @JsonProperty("scale") double scale) {
     this.filename = filename;
     this.name = name;
     this.imageName = constructImagePath(filename);
@@ -43,6 +48,9 @@ public class Item {
     this.unicode = determineUnicode(filename);
     this.baseOffsetX = 0;
     this.baseOffsetY = 0;
+    this.scale = scale;
+    this.xOffset = xOffset;
+    this.yOffset = yOffset;
   }
   
   private String constructImagePath(String filename) {
@@ -134,4 +142,6 @@ public class Item {
   public void setXOffset(double xOffset) { this.xOffset = xOffset; }
   public double getYOffset() { return yOffset; }
   public void setYOffset(double yOffset) { this.yOffset = yOffset; }
+  public double getScale() { return scale; }
+  public void setScale(double scale) { this.scale = scale; }
 }

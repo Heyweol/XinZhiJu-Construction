@@ -1,12 +1,12 @@
 package github.heyweol.demo.components;
 
 import com.almasb.fxgl.entity.component.Component;
-import com.almasb.fxgl.entity.Entity;
+
 import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.Item;
+import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
-import javafx.geometry.Point2D;
 
 public class BuildIndicatorComponent extends Component {
   private IsometricGrid grid;
@@ -28,8 +28,8 @@ public class BuildIndicatorComponent extends Component {
   }
   
   public void updateSize(Item item) {
-    this.width = item.getWidth();
-    this.height = item.getLength();
+    this.width = item.getNumTileWidth();
+    this.height = item.getNumTileHeight();
     updateShape();
   }
   

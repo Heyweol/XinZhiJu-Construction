@@ -1,14 +1,15 @@
 package github.heyweol.demo;
 
 import com.almasb.fxgl.entity.Entity;
+
 import javafx.geometry.Point2D;
 
 public class IsometricGrid {
-  private final int gridWidth;
-  private final int gridLength;
+  private int gridWidth;
+  private int gridLength;
   private final double tileWidth;
   private final double tileHeight;
-  private final Entity[][] grid;
+  private Entity[][] grid;
   private final double offsetX;
   private final double offsetY;
   
@@ -26,7 +27,7 @@ public class IsometricGrid {
    * Given a grid position (ie, column as X, row as Y), X points to lower right, Y to lower left
    * @param gridX
    * @param gridY
-   * @return screen position of center of the tile
+   * @return Point2D of screen position of center of the tile
    */
   public Point2D getIsometricPosition(int gridX, int gridY) {
     double x = offsetX + (gridX - gridY) * (tileWidth / 2.0);
@@ -65,19 +66,9 @@ public class IsometricGrid {
   
   
   public void placeItem(Entity item, int gridX, int gridY, int itemWidth, int itemLength) {
-    if (!canPlaceItem(gridX, gridY, itemWidth, itemLength)) {
-      return;
-    }
-    for (int x = gridX; x < gridX + itemWidth; x++) {
-      for (int y = gridY; y < gridY + itemLength; y++) {
-        grid[x][y] = item;
-      }
-    }
-    Point2D isoPos = getIsometricPosition(gridX, gridY);
-    System.out.println("set grid to item");
-    item.setPosition(isoPos);
+    placeItem(item, gridX, gridY, itemWidth, itemLength, Point2D.ZERO);
   }
-  
+
   public void placeItem(Entity item, int gridX, int gridY, int itemWidth, int itemLength, Point2D offset) {
     if (!canPlaceItem(gridX, gridY, itemWidth, itemLength)) {
       return;
@@ -87,12 +78,10 @@ public class IsometricGrid {
         grid[x][y] = item;
       }
     }
-    System.out.println("set grid to item");
     Point2D isoPos = getIsometricPosition(gridX, gridY);
     Item itemObj = item.getObject("item");
     isoPos = isoPos.add(itemObj.getXOffset(), itemObj.getYOffset());
     isoPos = isoPos.add(offset);
-    
     item.setPosition(isoPos);
   }
   
@@ -108,6 +97,16 @@ public class IsometricGrid {
         }
       }
     }
+  }
+
+  public void expand(int steps) {
+    gridWidth += steps;
+    gridLength += steps;
+    Entity[][] newGrid = new Entity[gridWidth][gridLength];
+    for (int x = 0; x < gridWidth - steps; x++) {
+        System.arraycopy(grid[x], 0, newGrid[x], 0, gridLength - steps);
+    }
+    grid = newGrid;
   }
   
   // Getters

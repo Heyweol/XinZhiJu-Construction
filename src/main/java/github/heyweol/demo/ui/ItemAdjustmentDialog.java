@@ -2,13 +2,17 @@ package github.heyweol.demo.ui;
 
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+
 import github.heyweol.demo.EntityType;
 import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.Item;
 import github.heyweol.demo.components.GridVisualizerComponent;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
@@ -66,6 +70,9 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     
     setResultConverter(buttonType -> {
       if (buttonType == ButtonType.OK) {
+        item.setXOffset(getXOffset());
+        item.setYOffset(getYOffset());
+        item.setScale(scaleSlider.getValue());
         return ButtonType.OK;
       }
       resetItemPosition();

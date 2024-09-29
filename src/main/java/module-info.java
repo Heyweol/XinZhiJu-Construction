@@ -1,6 +1,7 @@
 open module github.heyweol.demo {
   requires javafx.controls;
   requires javafx.fxml;
+  requires javafx.graphics;
   
   requires org.controlsfx.controls;
   requires org.kordamp.ikonli.javafx;
