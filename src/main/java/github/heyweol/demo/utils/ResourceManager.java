@@ -50,7 +50,7 @@ public class ResourceManager {
         return;
       }
       loadedItems = objectMapper.readValue(is, new TypeReference<List<Item>>() {});
-      LOGGER.info("Loaded " + loadedItems.size() + " items");
+//      LOGGER.info("Loaded " + loadedItems.size() + " items");
       
       // Log the unique characters found
       Set<String> characters = loadedItems.stream()

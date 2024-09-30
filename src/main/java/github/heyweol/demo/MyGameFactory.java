@@ -39,10 +39,11 @@ public class MyGameFactory implements EntityFactory {
     
     texture.setFitWidth(itemWidth);
     texture.setPreserveRatio(true);
-    
-    // Calculate base offset
-    double baseOffsetX = (item.getNumTileWidth() - 1) * tileWidth / 2;
-    double baseOffsetY = (item.getNumTileHeight() - 1) * leftWallGrid.getTileHeight() / 2;
+    texture.setScaleX(item.getScale());
+    texture.setScaleY(item.getScale());
+//    // Calculate base offset
+//    double baseOffsetX = (item.getNumTileWidth() - 1) * tileWidth / 2;
+//    double baseOffsetY = (item.getNumTileHeight() - 1) * leftWallGrid.getTileHeight() / 2;
     
     double bboxWidth = tileWidth * item.getNumTileWidth();
     double bboxHeight = leftWallGrid.getTileHeight() * item.getNumTileHeight();
@@ -53,10 +54,12 @@ public class MyGameFactory implements EntityFactory {
             .bbox(new HitBox(BoundingShape.box(bboxWidth, bboxHeight)))
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
             .with(new ZIndexComponent())
-            .with("itemWidth", item.getWidth())
-            .with("itemLength", item.getLength())
-            .with("baseOffsetX", baseOffsetX)
-            .with("baseOffsetY", baseOffsetY)
+            .with("itemWidth", item.getNumTileWidth())
+            .with("itemLength", item.getNumTileHeight())
+            .with("xOffset", item.getXOffset())
+            .with("yOffset", item.getYOffset())
+            .with("xOffsetMirror", item.getXOffsetMirror())
+            .with("yOffsetMirror", item.getYOffsetMirror())
             .build();
   }
   
@@ -65,12 +68,16 @@ public class MyGameFactory implements EntityFactory {
     Item item = data.get("item");
     Texture texture = FXGL.texture(item.getImageName());
     
+    
     // Calculate the width based on the item's dimensions and the grid's tile width
     double tileWidth = isometricGrid.getTileWidth();
     double itemWidth = tileWidth + (item.getWidth() - 1 + item.getLength() - 1) * (tileWidth / 2);
     
     texture.setFitWidth(itemWidth);
     texture.setPreserveRatio(true);
+    
+    texture.setScaleX(item.getScale());
+    texture.setScaleY(item.getScale());
     
     return entityBuilder(data)
             .type(EntityType.FLOOR_ITEM)
@@ -79,8 +86,11 @@ public class MyGameFactory implements EntityFactory {
             .with(new ZIndexComponent())
             .with("itemWidth", item.getNumTileWidth())
             .with("itemLength", item.getNumTileHeight())
-            .with("OffsetX", item.getXOffset())
-            .with("OffsetY", item.getYOffset())
+            .with("xOffset", item.getXOffset())
+            .with("yOffset", item.getYOffset())
+            .with("xOffsetMirror", item.getXOffsetMirror())
+            .with("yOffsetMirror", item.getYOffsetMirror())
+            .with("scale", item.getScale())
             .build();
   }
   

@@ -289,12 +289,17 @@ public class MyGameApp extends GameApplication {
   
   private void spawnItem(Item selectedItem, Point2D position, EntityType type) {
     String entityType = (type == EntityType.WALL_ITEM) ? "wallItem" : "floorItem";
+    Point2D gridPos = isometricGrid.getGridPosition(position.getX(), position.getY());
+    if (!isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
+      return;
+    }
     Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
             .put("item", selectedItem)
             .put("type", type));
-    if (type == EntityType.FLOOR_ITEM) {
-      isometricGrid.placeEntity(placedItem, (int) ( position.getX()  ), (int) (position.getY()  ));
-    }
+    //no use here
+//    if (type == EntityType.FLOOR_ITEM) {
+//      isometricGrid.placeEntity(placedItem, (int) ( position.getX()  ), (int) (position.getY()  ));
+//    }
     updateMaterialSummary();
   }
   

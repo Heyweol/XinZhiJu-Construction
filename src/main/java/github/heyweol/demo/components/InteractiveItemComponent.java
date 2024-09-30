@@ -50,8 +50,8 @@ public class InteractiveItemComponent extends Component {
   
   private Point2D currentDisplayOffset = new Point2D(0, 0);
   private Point2D lastGridPos = new Point2D(0, 0);
-  private double xOffset = 0;
-  private double yOffset = 0;
+  private double xOffset;
+  private double yOffset;
   
   
   static {
@@ -69,6 +69,10 @@ public class InteractiveItemComponent extends Component {
   
   @Override
   public void onAdded() {
+    Item item = entity.getObject("item");
+    double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
+    currentDisplayOffset = new Point2D(-displayWidth/4, -displayWidth * item.getRatio()/2);
+    
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
@@ -146,10 +150,9 @@ public class InteractiveItemComponent extends Component {
             item.getNumTileWidth(), item.getNumTileHeight())) {
       Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
       
-      double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
-      currentDisplayOffset = new Point2D(-displayWidth/4, -displayWidth * item.getRatio()/2);
-      isoPos = isoPos.add(currentDisplayOffset);
       
+      isoPos = isoPos.add(currentDisplayOffset);
+
       isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
       lastGridPos = gridPos;
       
@@ -186,10 +189,9 @@ public class InteractiveItemComponent extends Component {
         
         Item item = entity.getObject("item");
         
-        double displayWidth = item.getNumTileWidth()* isometricGrid.getTileWidth() ;
-        
         Point2D isoPos = isometricGrid.getIsometricPosition((int) lastGridPos.getX(), (int) lastGridPos.getY());
         isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+        entity.setPosition(isoPos);
         isometricGrid.placeEntity(entity, (int) lastGridPos.getX(), (int) lastGridPos.getY(),
                 entity.getInt("itemWidth"), entity.getInt("itemLength"),currentDisplayOffset);
         

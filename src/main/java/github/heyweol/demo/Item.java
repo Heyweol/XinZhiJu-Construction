@@ -26,6 +26,8 @@ public class Item {
   private double scale;
   private double xOffset;
   private double yOffset;
+  private double xOffsetMirror;
+  private double yOffsetMirror;
   
   @JsonIgnore
   private Image image;
@@ -38,7 +40,9 @@ public class Item {
               @JsonProperty("material_list") List<String> materialListStrings,
               @JsonProperty("xOffset") double xOffset,
               @JsonProperty("yOffset") double yOffset,
-              @JsonProperty("scale") double scale) {
+              @JsonProperty("xOffsetMirror") double xOffsetMirror,
+              @JsonProperty("yOffsetMirror") double yOffsetMirror,
+              @JsonProperty("scale") Double scale) {
     this.filename = filename;
     this.name = name;
     this.imageName = constructImagePath(filename);
@@ -48,9 +52,11 @@ public class Item {
     this.unicode = determineUnicode(filename);
     this.baseOffsetX = 0;
     this.baseOffsetY = 0;
-    this.scale = scale;
+    this.scale = scale!=null? scale : 1.0;
     this.xOffset = xOffset;
     this.yOffset = yOffset;
+    this.xOffsetMirror = xOffsetMirror;
+    this.yOffsetMirror = yOffsetMirror;
   }
   
   private String constructImagePath(String filename) {
@@ -145,6 +151,10 @@ public class Item {
   public void setXOffset(double xOffset) { this.xOffset = xOffset; }
   public double getYOffset() { return yOffset; }
   public void setYOffset(double yOffset) { this.yOffset = yOffset; }
+  public double getXOffsetMirror() { return xOffsetMirror; }
+  public void setXOffsetMirror(double xOffsetMirror) { this.xOffsetMirror = xOffsetMirror; }
+  public double getYOffsetMirror() { return yOffsetMirror; }
+  public void setYOffsetMirror(double yOffsetMirror) { this.yOffsetMirror = yOffsetMirror; }
   public double getScale() { return scale; }
   public void setScale(double scale) { this.scale = scale; }
 }

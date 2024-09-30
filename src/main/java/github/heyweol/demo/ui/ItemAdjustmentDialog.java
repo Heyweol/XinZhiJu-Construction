@@ -102,11 +102,11 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   }
   
   private void updateItemPosition() {
-    double xOffset = originalXOffset + xOffsetSlider.getValue();
-    double yOffset = originalYOffset + yOffsetSlider.getValue();
+    double xOffset = xOffsetSlider.getValue();
+    double yOffset = yOffsetSlider.getValue();
     item.setXOffset(xOffset);
     item.setYOffset(yOffset);
-    
+
     Point2D gridPos = isometricGrid.getGridPosition(originalX, originalY);
     Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
     isoPos = isoPos.add(xOffset, yOffset);
@@ -119,6 +119,8 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     double scale = scaleSlider.getValue();
     entity.setScaleX(scale);
     entity.setScaleY(scale);
+    Item item = entity.getObject("item");
+    item.setScale(scale);
     gridVisualizerComponent.showItemBase(item, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
   }
   

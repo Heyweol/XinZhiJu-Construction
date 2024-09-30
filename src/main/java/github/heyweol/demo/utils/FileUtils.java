@@ -64,7 +64,7 @@ public class FileUtils {
   private static String convertItemType(String originalType) {
     switch (originalType) {
       case "guajia":
-        return "hanging";
+        return "wall";
       case "qiju":
         return "furniture";
       case "zhiwu":
