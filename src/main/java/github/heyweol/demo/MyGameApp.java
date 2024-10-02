@@ -360,14 +360,20 @@ public class MyGameApp extends GameApplication {
 //    isometricGrid.placeEntity(placedItem, (int) finalGridPos.getX(), (int) finalGridPos.getY(),
 //            selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight());
 //
+    Point2D textureOffset = new Point2D(-placedItem.getDouble("textureFitWidth")/2,-placedItem.getDouble("textureFitHeight"));
+    System.out.println("textureOffset: " + textureOffset);
+    Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
+    isoPos = isoPos.add(textureOffset);
+    isoPos = isoPos.add(placedItem.getDouble("xOffset"), placedItem.getDouble("yOffset"));
+    placedItem.setPosition(isoPos);
     updateMaterialSummary();
   }
   
-  private Point2D calculateOffset(Entity entity) {
-    BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
-    double height = bbox.getHeight();
-    return new Point2D(0, -height);
-  }
+//  private Point2D calculateOffset(Entity entity) {
+//    BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
+//    double height = bbox.getHeight();
+//    return new Point2D(0, -height);
+//  }
   
 //  private void initSaveModule() {
 //    saveSelector = new ComboBox<>();

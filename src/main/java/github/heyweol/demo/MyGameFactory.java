@@ -68,13 +68,23 @@ public class MyGameFactory implements EntityFactory {
     Item item = data.get("item");
     Texture texture = FXGL.texture(item.getImageName());
     
+    // Get the original image dimensions
+    double originalWidth = texture.getImage().getWidth();
+    double originalHeight = texture.getImage().getHeight();
+    double aspectRatio = originalHeight / originalWidth;
     
     // Calculate the width based on the item's dimensions and the grid's tile width
     double tileWidth = isometricGrid.getTileWidth();
     double itemWidth = tileWidth + (item.getWidth() - 1 + item.getLength() - 1) * (tileWidth / 2);
     
-    texture.setFitWidth(itemWidth);
+    // Apply scaling
+    double scaledWidth = itemWidth;
+    double scaledHeight = scaledWidth * aspectRatio;
+    
+    texture.setFitWidth(scaledWidth);
+    texture.setFitHeight(scaledHeight);
     texture.setPreserveRatio(true);
+    System.out.println("fit height: " + texture.getFitHeight());
     
     texture.setScaleX(item.getScale());
     texture.setScaleY(item.getScale());
@@ -89,8 +99,8 @@ public class MyGameFactory implements EntityFactory {
             .with("xOffsetMirror", item.getXOffsetMirror())
             .with("yOffsetMirror", item.getYOffsetMirror())
             .with("scale", item.getScale())
-            .with("textureWidth", texture.getWidth())
-            .with("textureHeight", texture.getHeight())
+            .with("textureFitWidth", texture.getFitWidth())
+            .with("textureFitHeight", texture.getFitHeight())
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
             .with(new ZIndexComponent())
             .build();
