@@ -89,6 +89,8 @@ public class MyGameFactory implements EntityFactory {
             .with("xOffsetMirror", item.getXOffsetMirror())
             .with("yOffsetMirror", item.getYOffsetMirror())
             .with("scale", item.getScale())
+            .with("textureWidth", texture.getWidth())
+            .with("textureHeight", texture.getHeight())
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
             .with(new ZIndexComponent())
             .build();

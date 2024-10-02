@@ -109,13 +109,22 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>github.heyweol.demo/github.heyweol.demo.HelloApplication</mainClass>
+                            <mainClass>github.heyweol.demo.MyGameApp</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -135,7 +144,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>github.heyweol.demo/github.heyweol.demo.HelloApplication</mainClass>
+                            <mainClass>github.heyweol.demo.MyGameApp</mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>

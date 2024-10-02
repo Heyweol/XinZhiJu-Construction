@@ -22,6 +22,7 @@ import static com.almasb.fxgl.dsl.FXGL.getInput;
 import static com.almasb.fxgl.dsl.FXGL.spawn;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
+import com.almasb.fxgl.entity.components.BoundingBoxComponent;
 import com.almasb.fxgl.input.UserAction;
 
 import github.heyweol.demo.components.GridVisualizerComponent;
@@ -47,6 +48,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
 
@@ -69,7 +71,7 @@ public class MyGameApp extends GameApplication {
   private List<Item> allItems;
   private Map<String, Integer> materialPrices;
   private MaterialSummaryWindow materialSummaryWindow;
-  private Map<String, Integer> totalMaterials = new HashMap<>();
+  private final Map<String, Integer> totalMaterials = new HashMap<>();
   // Add these as class variables
   private WallGrid leftWallGrid;
   private WallGrid rightWallGrid;
@@ -77,13 +79,13 @@ public class MyGameApp extends GameApplication {
   
   private static final int game_height = 600;
   
-  private static double scale_factor = (double) game_height / BG_HEIGHT;
-  private static int bg_height = game_height;
-  private static int bg_width = (int) (BG_WIDTH * scale_factor);
-  private static int game_width = bg_width + ITEM_BAR_WIDTH;
+  private static final double scale_factor = (double) game_height / BG_HEIGHT;
+  private static final int bg_height = game_height;
+  private static final int bg_width = (int) (BG_WIDTH * scale_factor);
+  private static final int game_width = bg_width + ITEM_BAR_WIDTH;
   
-  private static int GRID_TOP_X = ITEM_BAR_WIDTH + bg_width / 2; // 528
-  private static int GRID_TOP_Y = (int) (451*scale_factor);
+  private static final int GRID_TOP_X = ITEM_BAR_WIDTH + bg_width / 2; // 528
+  private static final int GRID_TOP_Y = (int) (451*scale_factor);
   
   private RadialMenu radialMenu;
   
@@ -202,6 +204,19 @@ public class MyGameApp extends GameApplication {
       ResourceManager.saveItemsToJson(savePath);
     });
     FXGL.addUINode(saveButton, 300, 10);
+    
+    Text positionText = new Text();
+    positionText.setTranslateX(500);
+    positionText.setTranslateY(20);
+    FXGL.addUINode(positionText);
+    // Add mouse move listener
+    FXGL.getInput().addEventHandler(javafx.scene.input.MouseEvent.MOUSE_MOVED, event -> {
+      Point2D mousePos = new Point2D(event.getX(), event.getY());
+      Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+      positionText.setText(String.format("Mouse: (%.2f, %.2f) Grid: (%.0f, %.0f)",
+              mousePos.getX(), mousePos.getY(),
+              gridPos.getX(), gridPos.getY()));
+    });
   }
   
   @Override
@@ -334,9 +349,24 @@ public class MyGameApp extends GameApplication {
     Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
             .put("item", selectedItem)
             .put("type", type));
-
     
+//    // Calculate and apply the offset
+//    Point2D offset = calculateOffset(placedItem);
+//    placedItem.translate(offset);
+//
+//    // Update the grid with the new position
+//    Point2D finalPos = new Point2D(placedItem.getX(), placedItem.getY());
+//    Point2D finalGridPos = isometricGrid.getGridPosition(finalPos.getX(), finalPos.getY());
+//    isometricGrid.placeEntity(placedItem, (int) finalGridPos.getX(), (int) finalGridPos.getY(),
+//            selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight());
+//
     updateMaterialSummary();
+  }
+  
+  private Point2D calculateOffset(Entity entity) {
+    BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
+    double height = bbox.getHeight();
+    return new Point2D(0, -height);
   }
   
 //  private void initSaveModule() {

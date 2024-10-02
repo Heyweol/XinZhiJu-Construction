@@ -53,6 +53,7 @@ public class InteractiveItemComponent extends Component {
   private double xOffset;
   private double yOffset;
   
+  private Point2D textureOffset = new Point2D(0, 0);
   
   static {
     selectionEffect = new DropShadow();
@@ -73,12 +74,15 @@ public class InteractiveItemComponent extends Component {
     double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
     currentDisplayOffset = new Point2D(-displayWidth/4, -displayWidth * item.getRatio()/2);
     
+    textureOffset = new Point2D(-entity.getDouble("textureWidth")/2,-entity.getDouble("textureHeight"));
+    
     Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
     Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
     isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
     // we also need to offset numtiles * tilewidth / 2 to center the item
     isoPos = isoPos.add(item.getNumTileWidth() * isometricGrid.getTileWidth() / 2, item.getNumTileHeight() * isometricGrid.getTileWidth() / 2);
-    
+    isoPos = isoPos.add(textureOffset);
+    isoPos = isoPos.add(new Point2D(-100,-100));
     entity.setPosition(isoPos);
     
     isometricGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY(), item.getNumTileWidth(), item.getNumTileHeight());
@@ -193,9 +197,10 @@ public class InteractiveItemComponent extends Component {
         
         Item item = entity.getObject("item");
         
-        Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+        Point2D gridPos = isometricGrid.getGridPosition(lastGridPos.getX(), lastGridPos.getY());
         Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
-        isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+//        isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+        
         entity.setPosition(isoPos);
 
         
