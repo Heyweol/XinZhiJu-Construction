@@ -133,28 +133,56 @@ public class MyGameApp extends GameApplication {
     ResourceManager.initialize();
     List<Item> allItems = ResourceManager.getAllItems();
     
-    Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
+//    Map<String, Map<String, List<Item>>> organizedItems = allItems.stream()
+//            .collect(Collectors.groupingBy(
+//                    item -> item.getFilename().split("_")[1],
+//                    Collectors.groupingBy(item -> {
+//                      String filename = item.getFilename();
+//                      if (filename.contains("guajian")) return "挂件";
+//                      if (filename.contains("qiju")) return "起居";
+//                      if (filename.contains("zhiwu")) return "植物";
+//                      if (filename.contains("zhuangshi")) return "装饰";
+//                      return "其他";
+//                    })
+//            ));
+    
+    Map<String, Map<String, Map<String, List<Item>>>> organizedItems = allItems.stream()
             .collect(Collectors.groupingBy(
-                    item -> item.getFilename().split("_")[1],
-                    Collectors.groupingBy(item -> {
-                      String filename = item.getFilename();
-                      if (filename.contains("guajian")) return "挂件";
-                      if (filename.contains("qiju")) return "起居";
-                      if (filename.contains("zhiwu")) return "植物";
-                      if (filename.contains("zhuangshi")) return "装饰";
-                      return "其他";
-                    })
+                    item -> item.getFilename().split("_")[0], // Season
+                    Collectors.groupingBy(
+                            item -> item.getFilename().split("_")[1], // Character
+                            Collectors.groupingBy(item -> {
+                              String filename = item.getFilename();
+                              if (filename.contains("guajian")) return "挂件";
+                              if (filename.contains("qiju")) return "起居";
+                              if (filename.contains("zhiwu")) return "植物";
+                              if (filename.contains("zhuangshi")) return "装饰";
+                              return "其他";
+                            })
+                    )
             ));
     
-    for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
-      String character = characterEntry.getKey();
-      for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
-        String type = typeEntry.getKey();
-        List<Item> items = typeEntry.getValue();
-//        LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
-        itemBar.addItemType(character, type, items);
+    for (Map.Entry<String, Map<String, Map<String, List<Item>>>> seasonEntry : organizedItems.entrySet()) {
+      String season = seasonEntry.getKey();
+      for (Map.Entry<String, Map<String, List<Item>>> characterEntry : seasonEntry.getValue().entrySet()) {
+        String character = characterEntry.getKey();
+        for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
+          String type = typeEntry.getKey();
+          List<Item> items = typeEntry.getValue();
+          itemBar.addItemType(season, character, type, items);
+        }
       }
     }
+    
+//    for (Map.Entry<String, Map<String, List<Item>>> characterEntry : organizedItems.entrySet()) {
+//      String character = characterEntry.getKey();
+//      for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
+//        String type = typeEntry.getKey();
+//        List<Item> items = typeEntry.getValue();
+////        LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
+//        itemBar.addItemType(character, type, items);
+//      }
+//    }
     
     FXGL.addUINode(itemBar, 0, 0);
     
@@ -418,7 +446,7 @@ public class MyGameApp extends GameApplication {
       }
       ImageIO.write(bufferedImage, "png", file);
       
-      FXGL.getNotificationService().pushNotification("截图已保存至桌面: " + fileName);
+      FXGL.getNotificationService().pushNotification("截图已保存至桌面😊 ");
     } catch (IOException e) {
       e.printStackTrace();
       FXGL.getNotificationService().pushNotification("截图失败😫");

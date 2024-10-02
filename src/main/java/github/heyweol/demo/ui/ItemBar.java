@@ -17,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -27,26 +28,87 @@ public class ItemBar extends VBox {
   private static final Logger LOGGER = Logger.getLogger(ItemBar.class.getName());
   
   private TabPane tabPane;
+  private ComboBox<String> seasonSelector;
   private ComboBox<String> characterSelector;
+  private Map<String, Map<String, Map<String, List<Item>>>> itemsBySeasonAndCharacter;
   private Map<String, Map<String, List<Item>>> itemsByCharacter;
   private Item selectedItem;
   private VBox selectedCard;
+  
+  private static final Map<String, String> SEASON_NAMES = Map.of(
+          "s2", "儿童劫",
+          "s3", "海底捞");
+  
+  private static final Map<String, String> CHARACTER_NAMES = Map.of(
+          "fr", "傅融",
+          "lb", "刘辩",
+          "sc", "孙策",
+          "yj", "袁基",
+          "zc", "左慈"
+  );
   
   public ItemBar(double width, double height) {
     this.setPrefSize(width, height);
     this.setStyle("-fx-background-color: lightgray;");
     
+    seasonSelector = new ComboBox<>();
+    seasonSelector.setPromptText("选择季节");
+    seasonSelector.setOnAction(e -> updateCharacterSelector());
+    
     characterSelector = new ComboBox<>();
-    characterSelector.setPromptText("Select Character");
+    characterSelector.setPromptText("选择角色");
     characterSelector.setOnAction(e -> updateItemDisplay());
+    
+    // Create an HBox to hold the selectors side by side
+    HBox selectorBox = new HBox(10); // 10 is the spacing between elements
+    selectorBox.getChildren().addAll(seasonSelector, characterSelector);
     
     tabPane = new TabPane();
     tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-    itemsByCharacter = new HashMap<>();
     
-    this.getChildren().addAll(characterSelector, tabPane);
+    itemsBySeasonAndCharacter = new HashMap<>();
+    
+    this.getChildren().addAll(selectorBox, tabPane);
     
     LOGGER.info("ItemBar initialized");
+  }
+  
+  public void addItemType(String season, String character, String type, List<Item> itemList) {
+    itemsBySeasonAndCharacter
+            .computeIfAbsent(season, k -> new HashMap<>())
+            .computeIfAbsent(character, k -> new HashMap<>())
+            .put(type, itemList);
+    
+    String seasonName = SEASON_NAMES.getOrDefault(season, season);
+    if (!seasonSelector.getItems().contains(seasonName)) {
+      seasonSelector.getItems().add(seasonName);
+    }
+    
+    // If this is the first season added, select it
+    if (seasonSelector.getItems().size() == 1) {
+      seasonSelector.getSelectionModel().select(0);
+      updateCharacterSelector();
+    }
+  }
+  
+  private void updateCharacterSelector() {
+    String selectedSeason = seasonSelector.getValue();
+    String seasonCode = SEASON_NAMES.entrySet().stream()
+            .filter(entry -> entry.getValue().equals(selectedSeason))
+            .map(Map.Entry::getKey)
+            .findFirst()
+            .orElse(selectedSeason);
+    
+    characterSelector.getItems().clear();
+    if (seasonCode != null && itemsBySeasonAndCharacter.containsKey(seasonCode)) {
+      itemsBySeasonAndCharacter.get(seasonCode).keySet().stream()
+              .map(character -> CHARACTER_NAMES.getOrDefault(character, character))
+              .forEach(characterSelector.getItems()::add);
+      if (!characterSelector.getItems().isEmpty()) {
+        characterSelector.getSelectionModel().select(0);
+        updateItemDisplay();
+      }
+    }
   }
   
   public void addItemType(String character, String type, List<Item> itemList) {
@@ -62,10 +124,26 @@ public class ItemBar extends VBox {
   }
   
   private void updateItemDisplay() {
+    String selectedSeason = seasonSelector.getValue();
     String selectedCharacter = characterSelector.getValue();
-    if (selectedCharacter != null && itemsByCharacter.containsKey(selectedCharacter)) {
+    
+    String seasonCode = SEASON_NAMES.entrySet().stream()
+            .filter(entry -> entry.getValue().equals(selectedSeason))
+            .map(Map.Entry::getKey)
+            .findFirst()
+            .orElse(selectedSeason);
+    
+    String characterCode = CHARACTER_NAMES.entrySet().stream()
+            .filter(entry -> entry.getValue().equals(selectedCharacter))
+            .map(Map.Entry::getKey)
+            .findFirst()
+            .orElse(selectedCharacter);
+    
+    if (seasonCode != null && characterCode != null &&
+            itemsBySeasonAndCharacter.containsKey(seasonCode) &&
+            itemsBySeasonAndCharacter.get(seasonCode).containsKey(characterCode)) {
       tabPane.getTabs().clear();
-      Map<String, List<Item>> characterItems = itemsByCharacter.get(selectedCharacter);
+      Map<String, List<Item>> characterItems = itemsBySeasonAndCharacter.get(seasonCode).get(characterCode);
       for (Map.Entry<String, List<Item>> entry : characterItems.entrySet()) {
         createTab(entry.getKey(), entry.getValue());
       }

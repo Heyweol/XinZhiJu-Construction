@@ -97,7 +97,7 @@ public class InteractiveItemComponent extends Component {
   private void onMouseDragged(MouseEvent e) {
     double dragDistance = new Point2D(e.getSceneX() - (entity.getX() + dragOffset.getX()),
             e.getSceneY() - (entity.getY() + dragOffset.getY())).magnitude();
-    if (dragDistance > 5 || isDragging) {
+    if (dragDistance > 2 || isDragging) {
       if (!isDragging) {
         EntityType type = (EntityType) entity.getType();
         if (type == EntityType.WALL_ITEM) {
@@ -156,7 +156,7 @@ public class InteractiveItemComponent extends Component {
             item.getNumTileWidth(), item.getNumTileHeight())) {
       Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
       
-      isoPos = isoPos.add(currentDisplayOffset);
+//      isoPos = isoPos.add(currentDisplayOffset);
       isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
       lastGridPos = gridPos;
       
