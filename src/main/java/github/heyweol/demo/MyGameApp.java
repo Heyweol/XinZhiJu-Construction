@@ -1,6 +1,5 @@
 package github.heyweol.demo;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +25,6 @@ import com.almasb.fxgl.input.UserAction;
 
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
-import github.heyweol.demo.components.ZIndexComponent;
 import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.ui.MaterialSummaryWindow;
@@ -39,22 +37,17 @@ import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
 
 public class MyGameApp extends GameApplication {
   
   private static final Logger LOGGER = Logger.getLogger(MyGameApp.class.getName());
-  
-  
   
   private static final int ITEM_BAR_WIDTH = 260;
   private static final int BG_WIDTH = 1063;
@@ -174,7 +167,10 @@ public class MyGameApp extends GameApplication {
     
     // Save button for debugging use only
     Button saveButton = new Button("Save Items to JSON");
-    saveButton.setOnAction(event -> handleSaveButtonClick());
+    saveButton.setOnAction(event -> {
+      String savePath = "src/main/resources/assets/data/updated_items.json";
+      ResourceManager.saveItemsToJson(savePath);
+    });
     FXGL.addUINode(saveButton, 300, 10);
   }
   
@@ -237,11 +233,6 @@ public class MyGameApp extends GameApplication {
         gridVisualizerComponent.hide();
       }
     }, MouseButton.PRIMARY);
-  }
-  
-  private void handleSaveButtonClick() {
-    String savePath = "src/main/resources/assets/data/updated_items.json";
-    ResourceManager   .saveItemsToJson(savePath);
   }
   
   @Override
@@ -307,54 +298,52 @@ public class MyGameApp extends GameApplication {
     Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
             .put("item", selectedItem)
             .put("type", type));
-    //no use here
-//    if (type == EntityType.FLOOR_ITEM) {
-//      isometricGrid.placeEntity(placedItem, (int) ( position.getX()  ), (int) (position.getY()  ));
-//    }
+
+    
     updateMaterialSummary();
   }
   
-  private void initSaveModule() {
-    saveSelector = new ComboBox<>();
-    updateSaveList();
-    
-    Button saveButton = new Button("Save Scene");
-    saveButton.setOnAction(e -> {
-      TextInputDialog dialog = new TextInputDialog();
-      dialog.setTitle("Save Scene");
-      dialog.setHeaderText("Enter a name for your save:");
-      dialog.setContentText("Save name:");
-      
-      dialog.showAndWait().ifPresent(saveName -> {
-        SceneManager.saveScene(saveName);
-        updateSaveList();
-      });
-    });
-    
-    Button loadButton = new Button("Load Scene");
-    loadButton.setOnAction(e -> {
-      String selectedSave = saveSelector.getValue();
-      if (selectedSave != null) {
-        SceneManager.loadScene(selectedSave);
-      }
-    });
-    
-    Button deleteButton = new Button("Delete Save");
-    deleteButton.setOnAction(e -> {
-      String selectedSave = saveSelector.getValue();
-      if (selectedSave != null) {
-        SceneManager.deleteSave(selectedSave);
-        updateSaveList();
-      }
-    });
-    
-    HBox buttonBox = new HBox(10, saveButton, loadButton, deleteButton);
-    VBox saveBox = new VBox(10, saveSelector, buttonBox);
-    saveBox.setTranslateX(ITEM_BAR_WIDTH);
-    saveBox.setTranslateY(10);
-    
-    FXGL.addUINode(saveBox);
-  }
+//  private void initSaveModule() {
+//    saveSelector = new ComboBox<>();
+//    updateSaveList();
+//
+//    Button saveButton = new Button("Save Scene");
+//    saveButton.setOnAction(e -> {
+//      TextInputDialog dialog = new TextInputDialog();
+//      dialog.setTitle("Save Scene");
+//      dialog.setHeaderText("Enter a name for your save:");
+//      dialog.setContentText("Save name:");
+//
+//      dialog.showAndWait().ifPresent(saveName -> {
+//        SceneManager.saveScene(saveName);
+//        updateSaveList();
+//      });
+//    });
+//
+//    Button loadButton = new Button("Load Scene");
+//    loadButton.setOnAction(e -> {
+//      String selectedSave = saveSelector.getValue();
+//      if (selectedSave != null) {
+//        SceneManager.loadScene(selectedSave);
+//      }
+//    });
+//
+//    Button deleteButton = new Button("Delete Save");
+//    deleteButton.setOnAction(e -> {
+//      String selectedSave = saveSelector.getValue();
+//      if (selectedSave != null) {
+//        SceneManager.deleteSave(selectedSave);
+//        updateSaveList();
+//      }
+//    });
+//
+//    HBox buttonBox = new HBox(10, saveButton, loadButton, deleteButton);
+//    VBox saveBox = new VBox(10, saveSelector, buttonBox);
+//    saveBox.setTranslateX(ITEM_BAR_WIDTH);
+//    saveBox.setTranslateY(10);
+//
+//    FXGL.addUINode(saveBox);
+//  }
   
   private void updateSaveList() {
     List<String> saveFiles = SceneManager.getSaveFiles();
@@ -364,25 +353,25 @@ public class MyGameApp extends GameApplication {
     }
   }
   
-  private void adjustItemPosition(Entity item, double dx, double dy, double scale) {
-    // Adjust position
-    item.translateX(dx);
-    item.translateY(dy);
-    
-    // Adjust scale
-    item.setScaleX(scale);
-    item.setScaleY(scale);
-    
-    // Update grid position if necessary
-    if (item.getType() == EntityType.FLOOR_ITEM) {
-      Point2D gridPos = isometricGrid.getGridPosition(item.getX()                                                                                                      , item.getY());
-      isometricGrid.placeEntity(item, (int) gridPos.getX(), (int) gridPos.getY(),
-              item.getInt("itemWidth"), item.getInt("itemLength"));
-    }
-    
-    // Update z-index
-    item.getComponent(ZIndexComponent.class).onUpdate(0);
-  }
+//  private void adjustItemPosition(Entity item, double dx, double dy, double scale) {
+//    // Adjust position
+//    item.translateX(dx);
+//    item.translateY(dy);
+//
+//    // Adjust scale
+//    item.setScaleX(scale);
+//    item.setScaleY(scale);
+//
+//    // Update grid position if necessary
+//    if (item.getType() == EntityType.FLOOR_ITEM) {
+//      Point2D gridPos = isometricGrid.getGridPosition(item.getX()                                                                                                      , item.getY());
+//      isometricGrid.placeEntity(item, (int) gridPos.getX(), (int) gridPos.getY(),
+//              item.getInt("itemWidth"), item.getInt("itemLength"));
+//    }
+//
+//    // Update z-index
+//    item.getComponent(ZIndexComponent.class).onUpdate(0);
+//  }
   
   
   private void takeCustomScreenshot() {
@@ -406,7 +395,7 @@ public class MyGameApp extends GameApplication {
     
     radialMenu.setVisible(true);
     // Save the screenshot
-    String fileName = "screenshot_" + System.currentTimeMillis() + ".png";
+    String fileName = "截图_" + System.currentTimeMillis() + ".png";
     String filePath = System.getProperty("user.home") + "/Desktop/" + fileName;
     File file = new File(filePath);
     
@@ -421,10 +410,10 @@ public class MyGameApp extends GameApplication {
       }
       ImageIO.write(bufferedImage, "png", file);
       
-      FXGL.getNotificationService().pushNotification("High-res screenshot saved: " + fileName);
+      FXGL.getNotificationService().pushNotification("截图已保存至桌面: " + fileName);
     } catch (IOException e) {
       e.printStackTrace();
-      FXGL.getNotificationService().pushNotification("Failed to save screenshot");
+      FXGL.getNotificationService().pushNotification("截图失败😟");
     }
   }
 }

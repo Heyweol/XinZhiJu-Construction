@@ -73,6 +73,13 @@ public class InteractiveItemComponent extends Component {
     double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
     currentDisplayOffset = new Point2D(-displayWidth/4, -displayWidth * item.getRatio()/2);
     
+    Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+    Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
+    isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+    entity.setPosition(isoPos);
+    
+    isometricGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY(), item.getNumTileWidth(), item.getNumTileHeight());
+    
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
@@ -179,11 +186,12 @@ public class InteractiveItemComponent extends Component {
         entity.setProperty("isDragging", false);
       } else {
         // For floor items (existing code)
-        Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+//        Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
         
         Item item = entity.getObject("item");
         
-        Point2D isoPos = isometricGrid.getIsometricPosition((int) lastGridPos.getX(), (int) lastGridPos.getY());
+        Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+        Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
         isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
         entity.setPosition(isoPos);
 

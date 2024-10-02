@@ -1,28 +1,27 @@
 package github.heyweol.demo.ui;
 
-import com.almasb.fxgl.dsl.FXGL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import github.heyweol.demo.Item;
 import github.heyweol.demo.utils.ResourceManager;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import org.kordamp.ikonli.javafx.FontIcon;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignA;
-
-import java.util.*;
-import java.util.logging.Logger;
 
 public class ItemBar extends VBox {
   private static final Logger LOGGER = Logger.getLogger(ItemBar.class.getName());
