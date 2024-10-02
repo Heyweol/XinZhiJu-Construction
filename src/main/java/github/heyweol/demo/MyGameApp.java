@@ -418,10 +418,10 @@ public class MyGameApp extends GameApplication {
       }
       ImageIO.write(bufferedImage, "png", file);
       
-      FXGL.getNotificationService().pushNotification("High-res screenshot saved: " + fileName);
+      FXGL.getNotificationService().pushNotification("截图已保存至桌面: " + fileName);
     } catch (IOException e) {
       e.printStackTrace();
-      FXGL.getNotificationService().pushNotification("Failed to save screenshot");
+      FXGL.getNotificationService().pushNotification("截图失败😫");
     }
   }
 }

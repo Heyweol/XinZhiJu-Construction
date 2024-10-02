@@ -1,5 +1,6 @@
 package github.heyweol.demo;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,7 +29,9 @@ public class Item {
   private double yOffset;
   private double xOffsetMirror;
   private double yOffsetMirror;
-  
+  private int numTileWidth;
+  private int numTileHeight;
+  private String season;
   @JsonIgnore
   private Image image;
   
@@ -37,7 +40,8 @@ public class Item {
               @JsonProperty("name") String name,
               @JsonProperty("size") String sizeString,
               @JsonProperty("outside") String outside,
-              @JsonProperty("material_list") List<String> materialListStrings,
+//              @JsonProperty("material_list") List<String> materialListStrings,
+              @JsonProperty("material_list") String materialListStrings,
               @JsonProperty("xOffset") double xOffset,
               @JsonProperty("yOffset") double yOffset,
               @JsonProperty("xOffsetMirror") double xOffsetMirror,
@@ -57,6 +61,9 @@ public class Item {
     this.yOffset = yOffset;
     this.xOffsetMirror = xOffsetMirror;
     this.yOffsetMirror = yOffsetMirror;
+    this.numTileWidth = size.get(0);
+    this.numTileHeight = size.get(1);
+    this.season = filename.split("_")[0];
   }
   
   private String constructImagePath(String filename) {
@@ -64,9 +71,10 @@ public class Item {
     if (parts.length < 4) {
       throw new IllegalArgumentException("Invalid filename format: " + filename);
     }
+    String season = parts[0];
     String characterName = parts[1];
     String itemType = parts[2];
-    return "s2/" + characterName + "/" + itemType + "/" + filename;
+    return season + "/" + characterName + "/" + itemType + "/" + filename;
   }
   
   private List<Integer> parseSize(String sizeString) {
@@ -81,6 +89,17 @@ public class Item {
                     parts -> parts[0].trim(),
                     parts -> Integer.parseInt(parts[1].trim())
             ));
+  }
+  
+ private Map<String, Integer>parseMaterialList(String materialListString) {
+   materialListString = materialListString.replaceAll("[\\[\\]\"]", "");
+   return Arrays.stream(materialListString.split(","))
+           .map(s -> s.split(":"))
+           .filter(parts -> parts.length == 2)
+           .collect(Collectors.toMap(
+                   parts -> parts[0].trim(),
+                   parts -> Integer.parseInt(parts[1].trim())
+           ));
   }
   
   private String determineUnicode(String filename) {
@@ -104,16 +123,16 @@ public class Item {
    *  @deprecated Use {@link #getNumTileWidth()} instead.
    */
   @Deprecated
-  public int getWidth() { return size.get(0); }
+  public int getWidth() { return getNumTileWidth(); }
   
   /**
    *  @deprecated Use {@link #getNumTileHeight()} instead.
    */
   @Deprecated
-  public int getLength() { return size.get(1); }
+  public int getLength() { return getNumTileHeight(); }
   
-  public int getNumTileWidth() { return size.get(0); }
-  public int getNumTileHeight() { return size.get(1); }
+  public int getNumTileWidth() { return numTileWidth; }
+  public int getNumTileHeight() { return numTileHeight; }
   
   @JsonIgnore
   public Image getImage() {
@@ -157,4 +176,16 @@ public class Item {
   public void setYOffsetMirror(double yOffsetMirror) { this.yOffsetMirror = yOffsetMirror; }
   public double getScale() { return scale; }
   public void setScale(double scale) { this.scale = scale; }
+  
+  public void setNumTileWidth(int width) {
+    numTileWidth = width;
+  }
+  
+  public void setNumTileHeight(int height) {
+    numTileHeight = height;
+  }
+  
+  public void setSize(double scale) {
+    this.size =  List.of((int) (numTileWidth ), (int) (numTileHeight ));
+  }
 }

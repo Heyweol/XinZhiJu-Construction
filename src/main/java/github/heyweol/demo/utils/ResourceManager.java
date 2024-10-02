@@ -47,7 +47,7 @@ public class ResourceManager {
   }
   
   public static void loadItems() {
-    try (InputStream is = ResourceManager.class.getResourceAsStream("/assets/data/items.json")) {
+    try (InputStream is = ResourceManager.class.getResourceAsStream("/assets/data/items_10022.json")) {
       if (is == null) {
         LOGGER.severe("Cannot find items.json");
         loadedItems = new ArrayList<>();

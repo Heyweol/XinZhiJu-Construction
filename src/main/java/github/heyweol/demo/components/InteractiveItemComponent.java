@@ -76,6 +76,9 @@ public class InteractiveItemComponent extends Component {
     Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
     Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
     isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+    // we also need to offset numtiles * tilewidth / 2 to center the item
+    isoPos = isoPos.add(item.getNumTileWidth() * isometricGrid.getTileWidth() / 2, item.getNumTileHeight() * isometricGrid.getTileWidth() / 2);
+    
     entity.setPosition(isoPos);
     
     isometricGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY(), item.getNumTileWidth(), item.getNumTileHeight());
@@ -264,27 +267,35 @@ public class InteractiveItemComponent extends Component {
     
     toolbar.getChildren().addAll(mirrorBtn, adjustBtn, removeBtn);
     
-    Button adjustBaseBtn = createButton("", new FontIcon(FontAwesomeSolid.ARROWS_ALT));
-    adjustBaseBtn.setOnAction(e -> {
-      showBaseAdjustmentDialog();
+    Button switchWidHht = createButton("", new FontIcon(FontAwesomeSolid.ARROWS_ALT));
+    switchWidHht.setOnAction(e -> {
+      Item item = entity.getObject("item");
+      int temp = item.getNumTileWidth();
+      item.setNumTileWidth(item.getNumTileHeight());
+      item.setNumTileHeight(temp);
+      
+      
+      updateItemPosition();
+      
     });
     
-    toolbar.getChildren().add(adjustBaseBtn);
+    
+    toolbar.getChildren().add(switchWidHht);
     
     updateToolbarPosition();
     FXGL.addUINode(toolbar);
   }
-  
-  private void showBaseAdjustmentDialog() {
-    ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent, isometricGrid);
-    Optional<ButtonType> result = dialog.showAndWait();
-    if (result.isPresent() && result.get() == ButtonType.OK) {
-      Item item = entity.getObject("item");
-      item.setXOffset(dialog.getXOffset());
-      item.setYOffset(dialog.getYOffset());
-      updateItemPosition();
-    }
-  }
+//
+//  private void showBaseAdjustmentDialog() {
+//    ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent, isometricGrid);
+//    Optional<ButtonType> result = dialog.showAndWait();
+//    if (result.isPresent() && result.get() == ButtonType.OK) {
+//      Item item = entity.getObject("item");
+//      item.setXOffset(dialog.getXOffset());
+//      item.setYOffset(dialog.getYOffset());
+//      updateItemPosition();
+//    }
+//  }
   
   private void updateItemPosition() {
     if (entity.getType() == EntityType.FLOOR_ITEM) {
