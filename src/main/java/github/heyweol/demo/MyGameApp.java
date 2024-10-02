@@ -1,5 +1,6 @@
 package github.heyweol.demo;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import com.almasb.fxgl.input.UserAction;
 
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
+import github.heyweol.demo.components.ZIndexComponent;
 import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.ui.MaterialSummaryWindow;
@@ -37,17 +39,22 @@ import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
 
 public class MyGameApp extends GameApplication {
   
   private static final Logger LOGGER = Logger.getLogger(MyGameApp.class.getName());
+  
+  
   
   private static final int ITEM_BAR_WIDTH = 260;
   private static final int BG_WIDTH = 1063;
@@ -83,7 +90,6 @@ public class MyGameApp extends GameApplication {
   @Override
   protected void initSettings(GameSettings settings) {
     settings.setHeight(game_height);
-//    settings.setPreserveResizeRatio(true);
     settings.setWidth(game_width);
     settings.setTitle("心纸居");
     settings.setVersion("0.1");
@@ -93,8 +99,6 @@ public class MyGameApp extends GameApplication {
   
   @Override
   protected void initGame() {
-    
-    
     // Register a scene load listener to update the material list
     SceneManager.addSceneLoadListener(this::updateMaterialSummary);
     
@@ -133,14 +137,12 @@ public class MyGameApp extends GameApplication {
             .collect(Collectors.groupingBy(
                     item -> item.getFilename().split("_")[1],
                     Collectors.groupingBy(item -> {
-                      String[] parts = item.getFilename().split("_");
-                      switch(parts[2]) {
-                        case "guajian": return "hanging";
-                        case "qiju": return "furniture";
-                        case "zhiwu": return "plant";
-                        case "zhuangshi": return "decor";
-                        default: return "other";
-                      }
+                      String filename = item.getFilename();
+                      if (filename.contains("guajian")) return "挂件";
+                      if (filename.contains("qiju")) return "起居";
+                      if (filename.contains("zhiwu")) return "植物";
+                      if (filename.contains("zhuangshi")) return "装饰";
+                      return "其他";
                     })
             ));
     
@@ -149,7 +151,7 @@ public class MyGameApp extends GameApplication {
       for (Map.Entry<String, List<Item>> typeEntry : characterEntry.getValue().entrySet()) {
         String type = typeEntry.getKey();
         List<Item> items = typeEntry.getValue();
-        LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
+//        LOGGER.info("Adding " + items.size() + " items for character " + character + " and type " + type);
         itemBar.addItemType(character, type, items);
       }
     }
@@ -253,11 +255,11 @@ public class MyGameApp extends GameApplication {
     launch(args);
   }
   
-  private boolean isClickOnItem() {
-    return FXGL.getGameWorld().getEntitiesAt(getInput().getMousePositionWorld())
-            .stream()
-            .anyMatch(entity -> entity.hasComponent(InteractiveItemComponent.class));
-  }
+//  private boolean isClickOnItem() {
+//    return FXGL.getGameWorld().getEntitiesAt(getInput().getMousePositionWorld())
+//            .stream()
+//            .anyMatch(entity -> entity.hasComponent(InteractiveItemComponent.class));
+//  }
   
   private void handleGlobalSelection() {
     Entity selectedEntity = InteractiveItemComponent.getSelectedEntity();
@@ -289,6 +291,12 @@ public class MyGameApp extends GameApplication {
             .forEach(e -> e.setZIndex((int) (e.getY() * 100)));
   }
   
+  /**
+   *
+   * @param selectedItem Item object to spawn
+   * @param position Mouse position
+   * @param type
+   */
   private void spawnItem(Item selectedItem, Point2D position, EntityType type) {
     String entityType = (type == EntityType.WALL_ITEM) ? "wallItem" : "floorItem";
     Point2D gridPos = isometricGrid.getGridPosition(position.getX(), position.getY());
@@ -395,7 +403,7 @@ public class MyGameApp extends GameApplication {
     
     radialMenu.setVisible(true);
     // Save the screenshot
-    String fileName = "截图_" + System.currentTimeMillis() + ".png";
+    String fileName = "screenshot_" + System.currentTimeMillis() + ".png";
     String filePath = System.getProperty("user.home") + "/Desktop/" + fileName;
     File file = new File(filePath);
     
@@ -410,10 +418,10 @@ public class MyGameApp extends GameApplication {
       }
       ImageIO.write(bufferedImage, "png", file);
       
-      FXGL.getNotificationService().pushNotification("截图已保存至桌面: " + fileName);
+      FXGL.getNotificationService().pushNotification("High-res screenshot saved: " + fileName);
     } catch (IOException e) {
       e.printStackTrace();
-      FXGL.getNotificationService().pushNotification("截图失败😟");
+      FXGL.getNotificationService().pushNotification("Failed to save screenshot");
     }
   }
 }
