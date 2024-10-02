@@ -1,5 +1,6 @@
 package github.heyweol.demo;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -170,6 +171,11 @@ public class MyGameApp extends GameApplication {
     InteractiveItemComponent.addMaterialUpdateListener(this::updateMaterialSummary);
     
     getGameTimer().runAtInterval(this::updateZIndices, Duration.millis(50));
+    
+    // Save button for debugging use only
+    Button saveButton = new Button("Save Items to JSON");
+    saveButton.setOnAction(event -> handleSaveButtonClick());
+    FXGL.addUINode(saveButton, 300, 10);
   }
   
   @Override
@@ -231,6 +237,11 @@ public class MyGameApp extends GameApplication {
         gridVisualizerComponent.hide();
       }
     }, MouseButton.PRIMARY);
+  }
+  
+  private void handleSaveButtonClick() {
+    String savePath = "src/main/resources/assets/data/updated_items.json";
+    ResourceManager   .saveItemsToJson(savePath);
   }
   
   @Override

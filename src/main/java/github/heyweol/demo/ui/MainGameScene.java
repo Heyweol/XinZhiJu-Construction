@@ -1,4 +1,4 @@
-package github.heyweol.demo.ui;
+  package github.heyweol.demo.ui;
 
 import javafx.scene.layout.Pane;
 

@@ -30,6 +30,9 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private double originalYOffset;
   private GridVisualizerComponent gridVisualizerComponent;
   private IsometricGrid isometricGrid;
+  private Label xOffsetLabel;
+  private Label yOffsetLabel;
+  private Label scaleLabel;
   
   public ItemAdjustmentDialog(Entity entity, GridVisualizerComponent gridVisualizer, IsometricGrid isometricGrid) {
     this.entity = entity;
@@ -54,9 +57,13 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     initStyle(StageStyle.UTILITY);
     initOwner(FXGL.getGameScene().getRoot().getScene().getWindow());
     
-    xOffsetSlider = createSlider("X Offset", -50, 50, 0);
-    yOffsetSlider = createSlider("Y Offset", -50, 50, 0);
+    xOffsetSlider = createSlider("X Offset", -80, 80, 0);
+    yOffsetSlider = createSlider("Y Offset", -80, 80, 0);
     scaleSlider = createSlider("Scale", 0.5, 1.5, 1);
+    
+    xOffsetLabel = new Label(String.format("%.2f", xOffsetSlider.getValue()));
+    yOffsetLabel = new Label(String.format("%.2f", yOffsetSlider.getValue()));
+    scaleLabel = new Label(String.format("%.2f", scaleSlider.getValue()));
     
     GridPane grid = new GridPane();
     grid.setHgap(10);
@@ -65,10 +72,13 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     
     grid.add(new Label("X Offset:"), 0, 0);
     grid.add(xOffsetSlider, 1, 0);
+    grid.add(xOffsetLabel, 2, 0);
     grid.add(new Label("Y Offset:"), 0, 1);
     grid.add(yOffsetSlider, 1, 1);
+    grid.add(yOffsetLabel, 2, 1);
     grid.add(new Label("Scale:"), 0, 2);
     grid.add(scaleSlider, 1, 2);
+    grid.add(scaleLabel, 2, 2);
     
     getDialogPane().setContent(grid);
     getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -84,9 +94,18 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
       return ButtonType.CANCEL;
     });
     
-    xOffsetSlider.valueProperty().addListener((obs, oldVal, newVal) -> updateItemPosition());
-    yOffsetSlider.valueProperty().addListener((obs, oldVal, newVal) -> updateItemPosition());
-    scaleSlider.valueProperty().addListener((obs, oldVal, newVal) -> updateItemScale());
+    xOffsetSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+      xOffsetLabel.setText(String.format("%.1f", newVal.doubleValue()));
+      updateItemPosition();
+    });
+    yOffsetSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+      yOffsetLabel.setText(String.format("%.1f", newVal.doubleValue()));
+      updateItemPosition();
+    });
+    scaleSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+      scaleLabel.setText(String.format("%.1f", newVal.doubleValue()));
+      updateItemScale();
+    });
     
     setOnShowing(event -> {
       gridVisualizer.show();
@@ -97,6 +116,9 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
       gridVisualizer.hide();
       gridVisualizer.hideItemBase();
     });
+    
+
+    
   }
   
   private Slider createSlider(String name, double min, double max, double initial) {

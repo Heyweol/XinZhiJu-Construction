@@ -3,9 +3,11 @@ package github.heyweol.demo.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import javafx.scene.image.Image;
 import github.heyweol.demo.Item;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -16,7 +18,9 @@ public class ResourceManager {
   private static final Logger LOGGER = Logger.getLogger(ResourceManager.class.getName());
   private static final Map<String, Image> imageCache = new HashMap<>();
   private static final ObjectMapper objectMapper = new ObjectMapper()
-          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+          .configure(SerializationFeature.INDENT_OUTPUT, true)
+          .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+          .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   
   private static List<Item> loadedItems;
   private static Map<String, List<Item>> itemsByBaseName;
@@ -100,5 +104,21 @@ public class ResourceManager {
   
   public static void clearCache() {
     imageCache.clear();
+  }
+  
+  /**
+   * Saves the current list of items to the specified JSON file.
+   *
+   * @param filePath The path to the JSON file where items will be saved.
+   */
+  public static void saveItemsToJson(String filePath) {
+    try {
+      File file = new File(filePath);
+      objectMapper.writeValue(file, loadedItems);
+      LOGGER.info("Successfully saved items to " + filePath);
+    } catch (IOException e) {
+      LOGGER.severe("Failed to save items to JSON: " + e.getMessage());
+      e.printStackTrace();
+    }
   }
 }
