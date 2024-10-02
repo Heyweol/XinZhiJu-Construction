@@ -99,8 +99,7 @@ public class MyGameApp extends GameApplication {
   
   @Override
   protected void initGame() {
-    radialMenu = new RadialMenu(this::takeCustomScreenshot);
-    FXGL.addUINode(radialMenu, 300, 100);
+    
     
     // Register a scene load listener to update the material list
     SceneManager.addSceneLoadListener(this::updateMaterialSummary);
@@ -109,7 +108,8 @@ public class MyGameApp extends GameApplication {
     isometricGrid = new IsometricGrid(15, 15, 34, 17, GRID_TOP_X, GRID_TOP_Y);
     leftWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - 95, true);
     rightWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - 95, false);
-    
+    radialMenu = new RadialMenu(this::takeCustomScreenshot, isometricGrid);
+    FXGL.addUINode(radialMenu, 300, 100);
     
     Entity background = entityBuilder()
             .at(ITEM_BAR_WIDTH, 0)

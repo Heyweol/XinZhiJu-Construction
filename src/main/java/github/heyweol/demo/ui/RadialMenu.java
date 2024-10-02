@@ -1,7 +1,20 @@
 package github.heyweol.demo.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import com.almasb.fxgl.entity.Entity;
+import github.heyweol.demo.EntityType;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.javafx.FontIcon;
+
 import com.almasb.fxgl.dsl.FXGL;
+
 import github.heyweol.demo.utils.SceneManager;
+import github.heyweol.demo.components.InteractiveItemComponent;
+import github.heyweol.demo.IsometricGrid;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -11,12 +24,6 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
-import org.kordamp.ikonli.javafx.FontIcon;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 public class RadialMenu extends Pane {
   private final Button centerButton;
@@ -25,9 +32,11 @@ public class RadialMenu extends Pane {
   private final double radius = 50;
   private double dragStartX, dragStartY;
   private Runnable screenshotAction;
+  private IsometricGrid isometricGrid;
   
-  public RadialMenu(Runnable screenshotAction) {
+  public RadialMenu(Runnable screenshotAction, IsometricGrid isometricGrid) {
     this.screenshotAction = screenshotAction;
+    this.isometricGrid = isometricGrid;
     
     centerButton = createButton("", new FontIcon(FontAwesomeSolid.BARS));
     centerButton.getStyleClass().add("radial-menu-center");
@@ -38,10 +47,9 @@ public class RadialMenu extends Pane {
     
     getChildren().add(centerButton);
     
-    addMenuItem("Save", FontAwesomeSolid.SAVE, this::saveScene);
-    addMenuItem("Load", FontAwesomeSolid.FOLDER_OPEN, this::loadScene);
+    addMenuItem("File", FontAwesomeSolid.FILE, this::openFileSubmenu);
     addMenuItem("Screenshot", FontAwesomeSolid.CAMERA, this::takeScreenshot);
-    addMenuItem("Delete", FontAwesomeSolid.TRASH, this::deleteScene);
+    addMenuItem("Clear", FontAwesomeSolid.TRASH, this::clearScene);
     
     setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
     
@@ -72,6 +80,65 @@ public class RadialMenu extends Pane {
   }
 
   
+  private void openFileSubmenu() {
+    List<String> choices = List.of("Save", "Load", "Delete");
+    ChoiceDialog<String> dialog = new ChoiceDialog<>("Save", choices);
+    dialog.setTitle("File Operations");
+    dialog.setHeaderText("Choose an operation:");
+    dialog.setContentText("Operation:");
+    
+    Optional<String> result = dialog.showAndWait();
+    result.ifPresent(operation -> {
+      switch (operation) {
+        case "Save":
+          saveScene();
+          break;
+        case "Load":
+          loadScene();
+          break;
+        case "Delete":
+          deleteScene();
+          break;
+      }
+    });
+  }
+
+  private void clearScene() {
+    // Clear all entities from the game world
+//    FXGL.getGameWorld().getEntities().forEach(entity -> {
+//      // Remove the entity from the isometric grid
+//      // only TYPE==FLOOR_ITEM and TYPE==WALL_ITEM
+//      if (entity.getType() == EntityType.FLOOR_ITEM || entity.getType() == EntityType.WALL_ITEM)
+//      {
+//        isometricGrid.removeEntity(entity);
+//
+//        // Remove the entity from the game world
+//        entity.removeFromWorld();
+//      }
+//    });
+    
+    List<Entity> entitiesToRemove = new ArrayList<>();
+    FXGL.getGameWorld().getEntities().forEach(entity -> {
+      // Remove the entity from the isometric grid
+      // only TYPE==FLOOR_ITEM and TYPE==WALL_ITEM
+      if (entity.getType() == EntityType.FLOOR_ITEM || entity.getType() == EntityType.WALL_ITEM) {
+        isometricGrid.removeEntity(entity);
+        entitiesToRemove.add(entity);
+      }
+    });
+    entitiesToRemove.forEach(Entity::removeFromWorld);
+    // Clear the selection
+    InteractiveItemComponent.deselectAll();
+
+    // Clear any remaining UI elements (if necessary)
+//    FXGL.getGameScene().clearUINodes();
+
+    // Notify listeners that the materials have been updated
+    InteractiveItemComponent.addMaterialUpdateListener(() -> {});
+
+    FXGL.getNotificationService().pushNotification("Scene cleared");
+  }
+
   private void addMenuItem(String text, FontAwesomeSolid icon, Runnable action) {
     Button button = createButton(text, new FontIcon(icon));
     button.getStyleClass().add("radial-menu-item");

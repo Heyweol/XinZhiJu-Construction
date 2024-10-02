@@ -49,6 +49,16 @@ public class IsometricGrid {
     return new Point2D(gridX, gridY);
   }
   
+  public boolean positionInBounds(int gridX, int gridY) {
+    return gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridLength;
+  }
+  
+  public boolean positionInBounds(double screenX, double screenY) {
+    Point2D gridPos = getGridPosition(screenX, screenY);
+    return positionInBounds((int)gridPos.getX(), (int)gridPos.getY());
+  }
+
+  
   
   public boolean canPlaceItem(int gridX, int gridY, int itemWidth, int itemLength) {
     if (gridX < 0 || gridY < 0 || gridX + itemWidth > gridWidth || gridY + itemLength > gridLength) {
@@ -93,7 +103,7 @@ public class IsometricGrid {
    * Removes the item from the grid by setting the grid cell to null
    * @param item
    */
-  public void removeItem(Entity item) {
+  public void removeEntity(Entity item) {
     for (int x = 0; x < gridWidth; x++) {
       for (int y = 0; y < gridLength; y++) {
         if (grid[x][y] == item) {

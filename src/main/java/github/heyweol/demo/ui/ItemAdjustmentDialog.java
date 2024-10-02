@@ -42,6 +42,11 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     this.gridVisualizerComponent = gridVisualizer;
     this.isometricGrid = isometricGrid;
     
+    Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+    Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
+    isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+    entity.setPosition(isoPos);
+
     setTitle("Adjust Item");
     setHeaderText("Fine-tune item position and size");
     
@@ -70,8 +75,8 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     
     setResultConverter(buttonType -> {
       if (buttonType == ButtonType.OK) {
-        item.setXOffset(getXOffset());
-        item.setYOffset(getYOffset());
+        item.setXOffset(xOffsetSlider.getValue());
+        item.setYOffset(yOffsetSlider.getValue());
         item.setScale(scaleSlider.getValue());
         return ButtonType.OK;
       }
@@ -104,8 +109,8 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private void updateItemPosition() {
     double xOffset = xOffsetSlider.getValue();
     double yOffset = yOffsetSlider.getValue();
-    item.setXOffset(xOffset);
-    item.setYOffset(yOffset);
+    // item.setXOffset(xOffset);
+    // item.setYOffset(yOffset);
 
     Point2D gridPos = isometricGrid.getGridPosition(originalX, originalY);
     Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
