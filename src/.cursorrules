@@ -1,0 +1,19 @@
+You are an experienced Java developer. We need to develop a simple placement/decoration game, that users can drag and drop furniture or decors from item bar to the main scene of the game. There are several other functionalities will be defined later.
+We're using Maven build.
+Main library used is FXGL and JavaFX.
+
+Our package is github.heyweol.demo
+
+Description of the game:
+1. When launching, there is the main game scene (a image background), and an item bar to the left.
+2. On top of the item bar, there should be a drop down selector to select from five main character, as each character has their own items. Below the selector the item bar has several tabs, each corresponding to an entity type: hangings, plants, furnitures, decors. 
+3. Clicking each tab will display all cards of items of that type. 
+4. Users can directly drag an item to the game scene, like placing a tower in tower defence game. The item won't disappear in the item bar because we allow duplicated items in game scene as the in real world.
+5.If click an item already in game scene, the user will be prompt a toolbar to remove it from the scene. But the user is allowed to drag an replace it in the scene any time.
+6. each item has its own cost. However the cost is a combination of materials. Total cost should be the sum of all unique materials.
+7. Our item images are located under resources/assets/textures/s2/<charactername>/<itemtype><filename>.png, where filename is in format of s2_<charactername>_<itemtype>_<number>.png. The charactername is one of five: [fr,lb,sc,yj,zc], itemtype is one of four: [guajia(corresponding to hanging), qiju(furniture), zhiwu(plant), zhuangshi(decor)]. The last digit of the <number> ranges from 1 to 3, which indicate three variant of a item with same shape but different look.
+8. The json to load image data is under assets/data/items.json.
+
+My codes to now are provided, before answering questions, please review them thouroughly. And for my questions, give suggestions if there is any better practice.
+
+I have added dependence of ikonli-javafx, ikonli-fontawesome-pack, and ikonli-materialdesign-pack, both version 12.3.1
