@@ -9,13 +9,12 @@ import github.heyweol.demo.Item;
 import github.heyweol.demo.components.GridVisualizerComponent;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
+
+import java.util.Optional;
 
 public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private Slider xOffsetSlider;
@@ -88,9 +87,16 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     
     setResultConverter(buttonType -> {
       if (buttonType == ButtonType.OK) {
-        item.setXOffset(xOffsetSlider.getValue() + item.getXOffset());
-        item.setYOffset(yOffsetSlider.getValue() + item.getYOffset());
-        item.setScale(scaleSlider.getValue());
+        double newXOffset = xOffsetSlider.getValue() + item.getXOffset();
+        double newYOffset = yOffsetSlider.getValue() + item.getYOffset();
+        double newScale = scaleSlider.getValue();
+        
+        item.setXOffset(newXOffset);
+        item.setYOffset(newYOffset);
+        item.setScale(newScale);
+        
+        showApplyToAllVariantsDialog(newXOffset, newYOffset, newScale);
+        
         return ButtonType.OK;
       }
       resetItemPosition();
@@ -122,6 +128,34 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     
 
     
+  }
+  
+  private void showApplyToAllVariantsDialog(double newXOffset, double newYOffset, double newScale) {
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    alert.setTitle("Apply to All Variants");
+    alert.setHeaderText("Apply changes to all variants?");
+    alert.setContentText("Do you want to apply these adjustments to all variants of this item?");
+    
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+      String baseName = item.getName().split("·")[0];
+      applyChangesToAllVariants(baseName, newXOffset, newYOffset, newScale);
+    }
+  }
+  
+  private void applyChangesToAllVariants(String baseName, double newXOffset, double newYOffset, double newScale) {
+    FXGL.getGameWorld().getEntitiesByType(EntityType.FLOOR_ITEM, EntityType.WALL_ITEM)
+            .stream()
+            .filter(e -> {
+              Item item = e.getObject("item");
+              return item.getName().split("·")[0].equals(baseName);
+            })
+            .forEach(e -> {
+              Item item = e.getObject("item");
+              item.setXOffset(newXOffset);
+              item.setYOffset(newYOffset);
+              item.setScale(newScale);
+            });
   }
   
   private Slider createSlider(String name, double min, double max, double initial) {
