@@ -46,6 +46,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -292,6 +293,7 @@ public class MyGameApp extends GameApplication {
   @Override
   protected void onUpdate(double tpf) {
     super.onUpdate(tpf);
+
   }
   
   public static void main(String[] args) {
@@ -361,7 +363,6 @@ public class MyGameApp extends GameApplication {
 //            selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight());
 //
     Point2D textureOffset = new Point2D(-placedItem.getDouble("textureFitWidth")/2,-placedItem.getDouble("textureFitHeight"));
-    System.out.println("textureOffset: " + textureOffset);
     Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
     isoPos = isoPos.add(textureOffset);
     isoPos = isoPos.add(placedItem.getDouble("xOffset"), placedItem.getDouble("yOffset"));

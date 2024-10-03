@@ -81,19 +81,23 @@ public class InteractiveItemComponent extends Component {
     isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
     // we also need to offset numtiles * tilewidth / 2 to center the item
 //    isoPos = isoPos.add(item.getNumTileWidth() * isometricGrid.getTileWidth() / 2, item.getNumTileHeight() * isometricGrid.getTileWidth() / 2);
-//    isoPos = isoPos.add(textureOffset);
+    isoPos = isoPos.add(textureOffset);
     
 //    isoPos = isoPos.add(new Point2D(-100,-100));
 //    System.out.println("isoPos: " + isoPos);
 //    entity.setPosition(isoPos);
+//    entity.setProperty("position", isoPos);
+    
     
     isometricGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY(), item.getNumTileWidth(), item.getNumTileHeight());
+    
     
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
     
   }
+  
   
   private void onMousePressed(MouseEvent e) {
     dragOffset = new Point2D(e.getSceneX() - entity.getX(), e.getSceneY() - entity.getY());
@@ -165,9 +169,11 @@ public class InteractiveItemComponent extends Component {
 //      isoPos = isoPos.add(currentDisplayOffset);
       isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
       lastGridPos = gridPos;
+      System.out.println("dragged to: " + gridPos);
       
       isoPos = isoPos.add(textureOffset);
       entity.setPosition(isoPos);
+      entity.setProperty("position", isoPos);
       gridVisualizerComponent.showItemBase(item, (int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY(), false, false);
     }
   }
@@ -200,15 +206,17 @@ public class InteractiveItemComponent extends Component {
         
         Item item = entity.getObject("item");
         
-        Point2D gridPos = isometricGrid.getGridPosition(lastGridPos.getX(), lastGridPos.getY());
+        Point2D gridPos = lastGridPos;
+
         Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
         isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
         isoPos = isoPos.add(textureOffset);
         entity.setPosition(isoPos);
-
+        entity.setProperty("position", isoPos);
+        System.out.println("released at: " + gridPos);
         
         isometricGrid.placeEntity(entity, (int) lastGridPos.getX(), (int) lastGridPos.getY(),
-                entity.getInt("itemWidth"), entity.getInt("itemLength"),currentDisplayOffset);
+                entity.getInt("itemWidth"), entity.getInt("itemLength"));
         
         
       }
