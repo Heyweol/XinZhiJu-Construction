@@ -71,27 +71,27 @@ public class InteractiveItemComponent extends Component {
   @Override
   public void onAdded() {
     Item item = entity.getObject("item");
-    double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
-    currentDisplayOffset = new Point2D(-displayWidth/4, -displayWidth * item.getRatio()/2);
-    
-    textureOffset = new Point2D(-entity.getDouble("textureFitWidth")/2,-entity.getDouble("textureFitHeight"));
-    
-    Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
-    Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
-    isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
-    // we also need to offset numtiles * tilewidth / 2 to center the item
-//    isoPos = isoPos.add(item.getNumTileWidth() * isometricGrid.getTileWidth() / 2, item.getNumTileHeight() * isometricGrid.getTileWidth() / 2);
-    isoPos = isoPos.add(textureOffset);
-    
-//    isoPos = isoPos.add(new Point2D(-100,-100));
-//    System.out.println("isoPos: " + isoPos);
-//    entity.setPosition(isoPos);
-//    entity.setProperty("position", isoPos);
-    
-    
-    isometricGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY(), item.getNumTileWidth(), item.getNumTileHeight());
+    if (entity.getType() == EntityType.FLOOR_ITEM) {
+      
+      
+      double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
+      currentDisplayOffset = new Point2D(-displayWidth / 4, -displayWidth * item.getRatio() / 2);
+      
+      textureOffset = new Point2D(-entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
+      
+      Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+      Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
+      isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+      isoPos = isoPos.add(textureOffset);
+      isometricGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY(), item.getNumTileWidth(), item.getNumTileHeight());
+      
+    } else {
     
     
+    
+    
+    
+    }
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_PRESSED, this::onMousePressed);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
     entity.getViewComponent().addEventHandler(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);

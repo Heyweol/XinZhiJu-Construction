@@ -33,6 +33,12 @@ public class MyGameFactory implements EntityFactory {
     Item item = data.get("item");
     Texture texture = FXGL.texture(item.getImageName());
     
+    //get aspect ratio
+    double originalWidth = texture.getImage().getWidth();
+    double originalHeight = texture.getImage().getHeight();
+    double aspectRatio = originalHeight / originalWidth;
+    
+    
     // Calculate the width based on the item's dimensions and the wall grid's tile width
     double tileWidth = leftWallGrid.getTileWidth();
     double itemWidth = tileWidth * item.getNumTileWidth();

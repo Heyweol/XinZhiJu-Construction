@@ -4,7 +4,7 @@ import com.almasb.fxgl.entity.Entity;
 import javafx.geometry.Point2D;
 
 public class WallGrid {
-  private final int gridWidth;
+  private int gridWidth;
   private final int gridHeight;
   private final double tileWidth;
   private final double tileHeight;
@@ -12,6 +12,7 @@ public class WallGrid {
   private final double originY;
   private final boolean isLeftWall;
   private Entity[][] grid;
+  
   
   public WallGrid(int width, int height, double tileWidth, double tileHeight,
                   double originX, double originY, boolean isLeftWall) {
@@ -56,7 +57,13 @@ public class WallGrid {
   }
   
   public boolean canPlaceItem(int gridX, int gridY, int itemWidth, int itemHeight) {
-    return gridX >= 0 && gridY >= 0 && gridX + itemWidth <= gridWidth && gridY + itemHeight <= gridHeight;
+    if(!( gridX >= 0 && gridY >= 0 && gridX + itemWidth <= gridWidth && gridY + itemHeight <= gridHeight)) return false;
+    for (int x = gridX; x < gridX + itemWidth; x++) {
+      for (int y = gridY; y < gridY + itemHeight; y++) {
+        if (grid[x][y] != null) return false;
+      }
+    }
+    return true;
   }
   
   public boolean placeEntity(Entity entity, int gridX, int gridY) {
@@ -74,10 +81,34 @@ public class WallGrid {
     return false;
   }
   
+  public void removeEntity(Entity entity) {
+    for (int x = 0; x < gridWidth; x++) {
+      for (int y = 0; y < gridHeight; y++) {
+        if (grid[x][y] == entity) {
+          grid[x][y] = null;
+        }
+      }
+    }
+  }
+  
+  public void expand(int steps){
+    gridWidth += steps;
+    Entity[][] newGrid = new Entity[gridWidth][gridHeight];
+    for (int x = 0; x < gridWidth; x++) {
+      for (int y = 0; y < gridHeight; y++) {
+        if (x < gridWidth - steps) {
+          newGrid[x][y] = grid[x][y];
+        }
+      }
+    }
+    grid = newGrid;
+  }
+  
   // Getters
   public int getGridWidth() { return gridWidth; }
   public int getGridHeight() { return gridHeight; }
   public double getTileWidth() { return tileWidth; }
   public double getTileHeight() { return tileHeight; }
   public boolean isLeftWall() { return isLeftWall; }
+  public boolean isOccupied(int gridX, int gridY) { return grid[gridX][gridY] != null; }
 }
