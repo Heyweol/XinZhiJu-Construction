@@ -38,10 +38,12 @@ public class Item {
   @JsonCreator
   public Item(@JsonProperty("filename") String filename,
               @JsonProperty("name") String name,
-              @JsonProperty("size") String sizeString,
+//              @JsonProperty("size") String sizeString,
+              @JsonProperty("size") List<Integer> size,
               @JsonProperty("outside") String outside,
 //              @JsonProperty("material_list") List<String> materialListStrings,
-              @JsonProperty("material_list") String materialListStrings,
+//              @JsonProperty("material_list") String materialListStrings,
+              @JsonProperty("materialList") Map<String,Integer> materialListStrings,
               @JsonProperty("xOffset") double xOffset,
               @JsonProperty("yOffset") double yOffset,
               @JsonProperty("xOffsetMirror") double xOffsetMirror,
@@ -50,9 +52,11 @@ public class Item {
     this.filename = filename;
     this.name = name;
     this.imageName = constructImagePath(filename);
-    this.size = parseSize(sizeString);
+//    this.size = parseSize(sizeString);
+    this.size = size;
     this.canBePlacedAbove = "Y".equals(outside);
-    this.materialList = parseMaterialList(materialListStrings);
+//    this.materialList = parseMaterialList(materialListStrings);
+    this.materialList = materialListStrings;
     this.unicode = determineUnicode(filename);
     this.baseOffsetX = 0;
     this.baseOffsetY = 0;
