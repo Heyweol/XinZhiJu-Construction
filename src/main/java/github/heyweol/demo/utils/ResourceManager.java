@@ -47,7 +47,7 @@ public class ResourceManager {
   }
   
   public static void loadItems() {
-    try (InputStream is = ResourceManager.class.getResourceAsStream("/assets/data/updated_items.json")) {
+    try (InputStream is = ResourceManager.class.getResourceAsStream("/assets/data/merged_result.json")) {
       if (is == null) {
         LOGGER.severe("Cannot find items.json");
         loadedItems = new ArrayList<>();
