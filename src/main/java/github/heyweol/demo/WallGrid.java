@@ -23,6 +23,7 @@ public class WallGrid {
     this.originX = originX;
     this.originY = originY;
     this.isLeftWall = isLeftWall;
+    this.grid = new Entity[width][height];
   }
   
   public Point2D getWallPosition(int gridX, int gridY) {
@@ -66,9 +67,20 @@ public class WallGrid {
     return true;
   }
   
+  public boolean canPlaceEntity(Entity entity, int gridX, int gridY) {
+    int itemWidth = entity.getInt("itemWidth");
+    int itemHeight = entity.getInt("itemLength");
+    
+    return canPlaceItem(gridX, gridY, itemWidth, itemHeight);
+  }
+  
+  public boolean canPlaceEntity(Entity entity, double screenX, double screenY) {
+    return canPlaceEntity(entity, (int) getGridPosition(screenX, screenY).getX(), (int) getGridPosition(screenX, screenY).getY());
+  }
+  
   public boolean placeEntity(Entity entity, int gridX, int gridY) {
     int itemWidth = entity.getInt("itemWidth");
-    int itemHeight = entity.getInt("itemHeight");
+    int itemHeight = entity.getInt("itemLength");
     
     if (canPlaceItem(gridX, gridY, itemWidth, itemHeight)) {
       for (int x = gridX; x < gridX + itemWidth; x++) {
@@ -109,6 +121,7 @@ public class WallGrid {
   public int getGridHeight() { return gridHeight; }
   public double getTileWidth() { return tileWidth; }
   public double getTileHeight() { return tileHeight; }
+  public double getOriginX() { return originX; }
   public boolean isLeftWall() { return isLeftWall; }
   public boolean isOccupied(int gridX, int gridY) { return grid[gridX][gridY] != null; }
 }

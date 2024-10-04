@@ -300,12 +300,6 @@ public class MyGameApp extends GameApplication {
     launch(args);
   }
   
-//  private boolean isClickOnItem() {
-//    return FXGL.getGameWorld().getEntitiesAt(getInput().getMousePositionWorld())
-//            .stream()
-//            .anyMatch(entity -> entity.hasComponent(InteractiveItemComponent.class));
-//  }
-  
   private void handleGlobalSelection() {
     Entity selectedEntity = InteractiveItemComponent.getSelectedEntity();
     updateMaterialSummary();
@@ -344,79 +338,48 @@ public class MyGameApp extends GameApplication {
    */
   private void spawnItem(Item selectedItem, Point2D position, EntityType type) {
     String entityType = (type == EntityType.WALL_ITEM) ? "wallItem" : "floorItem";
-    Point2D gridPos = isometricGrid.getGridPosition(position.getX(), position.getY());
-    if (!isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
-      return;
+    switch (entityType){
+      case "wallItem":
+        WallGrid wallNow = (position.getX() < GRID_TOP_X) ? leftWallGrid : rightWallGrid;
+        Point2D wallGridPos = wallNow.getGridPosition(position.getX(), position.getY());
+        if (!wallNow.canPlaceItem((int) wallGridPos.getX(), (int) wallGridPos.getY(),
+                selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
+          return;
+        }
+        
+        Entity placedWallItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
+                .put("item", selectedItem)
+                .put("type", type)
+                .put("wallGrid", wallNow)
+                .put("isLeftWall", wallNow == leftWallGrid));
+        
+        Point2D wallTextureOffset = new Point2D(-placedWallItem.getDouble("textureFitWidth")/2,-placedWallItem.getDouble("textureFitHeight"));
+        Point2D wallIsoPos = wallNow.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
+        wallIsoPos = wallIsoPos.add(wallTextureOffset);
+        wallIsoPos = wallIsoPos.add(placedWallItem.getDouble("xOffset"), placedWallItem.getDouble("yOffset"));
+        placedWallItem.setPosition(wallIsoPos);
+        
+        
+        
+        break;
+      case "floorItem":
+        Point2D gridPos = isometricGrid.getGridPosition(position.getX(), position.getY());
+        if (!isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
+          return;
+        }
+        Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
+                .put("item", selectedItem)
+                .put("type", type));
+        
+        Point2D textureOffset = new Point2D(-placedItem.getDouble("textureFitWidth")/2,-placedItem.getDouble("textureFitHeight"));
+        Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
+        isoPos = isoPos.add(textureOffset);
+        isoPos = isoPos.add(placedItem.getDouble("xOffset"), placedItem.getDouble("yOffset"));
+        placedItem.setPosition(isoPos);
     }
-    Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
-            .put("item", selectedItem)
-            .put("type", type));
     
-//    // Calculate and apply the offset
-//    Point2D offset = calculateOffset(placedItem);
-//    placedItem.translate(offset);
-//
-//    // Update the grid with the new position
-//    Point2D finalPos = new Point2D(placedItem.getX(), placedItem.getY());
-//    Point2D finalGridPos = isometricGrid.getGridPosition(finalPos.getX(), finalPos.getY());
-//    isometricGrid.placeEntity(placedItem, (int) finalGridPos.getX(), (int) finalGridPos.getY(),
-//            selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight());
-//
-    Point2D textureOffset = new Point2D(-placedItem.getDouble("textureFitWidth")/2,-placedItem.getDouble("textureFitHeight"));
-    Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
-    isoPos = isoPos.add(textureOffset);
-    isoPos = isoPos.add(placedItem.getDouble("xOffset"), placedItem.getDouble("yOffset"));
-    placedItem.setPosition(isoPos);
     updateMaterialSummary();
   }
-  
-//  private Point2D calculateOffset(Entity entity) {
-//    BoundingBoxComponent bbox = entity.getBoundingBoxComponent();
-//    double height = bbox.getHeight();
-//    return new Point2D(0, -height);
-//  }
-  
-//  private void initSaveModule() {
-//    saveSelector = new ComboBox<>();
-//    updateSaveList();
-//
-//    Button saveButton = new Button("Save Scene");
-//    saveButton.setOnAction(e -> {
-//      TextInputDialog dialog = new TextInputDialog();
-//      dialog.setTitle("Save Scene");
-//      dialog.setHeaderText("Enter a name for your save:");
-//      dialog.setContentText("Save name:");
-//
-//      dialog.showAndWait().ifPresent(saveName -> {
-//        SceneManager.saveScene(saveName);
-//        updateSaveList();
-//      });
-//    });
-//
-//    Button loadButton = new Button("Load Scene");
-//    loadButton.setOnAction(e -> {
-//      String selectedSave = saveSelector.getValue();
-//      if (selectedSave != null) {
-//        SceneManager.loadScene(selectedSave);
-//      }
-//    });
-//
-//    Button deleteButton = new Button("Delete Save");
-//    deleteButton.setOnAction(e -> {
-//      String selectedSave = saveSelector.getValue();
-//      if (selectedSave != null) {
-//        SceneManager.deleteSave(selectedSave);
-//        updateSaveList();
-//      }
-//    });
-//
-//    HBox buttonBox = new HBox(10, saveButton, loadButton, deleteButton);
-//    VBox saveBox = new VBox(10, saveSelector, buttonBox);
-//    saveBox.setTranslateX(ITEM_BAR_WIDTH);
-//    saveBox.setTranslateY(10);
-//
-//    FXGL.addUINode(saveBox);
-//  }
   
   private void updateSaveList() {
     List<String> saveFiles = SceneManager.getSaveFiles();
@@ -425,27 +388,6 @@ public class MyGameApp extends GameApplication {
       saveSelector.setValue(saveFiles.get(0));
     }
   }
-  
-//  private void adjustItemPosition(Entity item, double dx, double dy, double scale) {
-//    // Adjust position
-//    item.translateX(dx);
-//    item.translateY(dy);
-//
-//    // Adjust scale
-//    item.setScaleX(scale);
-//    item.setScaleY(scale);
-//
-//    // Update grid position if necessary
-//    if (item.getType() == EntityType.FLOOR_ITEM) {
-//      Point2D gridPos = isometricGrid.getGridPosition(item.getX()                                                                                                      , item.getY());
-//      isometricGrid.placeEntity(item, (int) gridPos.getX(), (int) gridPos.getY(),
-//              item.getInt("itemWidth"), item.getInt("itemLength"));
-//    }
-//
-//    // Update z-index
-//    item.getComponent(ZIndexComponent.class).onUpdate(0);
-//  }
-  
   
   private void takeCustomScreenshot() {
     radialMenu.setVisible(false);

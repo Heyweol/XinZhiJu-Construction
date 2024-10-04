@@ -41,31 +41,37 @@ public class MyGameFactory implements EntityFactory {
     
     // Calculate the width based on the item's dimensions and the wall grid's tile width
     double tileWidth = leftWallGrid.getTileWidth();
-    double itemWidth = tileWidth * item.getNumTileWidth();
+    double itemWidth = tileWidth + (item.getWidth() - 1 + item.getLength() - 1) * (tileWidth / 2);
+    double scaledWidth = itemWidth;
+    double scaledHeight = scaledWidth * aspectRatio;
     
-    texture.setFitWidth(itemWidth);
+    texture.setFitWidth(scaledWidth);
+    texture.setFitHeight(scaledHeight);
     texture.setPreserveRatio(true);
+    
     texture.setScaleX(item.getScale());
     texture.setScaleY(item.getScale());
 //    // Calculate base offset
 //    double baseOffsetX = (item.getNumTileWidth() - 1) * tileWidth / 2;
 //    double baseOffsetY = (item.getNumTileHeight() - 1) * leftWallGrid.getTileHeight() / 2;
-    
-    double bboxWidth = tileWidth * item.getNumTileWidth();
-    double bboxHeight = leftWallGrid.getTileHeight() * item.getNumTileHeight();
+
 
     return entityBuilder(data)
             .type(EntityType.WALL_ITEM)
-            .view(texture)
-            .bbox(new HitBox(BoundingShape.box(bboxWidth, bboxHeight)))
-            .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
-            .with(new ZIndexComponent())
+            .viewWithBBox(texture)
             .with("itemWidth", item.getNumTileWidth())
             .with("itemLength", item.getNumTileHeight())
             .with("xOffset", item.getXOffset())
             .with("yOffset", item.getYOffset())
             .with("xOffsetMirror", item.getXOffsetMirror())
             .with("yOffsetMirror", item.getYOffsetMirror())
+            .with("scale", item.getScale())
+            .with("textureFitWidth", texture.getFitWidth())
+            .with("textureFitHeight", texture.getFitHeight())
+            .with("wallGrid", data.get("wallGrid"))
+            .with("isLeftWall", data.get("isLeftWall"))
+            .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
+            .with(new ZIndexComponent())
             .build();
   }
   
