@@ -1,5 +1,6 @@
 package github.heyweol.demo;
 
+import com.almasb.fxgl.entity.Entity;
 import javafx.geometry.Point2D;
 
 public class WallGrid {
@@ -10,6 +11,7 @@ public class WallGrid {
   private final double originX;
   private final double originY;
   private final boolean isLeftWall;
+  private Entity[][] grid;
   
   public WallGrid(int width, int height, double tileWidth, double tileHeight,
                   double originX, double originY, boolean isLeftWall) {
@@ -55,6 +57,21 @@ public class WallGrid {
   
   public boolean canPlaceItem(int gridX, int gridY, int itemWidth, int itemHeight) {
     return gridX >= 0 && gridY >= 0 && gridX + itemWidth <= gridWidth && gridY + itemHeight <= gridHeight;
+  }
+  
+  public boolean placeEntity(Entity entity, int gridX, int gridY) {
+    int itemWidth = entity.getInt("itemWidth");
+    int itemHeight = entity.getInt("itemHeight");
+    
+    if (canPlaceItem(gridX, gridY, itemWidth, itemHeight)) {
+      for (int x = gridX; x < gridX + itemWidth; x++) {
+        for (int y = gridY; y < gridY + itemHeight; y++) {
+          grid[x][y] = entity;
+        }
+      }
+      return true;
+    }
+    return false;
   }
   
   // Getters
