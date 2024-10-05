@@ -87,6 +87,7 @@ public class MyGameApp extends GameApplication {
   
   private static final int GRID_TOP_X = ITEM_BAR_WIDTH + bg_width / 2; // 528
   private static final int GRID_TOP_Y = (int) (451*scale_factor);
+  private static final int WALL_HEIGHT = 95;
   
   private RadialMenu radialMenu;
   
@@ -107,8 +108,8 @@ public class MyGameApp extends GameApplication {
     
     // Create the isometric grid with the new parameters
     isometricGrid = new IsometricGrid(15, 15, 34, 17, GRID_TOP_X, GRID_TOP_Y);
-    leftWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - 95, true);
-    rightWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - 95, false);
+    leftWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - WALL_HEIGHT, true);
+    rightWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - WALL_HEIGHT, false);
     radialMenu = new RadialMenu(this::takeCustomScreenshot, isometricGrid);
     FXGL.addUINode(radialMenu, 300, 100);
     
@@ -117,7 +118,7 @@ public class MyGameApp extends GameApplication {
             .view(new javafx.scene.shape.Rectangle(bg_width, bg_height, javafx.scene.paint.Color.TRANSPARENT))
             .buildAndAttach();
     
-    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid, leftWallGrid, rightWallGrid, ITEM_BAR_WIDTH, 0);
+    gridVisualizerComponent = new GridVisualizerComponent(isometricGrid, leftWallGrid, rightWallGrid, ITEM_BAR_WIDTH, 0, WALL_HEIGHT);
     background.addComponent(gridVisualizerComponent);
     
     FXGL.getGameWorld().addEntityFactory(new MyGameFactory(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent));
@@ -214,6 +215,13 @@ public class MyGameApp extends GameApplication {
     FXGL.getInput().addEventHandler(javafx.scene.input.MouseEvent.MOUSE_MOVED, event -> {
       Point2D mousePos = new Point2D(event.getX(), event.getY());
       Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+      if(!isometricGrid.positionInBounds(mousePos.getX(), mousePos.getY())) {
+        if (mousePos.getX()<GRID_TOP_X) {
+          gridPos = leftWallGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+        } else {
+        gridPos = rightWallGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+        }
+      }
       positionText.setText(String.format("Mouse: (%.2f, %.2f) Grid: (%.0f, %.0f)",
               mousePos.getX(), mousePos.getY(),
               gridPos.getX(), gridPos.getY()));

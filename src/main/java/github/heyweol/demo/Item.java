@@ -68,6 +68,12 @@ public class Item {
     this.numTileWidth = size.get(0);
     this.numTileHeight = size.get(1);
     this.season = filename.split("_")[0];
+    
+    if (this.filename.contains("guajian")) {
+      this.numTileHeight = size.get(0);
+      this.numTileWidth = size.get(1);
+    }
+    
   }
   
   private String constructImagePath(String filename) {
@@ -189,6 +195,7 @@ public class Item {
     numTileHeight = height;
   }
   
+  @Deprecated
   public void setSize(double scale) {
     this.size =  List.of((int) (numTileWidth ), (int) (numTileHeight ));
   }

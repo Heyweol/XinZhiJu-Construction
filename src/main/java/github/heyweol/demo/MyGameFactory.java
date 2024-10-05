@@ -41,9 +41,17 @@ public class MyGameFactory implements EntityFactory {
     
     // Calculate the width based on the item's dimensions and the wall grid's tile width
     double tileWidth = leftWallGrid.getTileWidth();
-    double itemWidth = tileWidth + (item.getWidth() - 1 + item.getLength() - 1) * (tileWidth / 2);
-    double scaledWidth = itemWidth;
-    double scaledHeight = scaledWidth * aspectRatio;
+    double tileHeight = leftWallGrid.getTileHeight();
+    double maxItemWidth = tileWidth * item.getNumTileWidth();
+    double maxItemHeight = tileHeight * item.getNumTileHeight() + item.getNumTileWidth() * (tileHeight / 2);
+    
+    double scaledWidth = maxItemWidth;
+    double scaledHeight = maxItemHeight;
+    if (scaledWidth * aspectRatio > maxItemHeight) {
+      scaledWidth = maxItemHeight / aspectRatio;
+    } else {
+      scaledHeight = scaledWidth * aspectRatio;
+    }
     
     texture.setFitWidth(scaledWidth);
     texture.setFitHeight(scaledHeight);
@@ -71,7 +79,7 @@ public class MyGameFactory implements EntityFactory {
             .with("wallGrid", data.get("wallGrid"))
             .with("isLeftWall", data.get("isLeftWall"))
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
-            .with(new ZIndexComponent())
+//            .with(new ZIndexComponent())
             .build();
   }
   

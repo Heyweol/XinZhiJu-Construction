@@ -30,14 +30,29 @@ public class WallGrid {
     double x, y;
     if (isLeftWall) {
       // Left wall extends to the left
-      x = originX - gridX * tileWidth;
-      y = originY + gridY * tileHeight + gridX * (tileHeight / 2);
+      x = originX - gridX * tileWidth ;
     } else {
       // Right wall extends to the right
-      x = originX + gridX * tileWidth;
-      y = originY + gridY * tileHeight + gridX * (tileHeight / 2);
+      x = originX + gridX * tileWidth ;
     }
+    y = originY + gridY * tileHeight + gridX * (tileHeight / 2);
     return new Point2D(x, y);
+  }
+  
+  /**
+   * center screen position of a tile in the wall grid
+   * @param gridX
+   * @param gridY
+   * @return
+   */
+  public Point2D getWallGrindCenter(int gridX, int gridY) {
+    Point2D centerOffset;
+    if (isLeftWall) {
+      centerOffset = new Point2D(-tileWidth / 2, tileHeight / 2);
+    } else {
+      centerOffset = new Point2D(tileWidth / 2, tileHeight / 2);
+    }
+    return getWallPosition(gridX, gridY).add(centerOffset);
   }
   
   public Point2D getGridPosition(double screenX, double screenY) {
@@ -58,7 +73,7 @@ public class WallGrid {
   }
   
   public boolean canPlaceItem(int gridX, int gridY, int itemWidth, int itemHeight) {
-    if(!( gridX >= 0 && gridY >= 0 && gridX + itemWidth <= gridWidth && gridY + itemHeight <= gridHeight)) return false;
+    if(!( gridX >= 0 && gridY >= 0 && gridX + itemWidth < gridWidth && gridY + itemHeight < gridHeight)) return false;
     for (int x = gridX; x < gridX + itemWidth; x++) {
       for (int y = gridY; y < gridY + itemHeight; y++) {
         if (grid[x][y] != null) return false;
@@ -88,6 +103,7 @@ public class WallGrid {
           grid[x][y] = entity;
         }
       }
+      entity.setProperty("isLeftWall", isLeftWall);
       return true;
     }
     return false;

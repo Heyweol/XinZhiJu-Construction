@@ -1,6 +1,8 @@
 package github.heyweol.demo.components;
 
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
+import github.heyweol.demo.EntityType;
 import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.Item;
 import github.heyweol.demo.WallGrid;
@@ -18,8 +20,9 @@ public class GridVisualizerComponent extends Component {
   private final Group itemBaseHighlight;
   private final double offsetX;
   private final double offsetY;
+  private double wallHeight;
   
-  public GridVisualizerComponent(IsometricGrid floorGrid, WallGrid leftWallGrid, WallGrid rightWallGrid, double offsetX, double offsetY) {
+  public GridVisualizerComponent(IsometricGrid floorGrid, WallGrid leftWallGrid, WallGrid rightWallGrid, double offsetX, double offsetY, double wallHeight) {
     this.floorGrid = floorGrid;
     this.leftWallGrid = leftWallGrid;
     this.rightWallGrid = rightWallGrid;
@@ -27,6 +30,7 @@ public class GridVisualizerComponent extends Component {
     this.itemBaseHighlight = new Group();
     this.offsetX = offsetX;
     this.offsetY = offsetY;
+    this.wallHeight = wallHeight;
   }
   
   @Override
@@ -128,6 +132,18 @@ public class GridVisualizerComponent extends Component {
         }
       }
     }
+    
+    FXGL.getGameWorld().getEntities().stream()
+            .filter(e -> e.getType() == EntityType.WALL_ITEM)
+            .forEach(e -> {
+              Item item = e.getObject("item");
+              Point2D gridPos = ((WallGrid) e.getObject("wallGrid")).getGridPosition(e.getX(), e.getY());
+              int gridX = (int) e.getX();
+              int gridY = (int) e.getY();
+              boolean isLeftWall = e.getBoolean("isLeftWall");
+              showItemBase(item, gridX, gridY, true, isLeftWall);
+            });
+    
     itemBaseHighlight.setVisible(true);
   }
   
@@ -162,23 +178,42 @@ public class GridVisualizerComponent extends Component {
   
   private void showWallItemBase(Item item, int gridX, int gridY, boolean isLeftWall) {
     WallGrid wallGrid = isLeftWall ? leftWallGrid : rightWallGrid;
-    double tileWidth = wallGrid.getTileWidth();
-    double tileHeight = wallGrid.getTileHeight();
+    int itemWidth = item.getNumTileWidth();
+    int itemLength = item.getNumTileHeight();
     
-    for (int x = 0; x < item.getWidth(); x++) {
-      for (int y = 0; y < item.getLength(); y++) {
-        Point2D pos = wallGrid.getWallPosition(gridX + x, gridY + y);
-        Polygon diamond = new Polygon(
-                pos.getX() - offsetX, pos.getY() - offsetY,
-                pos.getX() + tileWidth / 2 - offsetX, pos.getY() + tileHeight / 2 - offsetY,
-                pos.getX() - offsetX, pos.getY() + tileHeight - offsetY,
-                pos.getX() - tileWidth / 2 - offsetX, pos.getY() + tileHeight / 2 - offsetY
-        );
-        diamond.setFill(Color.LIGHTBLUE.deriveColor(0, 1, 1, 0.5));
-        diamond.setStroke(Color.BLUE);
-        itemBaseHighlight.getChildren().add(diamond);
-      }
-    }
+    Point2D ur = wallGrid.getWallPosition(gridX, gridY);
+    Point2D ul = wallGrid.getWallPosition(gridX + itemWidth, gridY);
+    Point2D lr = wallGrid.getWallPosition(gridX, gridY + itemLength);
+    Point2D ll = wallGrid.getWallPosition(gridX + itemWidth, gridY + itemLength);
+    
+    Polygon diamond = new Polygon(
+            ur.getX() - offsetX, ur.getY() - offsetY,
+            ul.getX() - offsetX, ul.getY() - offsetY,
+            ll.getX() - offsetX, ll.getY() - offsetY,
+            lr.getX() - offsetX, lr.getY() - offsetY
+    );
+    diamond.setFill(Color.LIGHTBLUE.deriveColor(0, 1, 1, 0.5));
+    diamond.setStroke(Color.BLUE);
+    itemBaseHighlight.getChildren().add(diamond);
+    
+    
+//    for (int x = 0; x < item.getWidth(); x++) {
+//      for (int y = 0; y < item.getLength(); y++) {
+//        Point2D pos = wallGrid.getWallPosition(gridX + x, gridY + y);
+//        Polygon diamond = new Polygon(
+//                pos.getX() - offsetX, pos.getY() - offsetY,
+//                pos.getX() + tileWidth / 2 - offsetX, pos.getY() + tileHeight / 2 - offsetY,
+//                pos.getX() - offsetX, pos.getY() + tileHeight - offsetY,
+//                pos.getX() - tileWidth / 2 - offsetX, pos.getY() + tileHeight / 2 - offsetY
+//        );
+//        diamond.setFill(Color.LIGHTBLUE.deriveColor(0, 1, 1, 0.5));
+//        diamond.setStroke(Color.BLUE);
+//        itemBaseHighlight.getChildren().add(diamond);
+//      }
+//    }
+  
+  
+  
   }
   
   public void hideItemBase() {
