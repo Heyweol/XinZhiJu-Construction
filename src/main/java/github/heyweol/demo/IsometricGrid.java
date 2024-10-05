@@ -10,17 +10,17 @@ public class IsometricGrid {
   private final double tileWidth;
   private final double tileHeight;
   private Entity[][] grid;
-  private final double offsetX;
-  private final double offsetY;
+  private final double originX;
+  private final double originY;
   
-  public IsometricGrid(int width, int length, double tileWidth, double tileHeight, double offsetX, double offsetY) {
+  public IsometricGrid(int width, int length, double tileWidth, double tileHeight, double originX, double originY) {
     this.gridWidth = width;
     this.gridLength = length;
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
     this.grid = new Entity[width][length];
-    this.offsetX = offsetX;
-    this.offsetY = offsetY;
+    this.originX = originX;
+    this.originY = originY;
   }
   
   /**
@@ -30,8 +30,8 @@ public class IsometricGrid {
    * @return Point2D of screen position of center of the tile
    */
   public Point2D getIsometricPosition(int gridX, int gridY) {
-    double x = offsetX + (gridX - gridY) * (tileWidth / 2.0);
-    double y = offsetY + (gridX + gridY) * (tileHeight / 2.0);
+    double x = originX + (gridX - gridY) * (tileWidth / 2.0);
+    double y = originY + (gridX + gridY) * (tileHeight / 2.0);
     return new Point2D(x, y);
   }
   
@@ -42,8 +42,8 @@ public class IsometricGrid {
    * @return grid position, X as column, Y as row
    */
   public Point2D getGridPosition(double screenX, double screenY) {
-    double x = screenX - offsetX;
-    double y = screenY - offsetY;
+    double x = screenX - originX;
+    double y = screenY - originY;
     int gridX = (int) Math.floor((x / (tileWidth / 2.0) + y / (tileHeight / 2.0)) / 2.0);
     int gridY = (int) Math.floor((y / (tileHeight / 2.0) - x / (tileWidth / 2.0)) / 2.0);
     return new Point2D(gridX, gridY);
@@ -78,7 +78,6 @@ public class IsometricGrid {
     placeEntity(entity, gridX, gridY, entity.getInt("itemWidth"), entity.getInt("itemLength"));
   }
   
-  
   public void placeEntity(Entity entity, int gridX, int gridY, int itemWidth, int itemLength) {
     placeEntity(entity, gridX, gridY, itemWidth, itemLength, Point2D.ZERO);
   }
@@ -92,11 +91,7 @@ public class IsometricGrid {
         grid[x][y] = entity;
       }
     }
-//    Point2D isoPos = getIsometricPosition(gridX, gridY);
-//    Item itemObj = entity.getObject("item");
-//    isoPos = isoPos.add(itemObj.getXOffset(), itemObj.getYOffset());
-//    isoPos = isoPos.add(offset);
-//    entity.setPosition(isoPos);
+    
   }
   
   /**
@@ -128,8 +123,8 @@ public class IsometricGrid {
   public double getTileHeight() { return tileHeight; }
   public int getGridWidth() { return gridWidth; }
   public int getGridLength() { return gridLength; }
-  public double getOffsetX() { return offsetX; }
-  public double getOffsetY() { return offsetY; }
+  public double getOriginX() { return originX; }
+  public double getOriginY() { return originY; }
   
   public boolean isOccupied(int gridX, int gridY) {
     return grid[gridX][gridY] != null;

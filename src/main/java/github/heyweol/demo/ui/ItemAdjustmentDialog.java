@@ -39,7 +39,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     this.item = entity.getObject("item");
     this.originalX = entity.getX();
     this.originalY = entity.getY();
-    this.originalScale = entity.getScaleX();
+    this.originalScale = item.getScale();
     this.originalXOffset = item.getXOffset();
     this.originalYOffset = item.getYOffset();
     this.gridVisualizerComponent = gridVisualizer;
@@ -93,9 +93,10 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
         
         item.setXOffset(newXOffset);
         item.setYOffset(newYOffset);
-        item.setScale(newScale);
+        item.setScale(newScale * originalScale);
         
-        showApplyToAllVariantsDialog(newXOffset, newYOffset, newScale);
+        
+        showApplyToAllVariantsDialog(newXOffset, newYOffset, newScale*originalScale);
         
         return ButtonType.OK;
       }
