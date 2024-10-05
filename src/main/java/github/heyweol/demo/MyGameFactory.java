@@ -30,6 +30,8 @@ public class MyGameFactory implements EntityFactory {
   
   @Spawns("wallItem")
   public Entity newHangingItem(SpawnData data) {
+    System.out.println("Spawning wall item");
+    System.out.println("data x,y: " + data.getX() + ", " + data.getY());
     Item item = data.get("item");
     Texture texture = FXGL.texture(item.getImageName());
     

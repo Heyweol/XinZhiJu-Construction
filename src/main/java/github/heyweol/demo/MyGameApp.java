@@ -242,17 +242,22 @@ public class MyGameApp extends GameApplication {
           // Determine which grid to use based on the selected item type
           if (selectedItem.getFilename().contains("guajian")) {
             // For hanging items, check both wall grids
-            Point2D leftGridPos = leftWallGrid.getGridPosition(mousePos.getX(), mousePos.getY());
-            Point2D rightGridPos = rightWallGrid.getGridPosition(mousePos.getX(), mousePos.getY());
-            
-            if (leftWallGrid.canPlaceItem((int) leftGridPos.getX(), (int) leftGridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
-              Point2D wallPos = leftWallGrid.getWallPosition((int) leftGridPos.getX(), (int) leftGridPos.getY());
-              spawnItem(selectedItem, wallPos, EntityType.WALL_ITEM);
-            } else if (rightWallGrid.canPlaceItem((int) rightGridPos.getX(), (int) rightGridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
-              Point2D wallPos = rightWallGrid.getWallPosition((int) rightGridPos.getX(), (int) rightGridPos.getY());
-              spawnItem(selectedItem, wallPos, EntityType.WALL_ITEM);
+            WallGrid wallGrid = (mousePos.getX() < GRID_TOP_X) ? leftWallGrid : rightWallGrid;
+            Point2D gridPos = wallGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+            Entity lastSpawnedEntity = null;
+            for (int i = 0; i < selectedItem.getNumTileHeight(); i++) {
+              if (wallGrid.canPlaceItem((int) gridPos.getX(), (int)gridPos.getY() - i, selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
+                Point2D wallIsoPos = wallGrid.getWallPosition((int) gridPos.getX(), (int)gridPos.getY() - i);
+                spawnItem(selectedItem, wallIsoPos, EntityType.WALL_ITEM);
+                lastSpawnedEntity = getGameWorld().getEntities().getLast();
+                mousePos = wallGrid.getWallPosition((int) gridPos.getX(), (int)gridPos.getY() - i);
+                break;
+              }
             }
-          } else {
+
+            
+              }
+          else {
             // For other items, use the floor grid
             Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
             System.out.println("gridPos: " + gridPos);
@@ -276,14 +281,17 @@ public class MyGameApp extends GameApplication {
         }
       }
       
-      @Override
-      protected void onAction() {
-        Point2D mousePos = getInput().getMousePositionWorld();
-        Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
-      }
+//      @Override
+//      protected void onAction() {
+//        Point2D mousePos = getInput().getMousePositionWorld();
+//        Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
+//      }
       
       @Override
       protected void onActionEnd() {
+        
+        
+        
         gridVisualizerComponent.hide();
       }
     }, MouseButton.PRIMARY);
@@ -350,6 +358,8 @@ public class MyGameApp extends GameApplication {
       case "wallItem":
         WallGrid wallNow = (position.getX() < GRID_TOP_X) ? leftWallGrid : rightWallGrid;
         Point2D wallGridPos = wallNow.getGridPosition(position.getX(), position.getY());
+        
+        
         if (!wallNow.canPlaceItem((int) wallGridPos.getX(), (int) wallGridPos.getY(),
                 selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
           return;
@@ -361,13 +371,11 @@ public class MyGameApp extends GameApplication {
                 .put("wallGrid", wallNow)
                 .put("isLeftWall", wallNow == leftWallGrid));
         
-        Point2D wallTextureOffset = new Point2D(-placedWallItem.getDouble("textureFitWidth")/2,-placedWallItem.getDouble("textureFitHeight"));
+//        Point2D wallTextureOffset = new Point2D(-placedWallItem.getDouble("textureFitWidth")/2,-placedWallItem.getDouble("textureFitHeight"));
         Point2D wallIsoPos = wallNow.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
-        wallIsoPos = wallIsoPos.add(wallTextureOffset);
+//        wallIsoPos = wallIsoPos.add(wallTextureOffset);
         wallIsoPos = wallIsoPos.add(placedWallItem.getDouble("xOffset"), placedWallItem.getDouble("yOffset"));
         placedWallItem.setPosition(wallIsoPos);
-        
-        
         
         break;
       case "floorItem":

@@ -73,7 +73,7 @@ public class WallGrid {
   }
   
   public boolean canPlaceItem(int gridX, int gridY, int itemWidth, int itemHeight) {
-    if(!( gridX >= 0 && gridY >= 0 && gridX + itemWidth < gridWidth && gridY + itemHeight < gridHeight)) return false;
+    if(!( gridX >= 0 && gridY >= 0 && gridX + itemWidth <= gridWidth && gridY + itemHeight <= gridHeight)) return false;
     for (int x = gridX; x < gridX + itemWidth; x++) {
       for (int y = gridY; y < gridY + itemHeight; y++) {
         if (grid[x][y] != null) return false;

@@ -101,11 +101,15 @@ public class InteractiveItemComponent extends Component {
       
       WallGrid wallGrid = entity.getObject("wallGrid");
       Point2D gridPos = wallGrid.getGridPosition(entity.getX(), entity.getY());
+      System.out.println("gridPos: " + gridPos);
       Point2D wallPos = wallGrid.getWallPosition((int) gridPos.getX(), (int) gridPos.getY());
+      System.out.println("wallPos: " + wallPos);
       wallPos = wallPos.add(wallGrid==leftWallGrid ? textureOffsetLeft : textureOffsetRight);
       wallPos = wallPos.add(item.getXOffset(), item.getYOffset());
       
       wallGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY());
+      entity.setPosition(wallPos);
+      if (wallGrid == leftWallGrid) mirror();
       
       lastWall = wallGrid;
     }
@@ -128,7 +132,8 @@ public class InteractiveItemComponent extends Component {
       if (!isDragging) {
         EntityType type = (EntityType) entity.getType();
         if (type == EntityType.WALL_ITEM) {
-          ((WallGrid) entity.getObject("wallGrid")).removeEntity(entity);
+          leftWallGrid.removeEntity(entity);
+          rightWallGrid.removeEntity(entity);
         } else {
           isometricGrid.removeEntity(entity);
         }
@@ -187,7 +192,7 @@ public class InteractiveItemComponent extends Component {
         Point2D wallPos = wallGrid.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
         
         wallPos = wallPos.add(textureOffset);
-        
+        wallPos = wallPos.add(item.getXOffset(), item.getYOffset());
         entity.setPosition(wallPos);
         entity.setProperty("position", wallPos);
 
@@ -199,6 +204,7 @@ public class InteractiveItemComponent extends Component {
         Point2D wallPos = wallGrid.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
         
         wallPos = wallPos.add(textureOffset);
+        wallPos = wallPos.add(item.getXOffset(), item.getYOffset());
         
         entity.setPosition(wallPos);
         entity.setProperty("position", wallPos);
@@ -250,7 +256,7 @@ public class InteractiveItemComponent extends Component {
         wallPos = wallPos.add(entity.getDouble("xOffset"), entity.getDouble("yOffset"));
         wallPos = wallPos.add(textureOffset);
         entity.setPosition(wallPos);
-        
+        wallNow.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY());
         entity.setProperty("isDragging", false);
         
         System.out.println("released at: " + gridPos);
@@ -274,7 +280,8 @@ public class InteractiveItemComponent extends Component {
         
       }
       notifyMaterialUpdateListeners();
-    } else {
+    }
+    else {
       if (selectedEntity != entity) {
         deselectCurrent();
         selectThis();
@@ -469,7 +476,6 @@ public class InteractiveItemComponent extends Component {
   
   public void mirror() {
     isMirrored = !isMirrored;
-    System.out.println("mirrored: " + isMirrored);
     // change entity's "itemWidth" and "itemLength" properties
     //only for floor items
     if (entity.getType() == EntityType.FLOOR_ITEM) {
