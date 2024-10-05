@@ -348,13 +348,17 @@ public class InteractiveItemComponent extends Component {
       Item item = entity.getObject("item");
       int temp = item.getNumTileWidth();
       item.setNumTileWidth(item.getNumTileHeight());
+      entity.setProperty("itemWidth", item.getNumTileHeight());
       item.setNumTileHeight(temp);
+      entity.setProperty("itemLength", temp);
       
+      temp = item.getSize().get(0);
+      item.getSize().set(0, item.getSize().get(1));
+      item.getSize().set(1, temp);
       
       updateItemPosition();
       
     });
-    
     
     toolbar.getChildren().add(switchWidHht);
     
