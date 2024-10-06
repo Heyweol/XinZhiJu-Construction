@@ -40,7 +40,6 @@ public class MyGameFactory implements EntityFactory {
     double originalHeight = texture.getImage().getHeight();
     double aspectRatio = originalHeight / originalWidth;
     
-    
     // Calculate the width based on the item's dimensions and the wall grid's tile width
     double tileWidth = leftWallGrid.getTileWidth();
     double tileHeight = leftWallGrid.getTileHeight();
@@ -64,8 +63,7 @@ public class MyGameFactory implements EntityFactory {
 //    // Calculate base offset
 //    double baseOffsetX = (item.getNumTileWidth() - 1) * tileWidth / 2;
 //    double baseOffsetY = (item.getNumTileHeight() - 1) * leftWallGrid.getTileHeight() / 2;
-
-
+    
     return entityBuilder(data)
             .type(EntityType.WALL_ITEM)
             .viewWithBBox(texture)
@@ -82,6 +80,7 @@ public class MyGameFactory implements EntityFactory {
             .with("isLeftWall", data.get("isLeftWall"))
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
 //            .with(new ZIndexComponent())
+//            .zIndex()
             .build();
   }
   
