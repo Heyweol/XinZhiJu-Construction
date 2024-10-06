@@ -343,6 +343,14 @@ public class InteractiveItemComponent extends Component {
       ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent,isometricGrid);
       Optional<ButtonType> result = dialog.showAndWait();
       if (result.isPresent() && result.get() == ButtonType.OK) {
+        Item item = entity.getObject("item");
+        if (isMirrored){
+          xOffset = -item.getXOffset();
+        }
+        else {
+          xOffset = item.getXOffset();
+        }
+        yOffset = item.getYOffset();
         updateItemPosition();
       }
     });
@@ -376,11 +384,29 @@ public class InteractiveItemComponent extends Component {
     if (entity.getType() == EntityType.FLOOR_ITEM) {
       
       Item item = entity.getObject("item");
-      Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
-      Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX() , (int) gridPos.getY() );
-      isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
-      isometricGrid.placeEntity(entity, (int) isoPos.getX(), (int) isoPos.getY());
+      
+//      Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+//      Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX() , (int) gridPos.getY() );
+//      isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+//      isometricGrid.placeEntity(entity, (int) isoPos.getX(), (int) isoPos.getY());
+
+
+//      Item item = entity.getObject("item");
+      
+      Point2D gridPos = lastGridPos;
+      
+      Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
+      isoPos = isoPos.add(xOffset, yOffset);
+      isoPos = isoPos.add(textureOffset);
+      entity.setPosition(isoPos);
+      entity.setProperty("position", isoPos);
+      System.out.println("released at: " + gridPos);
+      
+      isometricGrid.placeEntity(entity, (int) lastGridPos.getX(), (int) lastGridPos.getY(),
+              entity.getInt("itemWidth"), entity.getInt("itemLength"));
+      
       entity.getComponent(ZIndexComponent.class).onUpdate(0);
+      
     } else if (entity.getType() == EntityType.WALL_ITEM) {
       Point2D leftGridPos = leftWallGrid.getGridPosition(entity.getX(), entity.getY());
       Point2D rightGridPos = rightWallGrid.getGridPosition(entity.getX(), entity.getY());
