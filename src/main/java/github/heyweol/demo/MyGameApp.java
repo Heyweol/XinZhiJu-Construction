@@ -12,15 +12,11 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import com.almasb.fxgl.app.FXGLApplication;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.app.scene.FXGLMenu;
 import com.almasb.fxgl.dsl.FXGL;
-import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
-import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
-import static com.almasb.fxgl.dsl.FXGL.getGameWorld;
-import static com.almasb.fxgl.dsl.FXGL.getInput;
-import static com.almasb.fxgl.dsl.FXGL.spawn;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.components.BoundingBoxComponent;
@@ -41,12 +37,14 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -54,6 +52,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
+
+import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class MyGameApp extends GameApplication {
   
@@ -91,6 +91,10 @@ public class MyGameApp extends GameApplication {
   private static final int GRID_TOP_Y = (int) (451*scale_factor);
   private static final int WALL_HEIGHT = 95;
   
+  private boolean isDevMode = false;
+  private VBox pauseMenu;
+  private Button saveButton;
+  private Text positionText;
   private RadialMenu radialMenu;
   
   @Override
@@ -100,9 +104,11 @@ public class MyGameApp extends GameApplication {
     settings.setTitle("心纸居");
     settings.setVersion("0.1");
     
-
+    settings.setGameMenuEnabled(false);
     
     settings.getCSSList().add("radial-menu.css");
+    
+    
   }
   
 
@@ -205,14 +211,15 @@ public class MyGameApp extends GameApplication {
     getGameTimer().runAtInterval(this::updateZIndices, Duration.millis(50));
     
     // Save button for debugging use only
-    Button saveButton = new Button("Save Items to JSON");
+    saveButton = new Button("Save Items to JSON");
     saveButton.setOnAction(event -> {
       String savePath = "src/main/resources/assets/data/updated_items.json";
       ResourceManager.saveItemsToJson(savePath);
     });
     FXGL.addUINode(saveButton, 300, 10);
+    saveButton.setVisible(false);
     
-    Text positionText = new Text();
+    positionText = new Text();
     positionText.setTranslateX(500);
     positionText.setTranslateY(20);
     FXGL.addUINode(positionText);
@@ -300,6 +307,13 @@ public class MyGameApp extends GameApplication {
         gridVisualizerComponent.hide();
       }
     }, MouseButton.PRIMARY);
+    
+    getInput().addAction(new UserAction("Pause") {
+      @Override
+      protected void onActionBegin() {
+        togglePauseMenu();
+      }
+    }, KeyCode.ESCAPE);
   }
   
   @Override
@@ -309,12 +323,18 @@ public class MyGameApp extends GameApplication {
   @Override
   protected void initGameVars(Map<String, Object> vars) {
     super.initGameVars(vars);
+    vars.put("isDevMode", false);
   }
   
   @Override
   protected void onUpdate(double tpf) {
     super.onUpdate(tpf);
-
+    if (isDevMode && ! positionText.isVisible()) {
+      positionText.setVisible(true);
+    }
+    if (!isDevMode && positionText.isVisible()) {
+      positionText.setVisible(false);
+    }
   }
   
   
@@ -453,4 +473,69 @@ public class MyGameApp extends GameApplication {
       FXGL.getNotificationService().pushNotification("截图失败😫");
     }
   }
+  
+  private void togglePauseMenu() {
+    if (pauseMenu == null) {
+      createPauseMenu();
+    }
+    
+    if (pauseMenu.isVisible()) {
+      hidePauseMenu();
+    } else {
+      showPauseMenu();
+    }
+  }
+  
+  private void createPauseMenu() {
+    pauseMenu = new VBox(10);
+    pauseMenu.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5); -fx-padding: 20;");
+    pauseMenu.setVisible(false);
+    pauseMenu.setTranslateX(FXGL.getAppWidth() / 2 - 100);
+    pauseMenu.setTranslateY(FXGL.getAppHeight() / 2 - 50);
+    
+    // Dev Mode Toggle
+    CheckBox devModeCheckBox = new CheckBox("Enable Dev Mode");
+    devModeCheckBox.setSelected(isDevMode);
+    devModeCheckBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
+      isDevMode = isSelected;
+      // Enable or disable Dev Mode functionalities here
+      if (isDevMode) {
+        enableDevMode();
+      } else {
+        disableDevMode();
+      }
+    });
+    
+    // Close Button
+    Button closeButton = new Button("Close");
+    closeButton.setOnAction(e -> hidePauseMenu());
+    
+    pauseMenu.getChildren().addAll(devModeCheckBox, closeButton);
+    FXGL.addUINode(pauseMenu);
+  }
+  
+  private void showPauseMenu() {
+    pauseMenu.setVisible(true);
+    
+  }
+  
+  private void hidePauseMenu() {
+    pauseMenu.setVisible(false);
+
+  }
+  
+  private void enableDevMode() {
+    FXGL.getNotificationService().pushNotification("Dev Mode Enabled");
+    // Add your Dev Mode functionalities here
+    getWorldProperties().setValue("isDevMode", true);
+    saveButton.setVisible(true);
+  }
+  
+  private void disableDevMode() {
+    FXGL.getNotificationService().pushNotification("Dev Mode Disabled");
+    // Remove your Dev Mode functionalities here
+    getWorldProperties().setValue("isDevMode", false);
+    saveButton.setVisible(false);
+  }
+  
 }

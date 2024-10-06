@@ -34,6 +34,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private Label scaleLabel;
   private Point2D textureOffset;
   private Point2D lastGridPos;
+  private boolean isDevMode;
   
   public ItemAdjustmentDialog(Entity entity, GridVisualizerComponent gridVisualizer, IsometricGrid isometricGrid,Point2D lastGridPos) {
     this.entity = entity;
@@ -47,7 +48,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     this.isometricGrid = isometricGrid;
     this.textureOffset = new Point2D(-entity.getDouble("textureFitWidth")/2,-entity.getDouble("textureFitHeight"));
     this.lastGridPos = lastGridPos;
-    
+    this.isDevMode = FXGL.getWorldProperties().getBoolean("devMode");
 //    Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
 //    Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
 //    isoPos = isoPos.add(item.getXOffset(), item.getYOffset());

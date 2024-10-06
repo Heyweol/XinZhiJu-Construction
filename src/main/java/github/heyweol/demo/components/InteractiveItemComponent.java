@@ -59,6 +59,10 @@ public class InteractiveItemComponent extends Component {
   private Point2D textureOffsetLeft = new Point2D(0, 0);
   private Point2D textureOffsetRight = new Point2D(0, 0);
   
+  private boolean isDevMode = false;
+  private Button adjustBtn;
+  private Button switchWidHht;
+  
   static {
     selectionEffect = new DropShadow();
     selectionEffect.setColor(Color.BLUE);
@@ -124,6 +128,20 @@ public class InteractiveItemComponent extends Component {
     
   }
   
+  @Override
+  public void onUpdate(double tpf) {
+    
+    isDevMode = FXGL.getWorldProperties().getBoolean("isDevMode");
+    if (isDevMode  && toolbar!=null && !toolbar.getChildren().contains(adjustBtn) ){
+      toolbar.getChildren().add(adjustBtn);
+      toolbar.getChildren().add(switchWidHht);
+    }
+    else if (!isDevMode && toolbar!=null && toolbar.getChildren().contains(adjustBtn)){
+      toolbar.getChildren().remove(adjustBtn);
+      toolbar.getChildren().remove(switchWidHht);
+      
+    }
+  }
   
   private void onMousePressed(MouseEvent e) {
     dragOffset = new Point2D(e.getSceneX() - entity.getX(), e.getSceneY() - entity.getY());
@@ -328,9 +346,10 @@ public class InteractiveItemComponent extends Component {
       }
     }
     
-    Button mirrorBtn = createButton("mirror", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
+    Button mirrorBtn = createButton("mirror", new FontIcon(FontAwesomeSolid.SYNC));
     Button removeBtn = createButton("", new FontIcon(FontAwesomeSolid.TRASH));
-    Button adjustBtn = createButton("", new FontIcon(FontAwesomeSolid.SLIDERS_H));
+    adjustBtn = createButton("", new FontIcon(FontAwesomeSolid.SLIDERS_H));
+    switchWidHht = createButton("", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
     
     removeBtn.setOnAction(e -> {
       entity.removeFromWorld();
@@ -338,11 +357,9 @@ public class InteractiveItemComponent extends Component {
       hideToolbar();
       notifyMaterialUpdateListeners();
     });
-    
     mirrorBtn.setOnAction(e -> {
       mirror();
     })  ;
-    
     adjustBtn.setOnAction(e -> {
       ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent,isometricGrid,lastGridPos);
       Optional<ButtonType> result = dialog.showAndWait();
@@ -358,10 +375,6 @@ public class InteractiveItemComponent extends Component {
         updateItemPosition();
       }
     });
-    
-    toolbar.getChildren().addAll(mirrorBtn, adjustBtn, removeBtn);
-    
-    Button switchWidHht = createButton("", new FontIcon(FontAwesomeSolid.ARROWS_ALT));
     switchWidHht.setOnAction(e -> {
       Item item = entity.getObject("item");
       int temp = item.getNumTileWidth();
@@ -378,7 +391,11 @@ public class InteractiveItemComponent extends Component {
       
     });
     
-    toolbar.getChildren().add(switchWidHht);
+    toolbar.getChildren().addAll(mirrorBtn, removeBtn);
+    
+    if (isDevMode) {
+      toolbar.getChildren().addAll(adjustBtn, switchWidHht);
+    }
     
     updateToolbarPosition();
     FXGL.addUINode(toolbar);
