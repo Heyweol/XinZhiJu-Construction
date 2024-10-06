@@ -120,7 +120,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     
     setOnShowing(event -> {
       gridVisualizer.show();
-      gridVisualizer.showItemBase(item, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
+      gridVisualizer.showItemBase(entity, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
       positionDialogLeftOfGameScene();
     });
     setOnHiding(event -> {
@@ -180,7 +180,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     isoPos = isoPos.add(textureOffset);
     entity.setPosition(isoPos);
     
-    gridVisualizerComponent.showItemBase(item, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
+    gridVisualizerComponent.showItemBase(entity, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
   }
   
   private void updateItemScale() {
@@ -189,7 +189,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     entity.setScaleY(scale);
     Item item = entity.getObject("item");
     item.setScale(scale);
-    gridVisualizerComponent.showItemBase(item, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
+    gridVisualizerComponent.showItemBase(entity, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
   }
   
   private void resetItemPosition() {
