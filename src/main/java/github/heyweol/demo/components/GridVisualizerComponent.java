@@ -1,6 +1,7 @@
 package github.heyweol.demo.components;
 
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import github.heyweol.demo.EntityType;
 import github.heyweol.demo.IsometricGrid;
@@ -98,15 +99,15 @@ public class GridVisualizerComponent extends Component {
     }
   }
   
-  public void showItemBase(Item item, int entityX, int entityY, boolean isWallItem, boolean isLeftWall) {
+  public void showItemBase(Entity entity, int entityX, int entityY, boolean isWallItem, boolean isLeftWall) {
     
-    int gridX = entityX + item.getBaseOffsetX();
-    int gridY = entityY + item.getBaseOffsetY();
+    int gridX = entityX;
+    int gridY = entityY;
     
     if (isWallItem) {
-      showWallItemBase(item, gridX, gridY, isLeftWall);
+      showWallItemBase(entity, gridX, gridY, isLeftWall);
     } else {
-      showFloorItemBase(item, gridX, gridY);
+      showFloorItemBase(entity, gridX, gridY);
     }
     
     itemBaseHighlight.setVisible(true);
@@ -141,7 +142,7 @@ public class GridVisualizerComponent extends Component {
               int gridX = (int) e.getX();
               int gridY = (int) e.getY();
               boolean isLeftWall = e.getBoolean("isLeftWall");
-              showItemBase(item, gridX, gridY, true, isLeftWall);
+              showItemBase(e, gridX, gridY, true, isLeftWall);
             });
     
     itemBaseHighlight.setVisible(true);
@@ -151,12 +152,13 @@ public class GridVisualizerComponent extends Component {
     itemBaseHighlight.setVisible(false);
   }
   
-  private void showFloorItemBase(Item item, int gridX, int gridY) {
+  private void showFloorItemBase(Entity entity, int gridX, int gridY) {
+    
     double tileWidth = floorGrid.getTileWidth();
     double tileHeight = floorGrid.getTileHeight();
     
-    for (int x = 0; x < item.getWidth(); x++) {
-      for (int y = 0; y < item.getLength(); y++) {
+    for (int x = 0; x < entity.getInt("itemWidth"); x++) {
+      for (int y = 0; y < entity.getInt("itemLength"); y++) {
         Point2D topLeft = floorGrid.getIsometricPosition(gridX + x, gridY + y);
         Point2D topRight = floorGrid.getIsometricPosition(gridX + x + 1, gridY + y);
         Point2D bottomLeft = floorGrid.getIsometricPosition(gridX + x, gridY + y + 1);
@@ -176,10 +178,10 @@ public class GridVisualizerComponent extends Component {
     }
   }
   
-  private void showWallItemBase(Item item, int gridX, int gridY, boolean isLeftWall) {
+  private void showWallItemBase(Entity entity, int gridX, int gridY, boolean isLeftWall) {
     WallGrid wallGrid = isLeftWall ? leftWallGrid : rightWallGrid;
-    int itemWidth = item.getNumTileWidth();
-    int itemLength = item.getNumTileHeight();
+    int itemWidth = entity.getInt("itemWidth");
+    int itemLength = entity.getInt("itemLength");
     
     Point2D ur = wallGrid.getWallPosition(gridX, gridY);
     Point2D ul = wallGrid.getWallPosition(gridX + itemWidth, gridY);
@@ -211,8 +213,6 @@ public class GridVisualizerComponent extends Component {
 //        itemBaseHighlight.getChildren().add(diamond);
 //      }
 //    }
-  
-  
   
   }
   

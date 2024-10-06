@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.app.scene.FXGLMenu;
 import com.almasb.fxgl.dsl.FXGL;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
@@ -24,6 +25,7 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.components.BoundingBoxComponent;
 import com.almasb.fxgl.input.UserAction;
+import com.almasb.fxgl.app.GameSettings;
 
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
@@ -98,9 +100,12 @@ public class MyGameApp extends GameApplication {
     settings.setTitle("心纸居");
     settings.setVersion("0.1");
     
+
+    
     settings.getCSSList().add("radial-menu.css");
   }
   
+
   @Override
   protected void initGame() {
     // Register a scene load listener to update the material list
@@ -261,7 +266,7 @@ public class MyGameApp extends GameApplication {
             // For other items, use the floor grid
             Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
             System.out.println("gridPos: " + gridPos);
-            System.out.println("Can place item: " + isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength()));
+//            System.out.println("Can place item: " + isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength()));
             if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
               Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
               spawnItem(selectedItem, isoPos, EntityType.FLOOR_ITEM);
@@ -311,6 +316,7 @@ public class MyGameApp extends GameApplication {
     super.onUpdate(tpf);
 
   }
+  
   
   public static void main(String[] args) {
     launch(args);

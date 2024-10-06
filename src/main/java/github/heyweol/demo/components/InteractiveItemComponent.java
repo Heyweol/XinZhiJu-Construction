@@ -80,7 +80,6 @@ public class InteractiveItemComponent extends Component {
     
     if (entity.getType() == EntityType.FLOOR_ITEM) {
       
-      
       double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
       currentDisplayOffset = new Point2D(-displayWidth / 4, -displayWidth * item.getRatio() / 2);
       
@@ -88,8 +87,8 @@ public class InteractiveItemComponent extends Component {
       textureOffsetLeft = new Point2D(-entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
       textureOffsetRight = new Point2D(entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
       
-      
       Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+      lastGridPos = gridPos;
       Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
       isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
       isoPos = isoPos.add(textureOffset);
@@ -206,7 +205,7 @@ public class InteractiveItemComponent extends Component {
         entity.setPosition(wallPos);
         entity.setProperty("position", wallPos);
 
-        gridVisualizerComponent.showItemBase(item, (int) wallGridPos.getX() , (int) wallGridPos.getY() , true, wallGrid.isLeftWall());
+        gridVisualizerComponent.showItemBase(entity, (int) wallGridPos.getX() , (int) wallGridPos.getY() , true, wallGrid.isLeftWall());
         
       } else {
         Point2D wallGridPos = lastGridPos;
@@ -219,7 +218,7 @@ public class InteractiveItemComponent extends Component {
         entity.setPosition(wallPos);
         entity.setProperty("position", wallPos);
         
-        gridVisualizerComponent.showItemBase(item, (int) wallGridPos.getX() , (int) wallGridPos.getY() , true, wallGrid.isLeftWall());
+        gridVisualizerComponent.showItemBase(entity, (int) wallGridPos.getX() , (int) wallGridPos.getY() , true, wallGrid.isLeftWall());
       }
     
   }
@@ -228,7 +227,7 @@ public class InteractiveItemComponent extends Component {
     Point2D gridPos = isometricGrid.getGridPosition(newX, newY);
     
     if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(),
-            item.getNumTileWidth(), item.getNumTileHeight())) {
+            entity.getInt("itemWidth"), entity.getInt("itemLength"))) {
       Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
       
 //      isoPos = isoPos.add(currentDisplayOffset);
@@ -239,7 +238,7 @@ public class InteractiveItemComponent extends Component {
       isoPos = isoPos.add(textureOffset);
       entity.setPosition(isoPos);
       entity.setProperty("position", isoPos);
-      gridVisualizerComponent.showItemBase(item, (int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY(), false, false);
+      gridVisualizerComponent.showItemBase(entity, (int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY(), false, false);
     }
   }
   
@@ -299,7 +298,8 @@ public class InteractiveItemComponent extends Component {
         deselectCurrent();
       }
     }
-    
+    entity.setProperty("gridX", (int) lastGridPos.getX());
+    entity.setProperty("gridY", (int) lastGridPos.getY());
     isDragging = false;
     e.consume();
   }
@@ -328,7 +328,7 @@ public class InteractiveItemComponent extends Component {
       }
     }
     
-    Button mirrorBtn = createButton("", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
+    Button mirrorBtn = createButton("mirror", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
     Button removeBtn = createButton("", new FontIcon(FontAwesomeSolid.TRASH));
     Button adjustBtn = createButton("", new FontIcon(FontAwesomeSolid.SLIDERS_H));
     
@@ -341,7 +341,7 @@ public class InteractiveItemComponent extends Component {
     
     mirrorBtn.setOnAction(e -> {
       mirror();
-    });
+    })  ;
     
     adjustBtn.setOnAction(e -> {
       ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent,isometricGrid,lastGridPos);
@@ -524,6 +524,11 @@ public class InteractiveItemComponent extends Component {
       entity.setProperty("itemLength", temp);
       
       xOffset = -xOffset;
+      
+      isometricGrid.removeEntity(entity);
+      System.out.println("removed entity");
+      isometricGrid.placeEntity(entity, (int) lastGridPos.getX(), (int) lastGridPos.getY(),
+              entity.getInt("itemWidth"), entity.getInt("itemLength"));
       
     }
     else {
