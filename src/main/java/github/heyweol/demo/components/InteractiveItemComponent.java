@@ -80,7 +80,6 @@ public class InteractiveItemComponent extends Component {
     
     if (entity.getType() == EntityType.FLOOR_ITEM) {
       
-      
       double displayWidth = item.getNumTileWidth() * isometricGrid.getTileWidth();
       currentDisplayOffset = new Point2D(-displayWidth / 4, -displayWidth * item.getRatio() / 2);
       
@@ -88,8 +87,8 @@ public class InteractiveItemComponent extends Component {
       textureOffsetLeft = new Point2D(-entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
       textureOffsetRight = new Point2D(entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
       
-      
       Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+      lastGridPos = gridPos;
       Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
       isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
       isoPos = isoPos.add(textureOffset);
@@ -299,7 +298,8 @@ public class InteractiveItemComponent extends Component {
         deselectCurrent();
       }
     }
-    
+    entity.setProperty("gridX", (int) lastGridPos.getX());
+    entity.setProperty("gridY", (int) lastGridPos.getY());
     isDragging = false;
     e.consume();
   }
@@ -328,7 +328,7 @@ public class InteractiveItemComponent extends Component {
       }
     }
     
-    Button mirrorBtn = createButton("", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
+    Button mirrorBtn = createButton("mirror", new FontIcon(FontAwesomeSolid.EXCHANGE_ALT));
     Button removeBtn = createButton("", new FontIcon(FontAwesomeSolid.TRASH));
     Button adjustBtn = createButton("", new FontIcon(FontAwesomeSolid.SLIDERS_H));
     
@@ -341,7 +341,7 @@ public class InteractiveItemComponent extends Component {
     
     mirrorBtn.setOnAction(e -> {
       mirror();
-    });
+    })  ;
     
     adjustBtn.setOnAction(e -> {
       ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent,isometricGrid,lastGridPos);

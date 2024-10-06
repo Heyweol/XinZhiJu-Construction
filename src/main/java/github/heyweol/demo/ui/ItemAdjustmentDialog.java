@@ -48,10 +48,10 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     this.textureOffset = new Point2D(-entity.getDouble("textureFitWidth")/2,-entity.getDouble("textureFitHeight"));
     this.lastGridPos = lastGridPos;
     
-    Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
-    Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
-    isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
-    entity.setPosition(isoPos);
+//    Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
+//    Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
+//    isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+//    entity.setPosition(isoPos);
 
     setTitle("Adjust Item");
     setHeaderText("Fine-tune item position and size");
@@ -195,8 +195,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private void resetItemPosition() {
     entity.setX(originalX);
     entity.setY(originalY);
-    entity.setScaleX(originalScale);
-    entity.setScaleY(originalScale);
+    item.setScale(originalScale);
     item.setXOffset(originalXOffset);
     item.setYOffset(originalYOffset);
   }
