@@ -344,7 +344,7 @@ public class InteractiveItemComponent extends Component {
     });
     
     adjustBtn.setOnAction(e -> {
-      ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent,isometricGrid);
+      ItemAdjustmentDialog dialog = new ItemAdjustmentDialog(entity, gridVisualizerComponent,isometricGrid,lastGridPos);
       Optional<ButtonType> result = dialog.showAndWait();
       if (result.isPresent() && result.get() == ButtonType.OK) {
         Item item = entity.getObject("item");
