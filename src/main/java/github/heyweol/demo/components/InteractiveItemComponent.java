@@ -132,15 +132,20 @@ public class InteractiveItemComponent extends Component {
   public void onUpdate(double tpf) {
     
     isDevMode = FXGL.getWorldProperties().getBoolean("isDevMode");
-    if (isDevMode  && toolbar!=null && !toolbar.getChildren().contains(adjustBtn) ){
-      toolbar.getChildren().add(adjustBtn);
-      toolbar.getChildren().add(switchWidHht);
-    }
-    else if (!isDevMode && toolbar!=null && toolbar.getChildren().contains(adjustBtn)){
-      toolbar.getChildren().remove(adjustBtn);
-      toolbar.getChildren().remove(switchWidHht);
-      
-    }
+//    if (isDevMode  && toolbar!=null && !toolbar.getChildren().contains(adjustBtn) ){
+//      toolbar.getChildren().add(adjustBtn);
+//      toolbar.getChildren().add(switchWidHht);
+//    }
+//    else if (!isDevMode && toolbar!=null){
+//      if (toolbar.getChildren().contains(adjustBtn)){
+//        toolbar.getChildren().remove(adjustBtn);
+//
+//      }
+//      if (toolbar.getChildren().contains(switchWidHht)){
+//        toolbar.getChildren().remove(switchWidHht);
+//      }
+//
+//    }
   }
   
   private void onMousePressed(MouseEvent e) {
@@ -470,12 +475,14 @@ public class InteractiveItemComponent extends Component {
     entity.setProperty("item", newVariant);
     
     Texture currentTexture = (Texture) entity.getViewComponent().getChildren().get(0);
-    double entityWidth = entity.getWidth();
-    double entityHeight = entity.getHeight();
+    double entityWidth = entity.getDouble("textureFitWidth");
+    double entityHeight = entity.getDouble("textureFitHeight");
     
     Texture newTexture = new Texture(ResourceManager.getImage(newVariant.getImageName()));
     newTexture.setFitWidth(entityWidth);
     newTexture.setFitHeight(entityHeight);
+    newTexture.setScaleX(currentTexture.getScaleX());
+    newTexture.setScaleY(currentTexture.getScaleY());
     newTexture.setPreserveRatio(false);  // This ensures the image fits exactly to the specified dimensions
     
     entity.getViewComponent().clearChildren();
