@@ -75,6 +75,9 @@ public class InteractiveItemComponent extends Component {
   @Override
   public void onAdded() {
     Item item = entity.getObject("item");
+    xOffset = item.getXOffset();
+    yOffset = item.getYOffset();
+    
     if (entity.getType() == EntityType.FLOOR_ITEM) {
       
       
@@ -82,6 +85,9 @@ public class InteractiveItemComponent extends Component {
       currentDisplayOffset = new Point2D(-displayWidth / 4, -displayWidth * item.getRatio() / 2);
       
       textureOffset = new Point2D(-entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
+      textureOffsetLeft = new Point2D(-entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
+      textureOffsetRight = new Point2D(entity.getDouble("textureFitWidth") / 2, -entity.getDouble("textureFitHeight"));
+      
       
       Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
       Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
@@ -105,7 +111,7 @@ public class InteractiveItemComponent extends Component {
       Point2D wallPos = wallGrid.getWallPosition((int) gridPos.getX(), (int) gridPos.getY());
       System.out.println("wallPos: " + wallPos);
       wallPos = wallPos.add(wallGrid==leftWallGrid ? textureOffsetLeft : textureOffsetRight);
-      wallPos = wallPos.add(item.getXOffset(), item.getYOffset());
+      wallPos = wallPos.add(xOffset,yOffset);
       
       wallGrid.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY());
       entity.setPosition(wallPos);
@@ -192,7 +198,7 @@ public class InteractiveItemComponent extends Component {
         Point2D wallPos = wallGrid.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
         
         wallPos = wallPos.add(textureOffset);
-        wallPos = wallPos.add(item.getXOffset(), item.getYOffset());
+        wallPos = wallPos.add(this.xOffset, this.yOffset);
         entity.setPosition(wallPos);
         entity.setProperty("position", wallPos);
 
@@ -204,7 +210,7 @@ public class InteractiveItemComponent extends Component {
         Point2D wallPos = wallGrid.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
         
         wallPos = wallPos.add(textureOffset);
-        wallPos = wallPos.add(item.getXOffset(), item.getYOffset());
+        wallPos = wallPos.add(xOffset, yOffset);
         
         entity.setPosition(wallPos);
         entity.setProperty("position", wallPos);
@@ -222,7 +228,7 @@ public class InteractiveItemComponent extends Component {
       Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
       
 //      isoPos = isoPos.add(currentDisplayOffset);
-      isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+      isoPos = isoPos.add(xOffset, yOffset);
       lastGridPos = gridPos;
       System.out.println("dragged to: " + gridPos);
       
@@ -269,7 +275,7 @@ public class InteractiveItemComponent extends Component {
         Point2D gridPos = lastGridPos;
 
         Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
-        isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+        isoPos = isoPos.add(xOffset, yOffset);
         isoPos = isoPos.add(textureOffset);
         entity.setPosition(isoPos);
         entity.setProperty("position", isoPos);
@@ -494,11 +500,14 @@ public class InteractiveItemComponent extends Component {
       else {
         xOffset = entity.getDouble("xOffset");
       }
+      
     }
-    textureOffset = isMirrored ?  textureOffsetLeft: textureOffsetRight;
+    
     Texture texture = (Texture) entity.getViewComponent().getChildren().get(0);
     double scale = texture.getScaleX();
     texture.setScaleX( -scale);
+    textureOffset = isMirrored ?  textureOffsetLeft: textureOffsetRight;
+    currentDisplayOffset = new Point2D(-currentDisplayOffset.getX(), currentDisplayOffset.getY());
     
   }
   
