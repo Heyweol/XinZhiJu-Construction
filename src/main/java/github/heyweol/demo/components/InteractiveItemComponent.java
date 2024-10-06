@@ -492,6 +492,9 @@ public class InteractiveItemComponent extends Component {
       int temp = entity.getInt("itemWidth");
       entity.setProperty("itemWidth", entity.getInt("itemLength"));
       entity.setProperty("itemLength", temp);
+      
+      xOffset = -xOffset;
+      
     }
     else {
       if(isMirrored) {
@@ -500,14 +503,14 @@ public class InteractiveItemComponent extends Component {
       else {
         xOffset = entity.getDouble("xOffset");
       }
-      
+      textureOffset = isMirrored ?  textureOffsetLeft: textureOffsetRight;
     }
     
     Texture texture = (Texture) entity.getViewComponent().getChildren().get(0);
     double scale = texture.getScaleX();
     texture.setScaleX( -scale);
-    textureOffset = isMirrored ?  textureOffsetLeft: textureOffsetRight;
-    currentDisplayOffset = new Point2D(-currentDisplayOffset.getX(), currentDisplayOffset.getY());
+    
+    
     
   }
   
