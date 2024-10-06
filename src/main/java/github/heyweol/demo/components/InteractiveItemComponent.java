@@ -128,12 +128,16 @@ public class InteractiveItemComponent extends Component {
   
   private void onMousePressed(MouseEvent e) {
     dragOffset = new Point2D(e.getSceneX() - entity.getX(), e.getSceneY() - entity.getY());
+    System.out.println("dragOffset: " + dragOffset);
+    dragOffset = dragOffset.add(xOffset, yOffset);
+    dragOffset = dragOffset.add(textureOffset);
     e.consume();
   }
   
   private void onMouseDragged(MouseEvent e) {
     double dragDistance = new Point2D(e.getSceneX() - (entity.getX() + dragOffset.getX()),
             e.getSceneY() - (entity.getY() + dragOffset.getY())).magnitude();
+    
     if (dragDistance > 2 || isDragging) {
       if (!isDragging) {
         EntityType type = (EntityType) entity.getType();
@@ -152,8 +156,8 @@ public class InteractiveItemComponent extends Component {
     
     if (isDragging) {
       gridVisualizerComponent.showAllOccupiedGrids();
-      double newX = e.getSceneX()  ;
-      double newY = e.getSceneY() ;
+      double newX = e.getSceneX()  - dragOffset.getX();
+      double newY = e.getSceneY() - dragOffset.getY();
       
       Item item = entity.getObject("item");
       EntityType type = (EntityType) entity.getType();
@@ -230,7 +234,7 @@ public class InteractiveItemComponent extends Component {
 //      isoPos = isoPos.add(currentDisplayOffset);
       isoPos = isoPos.add(xOffset, yOffset);
       lastGridPos = gridPos;
-      System.out.println("dragged to: " + gridPos);
+//      System.out.println("dragged to: " + gridPos);
       
       isoPos = isoPos.add(textureOffset);
       entity.setPosition(isoPos);
