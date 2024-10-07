@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -96,6 +97,9 @@ public class MyGameApp extends GameApplication {
   private Button saveButton;
   private Text positionText;
   private RadialMenu radialMenu;
+  private Supplier<Map<String,Integer>> materailSupplier = this::getMaterialList;
+  private Supplier<File> screenshotSupplier = this::takeCustomScreenshot;
+  
   
   @Override
   protected void initSettings(GameSettings settings) {
@@ -121,7 +125,7 @@ public class MyGameApp extends GameApplication {
     isometricGrid = new IsometricGrid(15, 15, 34, 17, GRID_TOP_X, GRID_TOP_Y);
     leftWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - WALL_HEIGHT, true);
     rightWallGrid = new WallGrid(15, 5, 17, 17, GRID_TOP_X , GRID_TOP_Y - WALL_HEIGHT, false);
-    radialMenu = new RadialMenu(this::takeCustomScreenshot, isometricGrid);
+    radialMenu = new RadialMenu(this::takeCustomScreenshot, isometricGrid, materailSupplier, screenshotSupplier);
     FXGL.addUINode(radialMenu, 300, 100);
     
     Entity background = entityBuilder()
@@ -358,6 +362,10 @@ public class MyGameApp extends GameApplication {
     materialSummaryWindow.updateMaterials(totalMaterials);
   }
   
+  private Map<String, Integer> getMaterialList() {
+    return totalMaterials;
+  }
+  
   private Entity getEntityAtMouse() {
     return FXGL.getGameWorld().getEntitiesAt(getInput().getMousePositionWorld())
             .stream()
@@ -431,7 +439,7 @@ public class MyGameApp extends GameApplication {
     }
   }
   
-  private void takeCustomScreenshot() {
+  private File takeCustomScreenshot() {
     radialMenu.setVisible(false);
     // Get the main game scene without UI elements
     Node gameView = FXGL.getGameScene().getContentRoot();
@@ -468,10 +476,15 @@ public class MyGameApp extends GameApplication {
       ImageIO.write(bufferedImage, "png", file);
       
       FXGL.getNotificationService().pushNotification("截图已保存至桌面😊 ");
+      return file;
+      
     } catch (IOException e) {
       e.printStackTrace();
       FXGL.getNotificationService().pushNotification("截图失败😫");
+      return null;
     }
+    
+    
   }
   
   private void togglePauseMenu() {

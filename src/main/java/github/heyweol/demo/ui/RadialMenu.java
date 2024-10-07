@@ -1,13 +1,29 @@
 package github.heyweol.demo.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.almasb.fxgl.entity.Entity;
-import github.heyweol.demo.EntityType;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import github.heyweol.demo.utils.ApiClient;
+import github.heyweol.demo.utils.MachineIdentifier;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
+import javafx.stage.FileChooser;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.Map;
+import java.util.function.Supplier;
+import github.heyweol.demo.EntityType;
 
 import com.almasb.fxgl.dsl.FXGL;
 
@@ -33,11 +49,16 @@ public class RadialMenu extends Pane {
   private double dragStartX, dragStartY;
   private Runnable screenshotAction;
   private IsometricGrid isometricGrid;
-  
-  public RadialMenu(Runnable screenshotAction, IsometricGrid isometricGrid) {
+  private final Supplier<Map<String, Integer>> materialListSupplier;
+  private final Supplier<File> screenshotSupplier;
+  public RadialMenu(Runnable screenshotAction,
+                    IsometricGrid isometricGrid,
+                    Supplier<Map<String, Integer>> materialListSupplier,
+                    Supplier<File> screenshotSupplier) {
     this.screenshotAction = screenshotAction;
     this.isometricGrid = isometricGrid;
-    
+    this.materialListSupplier = materialListSupplier;
+    this.screenshotSupplier = screenshotSupplier;
     centerButton = createButton("", new FontIcon(FontAwesomeSolid.BARS));
     centerButton.getStyleClass().add("radial-menu-center");
     centerButton.setOnAction(e -> {
@@ -50,6 +71,7 @@ public class RadialMenu extends Pane {
     addMenuItem("File", FontAwesomeSolid.FILE, this::openFileSubmenu);
     addMenuItem("Screenshot", FontAwesomeSolid.CAMERA, this::takeScreenshot);
     addMenuItem("Clear", FontAwesomeSolid.TRASH, this::clearScene);
+    addMenuItem("Screenshot & Share", FontAwesomeSolid.SHARE, this::screenshotAndShare);
     
     setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
     
@@ -78,7 +100,44 @@ public class RadialMenu extends Pane {
       screenshotAction.run();
     }
   }
-
+  
+  private void screenshotAndShare() {
+    // Call the existing screenshot method and get the File
+    File screenshotFile = screenshotSupplier.get();
+    
+    if (screenshotFile != null && screenshotFile.exists()) {
+      // Show the share dialog
+      ShareDialog dialog = new ShareDialog();
+      dialog.showAndWait().ifPresent(shareData -> {
+        String machineId = MachineIdentifier.getUniqueIdentifier();
+        Map<String, Integer> materials = materialListSupplier.get();
+        
+        try {
+          ApiClient.getInstance().shareScreenshot(
+                  screenshotFile,
+                  shareData.nickname,
+                  shareData.description,
+                  machineId,
+                  materials,
+                  response -> {
+                    if (response.isSuccess()) {
+                      FXGL.getNotificationService().pushNotification("Screenshot shared successfully!");
+                    } else {
+                      FXGL.getNotificationService().pushNotification("Failed to share screenshot: " + response.getErrorMessage());
+                      System.out.println("Failed to share screenshot 1: " + response.getErrorMessage());
+                    }
+                  }
+          );
+        } catch (Exception e) {
+          FXGL.getNotificationService().pushNotification("Failed to share screenshot 2: " + e.getMessage());
+          System.out.println("Failed to share screenshot 3: " + e.getMessage());
+        }
+      });
+    } else {
+      FXGL.getNotificationService().pushNotification("Failed to take screenshot.");
+      System.out.println("Failed to take screenshot.");
+    }
+  }
   
   private void openFileSubmenu() {
     List<String> choices = List.of("Save", "Load", "Delete");
