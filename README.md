@@ -3,6 +3,9 @@ This is a simple building game designed for lovers of Ashes of the kingdom (Code
 
 It's written in Java with JavaFX and FXGL. Build with maven. It's planned to be hosted on website with JPRO so it can be run on any devices without Java plugin.
 
+Website to download: https://xinzhiju.replit.app/
+Have fun!!
+
 ## TODO
 - [x] Set up project
 - [x] Add background, side pane
