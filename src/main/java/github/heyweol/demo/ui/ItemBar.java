@@ -36,15 +36,15 @@ public class ItemBar extends VBox {
   private VBox selectedCard;
   
   private static final Map<String, String> SEASON_NAMES = Map.of(
-          "s2", "儿童劫",
-          "s3", "海底捞");
+          "s2", "ErTongJie",
+          "s3", "HaiDiLao");
   
   private static final Map<String, String> CHARACTER_NAMES = Map.of(
-          "fr", "傅融",
-          "lb", "刘辩",
-          "sc", "孙策",
-          "yj", "袁基",
-          "zc", "左慈"
+          "fr", "FuRong",
+          "lb", "LiuBian",
+          "sc", "SunCe",
+          "yj", "YuanJi",
+          "zc", "ZuoCi"
   );
   
   public ItemBar(double width, double height) {
@@ -52,11 +52,11 @@ public class ItemBar extends VBox {
     this.setStyle("-fx-background-color: lightgray;");
     
     seasonSelector = new ComboBox<>();
-    seasonSelector.setPromptText("选择季节");
+    seasonSelector.setPromptText("Season");
     seasonSelector.setOnAction(e -> updateCharacterSelector());
     
     characterSelector = new ComboBox<>();
-    characterSelector.setPromptText("选择角色");
+    characterSelector.setPromptText("Character");
     characterSelector.setOnAction(e -> updateItemDisplay());
     
     // Create an HBox to hold the selectors side by side
@@ -196,7 +196,8 @@ public class ItemBar extends VBox {
     materialsText.setFont(Font.font("System", 8));
     materialsText.setWrappingWidth(60);
     
-    card.getChildren().addAll(imageView, nameLabel, materialsText);
+//    card.getChildren().addAll(imageView, nameLabel, materialsText);
+    card.getChildren().addAll(imageView);
     
     // Set up drag-and-drop
     card.setOnDragDetected(event -> {

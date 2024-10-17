@@ -55,7 +55,7 @@ public class MaterialSummaryWindow extends VBox {
     header.setPadding(new Insets(0, 0, 3, 0));
     header.setStyle("-fx-border-color: #cccccc; -fx-border-width: 0 0 1 0;");
     
-    Label titleLabel = new Label("材料总结");
+    Label titleLabel = new Label("Materials Summary");
     titleLabel.setFont(Font.font("SimSun", 12));
     titleLabel.setStyle("-fx-font-weight: bold;");
     
