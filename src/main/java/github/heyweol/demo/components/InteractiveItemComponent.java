@@ -1,6 +1,5 @@
 package github.heyweol.demo.components;
 
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -261,7 +260,7 @@ public class InteractiveItemComponent extends Component {
       isoPos = isoPos.add(textureOffset);
       entity.setPosition(isoPos);
       entity.setProperty("position", isoPos);
-      gridVisualizerComponent.showItemBase(entity, (int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY(), false, false);
+      gridVisualizerComponent.showItemBase(entity, (int) gridPos.getX() , (int) gridPos.getY() , false, false);
     }
   }
   

@@ -278,7 +278,7 @@ public class MyGameApp extends GameApplication {
             Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
             System.out.println("gridPos: " + gridPos);
 //            System.out.println("Can place item: " + isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength()));
-            if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
+            if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
               Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
               spawnItem(selectedItem, isoPos, EntityType.FLOOR_ITEM);
             }

@@ -8,21 +8,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.almasb.fxgl.entity.Entity;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import github.heyweol.demo.utils.ApiClient;
 import github.heyweol.demo.utils.MachineIdentifier;
-import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
-import javafx.stage.FileChooser;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.Map;
-import java.util.function.Supplier;
 import github.heyweol.demo.EntityType;
 
 import com.almasb.fxgl.dsl.FXGL;
@@ -113,21 +102,21 @@ public class RadialMenu extends Pane {
         Map<String, Integer> materials = materialListSupplier.get();
         
         try {
-          ApiClient.getInstance().shareScreenshot(
-                  screenshotFile,
-                  shareData.nickname,
-                  shareData.description,
-                  machineId,
-                  materials,
-                  response -> {
-                    if (response.isSuccess()) {
-                      FXGL.getNotificationService().pushNotification("Screenshot shared successfully!");
-                    } else {
-                      FXGL.getNotificationService().pushNotification("Failed to share screenshot: " + response.getErrorMessage());
-                      System.out.println("Failed to share screenshot 1: " + response.getErrorMessage());
-                    }
-                  }
-          );
+//          ApiClient.getInstance().shareScreenshot(
+//                  screenshotFile,
+//                  shareData.nickname,
+//                  shareData.description,
+//                  machineId,
+//                  materials,
+//                  response -> {
+//                    if (response.isSuccess()) {
+//                      FXGL.getNotificationService().pushNotification("Screenshot shared successfully!");
+//                    } else {
+//                      FXGL.getNotificationService().pushNotification("Failed to share screenshot: " + response.getErrorMessage());
+//                      System.out.println("Failed to share screenshot 1: " + response.getErrorMessage());
+//                    }
+//                  }
+//          );
         } catch (Exception e) {
           FXGL.getNotificationService().pushNotification("Failed to share screenshot 2: " + e.getMessage());
           System.out.println("Failed to share screenshot 3: " + e.getMessage());

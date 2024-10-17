@@ -96,7 +96,7 @@ public class MyGameFactory implements EntityFactory {
     
     // Calculate the width based on the item's dimensions and the grid's tile width
     double tileWidth = isometricGrid.getTileWidth();
-    double itemWidth = tileWidth + (item.getWidth() - 1 + item.getLength() - 1) * (tileWidth / 2);
+    double itemWidth = tileWidth + (item.getNumTileWidth() - 1 + item.getNumTileHeight() - 1) * (tileWidth / 2);
     
     // Apply scaling
     double scaledWidth = itemWidth;
