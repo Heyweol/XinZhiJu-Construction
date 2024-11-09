@@ -14,6 +14,8 @@ import javax.imageio.ImageIO;
 
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.app.scene.LoadingScene;
+import com.almasb.fxgl.app.scene.SceneFactory;
 import com.almasb.fxgl.dsl.FXGL;
 import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
@@ -27,7 +29,11 @@ import com.almasb.fxgl.input.UserAction;
 
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
-import github.heyweol.demo.ui.*;
+import github.heyweol.demo.ui.ItemBar;
+import github.heyweol.demo.ui.MainGameScene;
+import github.heyweol.demo.ui.MaterialSummaryWindow;
+import github.heyweol.demo.ui.RadialMenu;
+import github.heyweol.demo.ui.TutorialWindow;
 import github.heyweol.demo.utils.ResourceManager;
 import github.heyweol.demo.utils.SceneManager;
 import javafx.geometry.Point2D;
@@ -105,7 +111,23 @@ public class MyGameApp extends GameApplication {
     
     settings.getCSSList().add("radial-menu.css");
     
-    
+    settings.setSceneFactory(new SceneFactory() {
+      @Override
+      public LoadingScene newLoadingScene() {
+        Image loadingImage = new Image(getClass().getResourceAsStream("/assets/textures/loading.png"));
+        ImageView imageView = new ImageView(loadingImage);
+        imageView.setFitWidth(game_width);
+        imageView.setFitHeight(game_height);
+        imageView.setPreserveRatio(true);
+
+        return new LoadingScene() {
+            @Override
+            public void onCreate() {
+                getContentRoot().getChildren().add(imageView);
+            }
+        };
+      }
+    });
   }
   
 
