@@ -1,6 +1,5 @@
 package github.heyweol.demo;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,24 +12,28 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
-import com.almasb.fxgl.app.FXGLApplication;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
-import com.almasb.fxgl.app.scene.FXGLMenu;
+import com.almasb.fxgl.app.scene.LoadingScene;
+import com.almasb.fxgl.app.scene.SceneFactory;
 import com.almasb.fxgl.dsl.FXGL;
+import static com.almasb.fxgl.dsl.FXGL.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGL.getGameTimer;
+import static com.almasb.fxgl.dsl.FXGL.getGameWorld;
+import static com.almasb.fxgl.dsl.FXGL.getInput;
+import static com.almasb.fxgl.dsl.FXGL.getWorldProperties;
+import static com.almasb.fxgl.dsl.FXGL.spawn;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
-import com.almasb.fxgl.entity.components.BoundingBoxComponent;
 import com.almasb.fxgl.input.UserAction;
-import com.almasb.fxgl.app.GameSettings;
 
 import github.heyweol.demo.components.GridVisualizerComponent;
 import github.heyweol.demo.components.InteractiveItemComponent;
-import github.heyweol.demo.components.ZIndexComponent;
 import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.ui.MaterialSummaryWindow;
 import github.heyweol.demo.ui.RadialMenu;
+import github.heyweol.demo.ui.TutorialWindow;
 import github.heyweol.demo.utils.ResourceManager;
 import github.heyweol.demo.utils.SceneManager;
 import javafx.geometry.Point2D;
@@ -40,21 +43,16 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
-
-import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class MyGameApp extends GameApplication {
   
@@ -99,7 +97,8 @@ public class MyGameApp extends GameApplication {
   private RadialMenu radialMenu;
   private Supplier<Map<String,Integer>> materailSupplier = this::getMaterialList;
   private Supplier<File> screenshotSupplier = this::takeCustomScreenshot;
-  
+  private TutorialWindow tutorialWindow;
+
   
   @Override
   protected void initSettings(GameSettings settings) {
@@ -112,7 +111,23 @@ public class MyGameApp extends GameApplication {
     
     settings.getCSSList().add("radial-menu.css");
     
-    
+    settings.setSceneFactory(new SceneFactory() {
+      @Override
+      public LoadingScene newLoadingScene() {
+        Image loadingImage = new Image(getClass().getResourceAsStream("/assets/textures/loading.png"));
+        ImageView imageView = new ImageView(loadingImage);
+        imageView.setFitWidth(game_width);
+        imageView.setFitHeight(game_height);
+        imageView.setPreserveRatio(true);
+
+        return new LoadingScene() {
+            @Override
+            public void onCreate() {
+                getContentRoot().getChildren().add(imageView);
+            }
+        };
+      }
+    });
   }
   
 
@@ -242,6 +257,11 @@ public class MyGameApp extends GameApplication {
               mousePos.getX(), mousePos.getY(),
               gridPos.getX(), gridPos.getY()));
     });
+    
+    tutorialWindow = new TutorialWindow();
+    FXGL.addUINode(tutorialWindow);
+    
+    showTutorial();
   }
   
   @Override
@@ -318,6 +338,10 @@ public class MyGameApp extends GameApplication {
         togglePauseMenu();
       }
     }, KeyCode.ESCAPE);
+  }
+  
+  private void showTutorial() {
+    tutorialWindow.show();
   }
   
   @Override
@@ -506,6 +530,13 @@ public class MyGameApp extends GameApplication {
     pauseMenu.setTranslateX(FXGL.getAppWidth() / 2 - 100);
     pauseMenu.setTranslateY(FXGL.getAppHeight() / 2 - 50);
     
+    // Tutorial Button
+    Button tutorialButton = new Button("Show Tutorial");
+    tutorialButton.setOnAction(e -> {
+      hidePauseMenu();
+      showTutorial();
+    });
+    
     // Dev Mode Toggle
     CheckBox devModeCheckBox = new CheckBox("Enable Dev Mode");
     devModeCheckBox.setSelected(isDevMode);
@@ -523,7 +554,7 @@ public class MyGameApp extends GameApplication {
     Button closeButton = new Button("Close");
     closeButton.setOnAction(e -> hidePauseMenu());
     
-    pauseMenu.getChildren().addAll(devModeCheckBox, closeButton);
+    pauseMenu.getChildren().addAll(tutorialButton, devModeCheckBox, closeButton);
     FXGL.addUINode(pauseMenu);
   }
   
