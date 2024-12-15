@@ -33,6 +33,7 @@ import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.ui.MaterialSummaryWindow;
 import github.heyweol.demo.ui.RadialMenu;
+import github.heyweol.demo.ui.StartScene;
 import github.heyweol.demo.ui.TutorialWindow;
 import github.heyweol.demo.utils.ResourceManager;
 import github.heyweol.demo.utils.SceneManager;
@@ -50,6 +51,10 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
@@ -99,6 +104,7 @@ public class MyGameApp extends GameApplication {
   private Supplier<File> screenshotSupplier = this::takeCustomScreenshot;
   private TutorialWindow tutorialWindow;
 
+  private StartScene startScene;
   
   @Override
   protected void initSettings(GameSettings settings) {
@@ -114,6 +120,18 @@ public class MyGameApp extends GameApplication {
     settings.setSceneFactory(new SceneFactory() {
       @Override
       public LoadingScene newLoadingScene() {
+        // Create gradient background (same as StartScene)
+        LinearGradient gradient = new LinearGradient(
+            0, 0,    // start point
+            0, 1,    // end point
+            true,    // proportional
+            CycleMethod.NO_CYCLE,
+            new Stop(0, javafx.scene.paint.Color.web("#b4c8df")),   // top color
+            new Stop(1, javafx.scene.paint.Color.web("#f4f6fc"))    // bottom color
+        );
+        
+        Rectangle background = new Rectangle(game_width, game_height, gradient);
+        
         Image loadingImage = new Image(getClass().getResourceAsStream("/assets/textures/loading.png"));
         ImageView imageView = new ImageView(loadingImage);
         imageView.setFitWidth(game_width);
@@ -123,7 +141,14 @@ public class MyGameApp extends GameApplication {
         return new LoadingScene() {
             @Override
             public void onCreate() {
-                getContentRoot().getChildren().add(imageView);
+                // Center the image if needed
+                double x = (game_width - imageView.getBoundsInLocal().getWidth()) / 2;
+                double y = (game_height - imageView.getBoundsInLocal().getHeight()) / 2;
+                imageView.setTranslateX(x);
+                imageView.setTranslateY(y);
+                
+                // Add both background and image
+                getContentRoot().getChildren().addAll(background, imageView);
             }
         };
       }
@@ -133,6 +158,18 @@ public class MyGameApp extends GameApplication {
 
   @Override
   protected void initGame() {
+    // Create and show start scene
+    FXGL.runOnce(() -> {
+        startScene = new StartScene(game_width, game_height);
+        startScene.setOnStartAction(() -> {
+            FXGL.getSceneService().popSubScene();
+            initializeGameContent();
+        });
+        FXGL.getSceneService().pushSubScene(startScene);
+    }, Duration.ZERO);
+  }
+  
+  private void initializeGameContent() {
     // Register a scene load listener to update the material list
     SceneManager.addSceneLoadListener(this::updateMaterialSummary);
     
@@ -357,11 +394,14 @@ public class MyGameApp extends GameApplication {
   @Override
   protected void onUpdate(double tpf) {
     super.onUpdate(tpf);
-    if (isDevMode && ! positionText.isVisible()) {
-      positionText.setVisible(true);
-    }
-    if (!isDevMode && positionText.isVisible()) {
-      positionText.setVisible(false);
+    // Only check position text visibility if it has been initialized
+    if (positionText != null) {
+        if (isDevMode && !positionText.isVisible()) {
+            positionText.setVisible(true);
+        }
+        if (!isDevMode && positionText.isVisible()) {
+            positionText.setVisible(false);
+        }
     }
   }
   
