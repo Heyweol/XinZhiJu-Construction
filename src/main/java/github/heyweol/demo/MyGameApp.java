@@ -224,10 +224,10 @@ public class MyGameApp extends GameApplication {
                             item -> item.getFilename().split("_")[1], // Character
                             Collectors.groupingBy(item -> {
                               String filename = item.getFilename();
-                              if (filename.contains("guajian")) return "Wall";
-                              if (filename.contains("qiju")) return "Furniture";
-                              if (filename.contains("zhiwu")) return "Misc";
-                              if (filename.contains("zhuangshi")) return "Decor";
+                              if (filename.contains("guajian")) return "挂件";
+                              if (filename.contains("qiju")) return "起居";
+                              if (filename.contains("zhiwu")) return "置物";
+                              if (filename.contains("zhuangshi")) return "装饰";
                               return "其他";
                             })
                     )
