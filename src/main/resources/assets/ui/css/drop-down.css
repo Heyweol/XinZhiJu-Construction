@@ -1,0 +1,45 @@
+.combo-box {
+    -fx-background-color: transparent;
+    -fx-background-radius: 20;
+    -fx-min-height: 40px;
+    -fx-pref-width: 200px;
+}
+
+.combo-box .combo-box-popup .list-view {
+    -fx-background-color: #2A2A2A;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
+}
+
+.combo-box .combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #FFFFFF;
+    -fx-padding: 8 12;
+}
+
+.combo-box .combo-box-popup .list-cell:hover {
+    -fx-background-color: rgba(255,255,255,0.1);
+}
+
+.combo-box-base {
+    -fx-background-image: url('../svg/drop-down-bg1.svg');
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: contain;
+    -fx-background-position: center;
+}
+
+.combo-box .arrow-button {
+    -fx-background-image: url('../svg/drop-down-button.svg');
+    -fx-background-color: transparent;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: contain;
+    -fx-background-position: center;
+}
+
+.combo-box .arrow {
+    -fx-background-color: transparent;
+}
+
+.combo-box .text-field {
+    -fx-text-fill: white;
+}

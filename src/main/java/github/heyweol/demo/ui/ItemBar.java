@@ -196,8 +196,8 @@ public class ItemBar extends VBox {
     materialsText.setFont(Font.font("System", 8));
     materialsText.setWrappingWidth(60);
     
-//    card.getChildren().addAll(imageView, nameLabel, materialsText);
-    card.getChildren().addAll(imageView);
+   card.getChildren().addAll(imageView, nameLabel, materialsText);
+    // card.getChildren().addAll(imageView);
     
     // Set up drag-and-drop
     card.setOnDragDetected(event -> {

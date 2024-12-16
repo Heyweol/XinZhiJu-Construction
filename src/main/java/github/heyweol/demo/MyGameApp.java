@@ -295,10 +295,10 @@ public class MyGameApp extends GameApplication {
               gridPos.getX(), gridPos.getY()));
     });
     
-    tutorialWindow = new TutorialWindow();
-    FXGL.addUINode(tutorialWindow);
-    
-    showTutorial();
+//    tutorialWindow = new TutorialWindow();
+//    FXGL.addUINode(tutorialWindow);
+//
+//    showTutorial();
   }
   
   @Override
