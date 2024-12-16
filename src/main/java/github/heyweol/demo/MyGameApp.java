@@ -571,11 +571,11 @@ public class MyGameApp extends GameApplication {
     pauseMenu.setTranslateY(FXGL.getAppHeight() / 2 - 50);
     
     // Tutorial Button
-    Button tutorialButton = new Button("Show Tutorial");
-    tutorialButton.setOnAction(e -> {
-      hidePauseMenu();
-      showTutorial();
-    });
+    // Button tutorialButton = new Button("Show Tutorial");
+    // tutorialButton.setOnAction(e -> {
+    //   hidePauseMenu();
+    //   showTutorial();
+    // });
     
     // Dev Mode Toggle
     CheckBox devModeCheckBox = new CheckBox("Enable Dev Mode");
@@ -594,7 +594,8 @@ public class MyGameApp extends GameApplication {
     Button closeButton = new Button("Close");
     closeButton.setOnAction(e -> hidePauseMenu());
     
-    pauseMenu.getChildren().addAll(tutorialButton, devModeCheckBox, closeButton);
+    // pauseMenu.getChildren().addAll(tutorialButton, devModeCheckBox, closeButton);
+    pauseMenu.getChildren().addAll(devModeCheckBox, closeButton);
     FXGL.addUINode(pauseMenu);
   }
   

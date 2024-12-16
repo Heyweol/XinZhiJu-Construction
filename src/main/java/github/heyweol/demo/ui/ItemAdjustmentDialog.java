@@ -1,5 +1,7 @@
 package github.heyweol.demo.ui;
 
+import java.util.Optional;
+
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
 
@@ -9,12 +11,14 @@ import github.heyweol.demo.Item;
 import github.heyweol.demo.components.GridVisualizerComponent;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
-
-import java.util.Optional;
 
 public class ItemAdjustmentDialog extends Dialog<ButtonType> {
   private Slider xOffsetSlider;
@@ -48,7 +52,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     this.isometricGrid = isometricGrid;
     this.textureOffset = new Point2D(-entity.getDouble("textureFitWidth")/2,-entity.getDouble("textureFitHeight"));
     this.lastGridPos = lastGridPos;
-    this.isDevMode = FXGL.getWorldProperties().getBoolean("devMode");
+    this.isDevMode = FXGL.getWorldProperties().getBoolean("isDevMode");
 //    Point2D gridPos = isometricGrid.getGridPosition(entity.getX(), entity.getY());
 //    Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
 //    isoPos = isoPos.add(item.getXOffset(), item.getYOffset());

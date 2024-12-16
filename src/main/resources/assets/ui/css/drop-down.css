@@ -9,7 +9,7 @@
 .combo-box .text {
     -fx-fill: #B4924A;
     -fx-text-fill: #B4924A;
-    -fx-font-size: 11px; /* Smaller text */
+    -fx-font-size: 12px; /* Smaller text */
 }
 
 /* Style for the arrow button on the right */
@@ -51,7 +51,7 @@
     -fx-text-fill: #B4924A;
     -fx-background-color: transparent;
     -fx-padding: 4px 8px;
-    -fx-font-size: 11px; /* Smaller text */
+    -fx-font-size: 12px; /* Smaller text */
     /* Add the underline image */
     -fx-background-image: url('../skin/drop-down-bg1.png');
     -fx-background-repeat: no-repeat;
@@ -72,6 +72,7 @@
 /* Tab Pane styling */
 .tab-pane {
     -fx-background-color: #2D2D2D;
+    -fx-font-size: 12px;
 }
 
 /* Tab header area styling */
