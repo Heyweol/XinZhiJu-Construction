@@ -111,7 +111,7 @@ public class MyGameApp extends GameApplication {
     settings.setHeight(game_height);
     settings.setWidth(game_width);
     settings.setTitle("心纸居");
-    settings.setVersion("0.1");
+    settings.setVersion("0.1.2");
     
     settings.setGameMenuEnabled(false);
     
