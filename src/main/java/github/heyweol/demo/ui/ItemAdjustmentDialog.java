@@ -8,6 +8,7 @@ import com.almasb.fxgl.entity.Entity;
 import github.heyweol.demo.EntityType;
 import github.heyweol.demo.IsometricGrid;
 import github.heyweol.demo.Item;
+import github.heyweol.demo.WallGrid;
 import github.heyweol.demo.components.GridVisualizerComponent;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -176,9 +177,40 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     // item.setXOffset(xOffset);
     // item.setYOffset(yOffset);
 
-    Point2D gridPos = isometricGrid.getGridPosition(originalX, originalY);
-    gridPos = lastGridPos;
+    // Point2D gridPos = isometricGrid.getGridPosition(originalX, originalY);
+    // gridPos = lastGridPos;
     
+    // Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
+    // isoPos = isoPos.add(xOffset, yOffset);
+    // isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
+    // isoPos = isoPos.add(textureOffset);
+    // entity.setPosition(isoPos);
+
+
+    
+    // gridVisualizerComponent.showItemBase(entity, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
+
+    if (entity.getType() == EntityType.WALL_ITEM) {
+      WallGrid wallGrid = entity.getObject("wallGrid");
+      Point2D gridPos = lastGridPos;
+
+      Point2D wallIsoPos = wallGrid.getWallPosition((int) gridPos.getX(), (int) gridPos.getY());
+      wallIsoPos = wallIsoPos.add(xOffset, yOffset);
+      wallIsoPos = wallIsoPos.add(item.getXOffset(), item.getYOffset());
+      // wallIsoPos = wallIsoPos.add(textureOffset);
+      entity.setPosition(wallIsoPos);
+      gridVisualizerComponent.showItemBase(entity, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, wallGrid.isLeftWall());
+      
+    }
+      else
+    {
+      // Point2D gridPos = lastGridPos;
+      // Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
+      // isoPos = isoPos.add(xOffset, yOffset);
+      // isoPos = isoPos.add(textureOffset);
+      // entity.setPosition(isoPos);
+
+    Point2D gridPos = lastGridPos;
     Point2D isoPos = isometricGrid.getIsometricPosition((int)gridPos.getX(), (int)gridPos.getY());
     isoPos = isoPos.add(xOffset, yOffset);
     isoPos = isoPos.add(item.getXOffset(), item.getYOffset());
@@ -186,6 +218,7 @@ public class ItemAdjustmentDialog extends Dialog<ButtonType> {
     entity.setPosition(isoPos);
     
     gridVisualizerComponent.showItemBase(entity, (int) entity.getX(), (int) entity.getY(), entity.getType() == EntityType.WALL_ITEM, false);
+    }
   }
   
   private void updateItemScale() {
