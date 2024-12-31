@@ -2,6 +2,7 @@ package github.heyweol.demo.components;
 
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.components.ViewComponent;
+import github.heyweol.demo.Item;
 
 public class ZIndexComponent extends Component {
   
@@ -9,11 +10,15 @@ public class ZIndexComponent extends Component {
   public void onUpdate(double tpf) {
     ViewComponent view = entity.getViewComponent();
     
-    // Calculate z-index based on y-position
-    // Items with higher y-value (lower on screen) should have higher z-index
-    int zIndex = (int) ((entity.getY()+entity.getHeight()) * 100);
+    // Get base z-index from y-position
+    int zIndex = (int) (entity.getY() * 25 + entity.getX());
     
-    // Set the z-index of the entity's view
+    // If this is a carpet, put it below other items
+    Item item = entity.getObject("item");
+    if (item.isCarpet()) {
+        zIndex -= (int) (entity.getY() + entity.getX()); // This ensures carpets are always below other items
+    }
+    
     view.setZIndex(zIndex);
   }
 }

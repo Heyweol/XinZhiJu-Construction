@@ -613,4 +613,8 @@ public class InteractiveItemComponent extends Component {
   private static void notifyGlobalSelectionListeners() {
     globalSelectionListeners.forEach(Runnable::run);
   }
+  
+  public boolean isDragging() {
+    return isDragging;
+  }
 }
