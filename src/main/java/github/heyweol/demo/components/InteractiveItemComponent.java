@@ -289,6 +289,7 @@ public class InteractiveItemComponent extends Component {
         entity.setPosition(wallPos);
         wallNow.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY());
         entity.setProperty("isDragging", false);
+        entity.setProperty("wallGrid", wallNow);
         
         System.out.println("released at: " + gridPos);
       }
@@ -616,5 +617,23 @@ public class InteractiveItemComponent extends Component {
   
   public boolean isDragging() {
     return isDragging;
+  }
+  
+  @Override
+  public void onRemoved() {
+    if (entity.getType() == EntityType.WALL_ITEM) {
+        // Get the wall grid this item was placed on
+        WallGrid wallGrid = entity.getObject("wallGrid");
+        if (wallGrid != null) {
+            wallGrid.removeEntity(entity);
+        } else {
+            // If wallGrid is not set, try both walls to ensure cleanup
+            leftWallGrid.removeEntity(entity);
+            rightWallGrid.removeEntity(entity);
+        }
+    } else {
+        isometricGrid.removeEntity(entity);
+    }
+    notifyMaterialUpdateListeners();
   }
 }
