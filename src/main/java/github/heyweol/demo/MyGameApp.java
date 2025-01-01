@@ -467,7 +467,9 @@ public class MyGameApp extends GameApplication {
                 .put("item", selectedItem)
                 .put("type", type)
                 .put("wallGrid", wallNow)
-                .put("isLeftWall", wallNow == leftWallGrid));
+                .put("isLeftWall", wallNow == leftWallGrid)
+                .put("gridX", (int)wallGridPos.getX())
+                .put("gridY", (int)wallGridPos.getY()));
         
 //        Point2D wallTextureOffset = new Point2D(-placedWallItem.getDouble("textureFitWidth")/2,-placedWallItem.getDouble("textureFitHeight"));
         Point2D wallIsoPos = wallNow.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
@@ -483,7 +485,9 @@ public class MyGameApp extends GameApplication {
         }
         Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
                 .put("item", selectedItem)
-                .put("type", type));
+                .put("type", type)
+                .put("gridX", (int)gridPos.getX())
+                .put("gridY", (int)gridPos.getY()));
         
         Point2D textureOffset = new Point2D(-placedItem.getDouble("textureFitWidth")/2,-placedItem.getDouble("textureFitHeight"));
         Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());

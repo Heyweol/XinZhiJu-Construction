@@ -321,6 +321,10 @@ public class InteractiveItemComponent extends Component {
         deselectCurrent();
       }
     }
+
+    System.out.println("z-index: " + entity.getZIndex() );
+    
+
     entity.setProperty("gridX", (int) lastGridPos.getX());
     entity.setProperty("gridY", (int) lastGridPos.getY());
     isDragging = false;

@@ -17,11 +17,14 @@ public class ZIndexComponent extends Component {
     Item item = entity.getObject("item");
     
     // Get base position (top-left corner of the item)
-    double baseY = entity.getY();
-    double baseX = entity.getX();
+    int baseY = entity.getInt("gridY");
+    int baseX = entity.getInt("gridX");
     
-    // Calculate z-index based on position
-    int zIndex = (int)(baseY * Y_WEIGHT + baseX * X_WEIGHT);
+    // For items larger than 1x1, use the furthest Y position
+    int maxY = baseY + item.getNumTileHeight() - 1;
+    
+    // Calculate z-index based on furthest Y position
+    int zIndex = (int)(maxY * Y_WEIGHT + baseX * X_WEIGHT);
     
     // If this is a carpet, ensure it stays below other items
     if (item.isCarpet()) {
