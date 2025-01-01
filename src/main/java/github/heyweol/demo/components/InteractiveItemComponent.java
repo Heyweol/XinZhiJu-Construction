@@ -1,6 +1,5 @@
 package github.heyweol.demo.components;
 
-import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -261,7 +260,7 @@ public class InteractiveItemComponent extends Component {
       isoPos = isoPos.add(textureOffset);
       entity.setPosition(isoPos);
       entity.setProperty("position", isoPos);
-      gridVisualizerComponent.showItemBase(entity, (int) gridPos.getX() + item.getBaseOffsetX(), (int) gridPos.getY() + item.getBaseOffsetY(), false, false);
+      gridVisualizerComponent.showItemBase(entity, (int) gridPos.getX() , (int) gridPos.getY() , false, false);
     }
   }
   
@@ -290,6 +289,7 @@ public class InteractiveItemComponent extends Component {
         entity.setPosition(wallPos);
         wallNow.placeEntity(entity, (int) gridPos.getX(), (int) gridPos.getY());
         entity.setProperty("isDragging", false);
+        entity.setProperty("wallGrid", wallNow);
         
         System.out.println("released at: " + gridPos);
       }
@@ -321,6 +321,10 @@ public class InteractiveItemComponent extends Component {
         deselectCurrent();
       }
     }
+
+    System.out.println("z-index: " + entity.getZIndex() );
+    
+
     entity.setProperty("gridX", (int) lastGridPos.getX());
     entity.setProperty("gridY", (int) lastGridPos.getY());
     isDragging = false;
@@ -613,5 +617,27 @@ public class InteractiveItemComponent extends Component {
   
   private static void notifyGlobalSelectionListeners() {
     globalSelectionListeners.forEach(Runnable::run);
+  }
+  
+  public boolean isDragging() {
+    return isDragging;
+  }
+  
+  @Override
+  public void onRemoved() {
+    if (entity.getType() == EntityType.WALL_ITEM) {
+        // Get the wall grid this item was placed on
+        WallGrid wallGrid = entity.getObject("wallGrid");
+        if (wallGrid != null) {
+            wallGrid.removeEntity(entity);
+        } else {
+            // If wallGrid is not set, try both walls to ensure cleanup
+            leftWallGrid.removeEntity(entity);
+            rightWallGrid.removeEntity(entity);
+        }
+    } else {
+        isometricGrid.removeEntity(entity);
+    }
+    notifyMaterialUpdateListeners();
   }
 }

@@ -55,6 +55,8 @@ public class SceneManager {
   public static void loadScene(String saveName) {
     String fileName = SAVE_DIRECTORY + File.separator + saveName + SAVE_EXTENSION;
     try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
+      
+      @SuppressWarnings("unchecked")
       List<SceneState> sceneStates = (List<SceneState>) ois.readObject();
       
       // Clear existing items

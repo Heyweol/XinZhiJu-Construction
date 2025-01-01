@@ -199,4 +199,8 @@ public class Item {
   public void setSize(double scale) {
     this.size =  List.of((int) (numTileWidth ), (int) (numTileHeight ));
   }
+  
+  public boolean isCarpet() {
+    return name.contains("地垫") || name.contains("毯");
+  }
 }

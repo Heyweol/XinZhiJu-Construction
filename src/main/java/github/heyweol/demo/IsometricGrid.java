@@ -1,7 +1,10 @@
 package github.heyweol.demo;
 
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
-
+import com.almasb.fxgl.entity.SpawnData;
+import github.heyweol.demo.Item;
+import github.heyweol.demo.components.InteractiveItemComponent;
 import javafx.geometry.Point2D;
 
 public class IsometricGrid {
@@ -10,6 +13,7 @@ public class IsometricGrid {
   private final double tileWidth;
   private final double tileHeight;
   private Entity[][] grid;
+  private Entity[][] carpetGrid;
   private final double originX;
   private final double originY;
   
@@ -19,6 +23,7 @@ public class IsometricGrid {
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
     this.grid = new Entity[width][length];
+    this.carpetGrid = new Entity[width][length];
     this.originX = originX;
     this.originY = originY;
   }
@@ -62,14 +67,37 @@ public class IsometricGrid {
   
   public boolean canPlaceItem(int gridX, int gridY, int itemWidth, int itemLength) {
     if (gridX < 0 || gridY < 0 || gridX + itemWidth > gridWidth || gridY + itemLength > gridLength) {
-      return false;
+        return false;
     }
+
+    // Get the currently dragged/selected entity
+    Entity placingEntity = FXGL.getGameWorld().getEntitiesCopy().stream()
+            .filter(e -> e.hasComponent(InteractiveItemComponent.class) && 
+                    e.getComponent(InteractiveItemComponent.class).isDragging())
+            .findFirst()
+            .orElse(null);
+    
+    if (placingEntity == null) {
+        return true;
+    }
+
+    Item placingItem = placingEntity.getObject("item");
+    boolean isPlacingCarpet = placingItem.isCarpet();
+
     for (int x = gridX; x < gridX + itemWidth; x++) {
-      for (int y = gridY; y < gridY + itemLength; y++) {
-        if (grid[x][y] != null) {
-          return false;
+        for (int y = gridY; y < gridY + itemLength; y++) {
+            if (isPlacingCarpet) {
+                // Carpets can't overlap with other carpets
+                if (carpetGrid[x][y] != null) {
+                    return false;
+                }
+            } else {
+                // Normal items can't overlap with other normal items
+                if (grid[x][y] != null) {
+                    return false;
+                }
+            }
         }
-      }
     }
     return true;
   }
@@ -86,36 +114,53 @@ public class IsometricGrid {
     if (!canPlaceItem(gridX, gridY, itemWidth, itemLength)) {
       return;
     }
-    for (int x = gridX; x < gridX + itemWidth; x++) {
-      for (int y = gridY; y < gridY + itemLength; y++) {
-        grid[x][y] = entity;
-      }
-    }
+
+    Item item = entity.getObject("item");
+    boolean isCarpet = item.isCarpet();
     
+    for (int x = gridX; x < gridX + itemWidth; x++) {
+        for (int y = gridY; y < gridY + itemLength; y++) {
+            if (isCarpet) {
+                carpetGrid[x][y] = entity;
+            } else {
+                grid[x][y] = entity;
+            }
+        }
+    }
   }
   
   /**
    * Removes the item from the grid by setting the grid cell to null
    * @param item
    */
-  public void removeEntity(Entity item) {
+  public void removeEntity(Entity entity) {
+    Item item = entity.getObject("item");
+    boolean isCarpet = item.isCarpet();
+    Entity[][] targetGrid = isCarpet ? carpetGrid : grid;
+
     for (int x = 0; x < gridWidth; x++) {
-      for (int y = 0; y < gridLength; y++) {
-        if (grid[x][y] == item) {
-          grid[x][y] = null;
+        for (int y = 0; y < gridLength; y++) {
+            if (targetGrid[x][y] == entity) {
+                targetGrid[x][y] = null;
+            }
         }
-      }
     }
   }
 
   public void expand(int steps) {
     gridWidth += steps;
     gridLength += steps;
+    
     Entity[][] newGrid = new Entity[gridWidth][gridLength];
+    Entity[][] newCarpetGrid = new Entity[gridWidth][gridLength];
+    
     for (int x = 0; x < gridWidth - steps; x++) {
         System.arraycopy(grid[x], 0, newGrid[x], 0, gridLength - steps);
+        System.arraycopy(carpetGrid[x], 0, newCarpetGrid[x], 0, gridLength - steps);
     }
+    
     grid = newGrid;
+    carpetGrid = newCarpetGrid;
   }
   
   // Getters
@@ -128,5 +173,9 @@ public class IsometricGrid {
   
   public boolean isOccupied(int gridX, int gridY) {
     return grid[gridX][gridY] != null;
+  }
+
+  public boolean isCarpetAt(int gridX, int gridY) {
+    return carpetGrid[gridX][gridY] != null;
   }
 }

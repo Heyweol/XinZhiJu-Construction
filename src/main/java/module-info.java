@@ -11,7 +11,6 @@ open module github.heyweol.demo {
   requires org.kordamp.ikonli.materialdesign2;
   requires org.kordamp.ikonli.fontawesome5;
   requires java.desktop;
-  requires okhttp3;
   
   
   

@@ -1,0 +1,123 @@
+.combo-box {
+    -fx-background-color: #2D2D2D;
+    -fx-background-radius: 25px; /* More rounded corners */
+    -fx-padding: 2px 8px; /* Reduced padding for smaller height */
+    -fx-min-width: 80px; /* Smaller width */
+    -fx-max-height: 28px; /* Control the height */
+}
+
+.combo-box .text {
+    -fx-fill: #B4924A;
+    -fx-text-fill: #B4924A;
+    -fx-font-size: 12px; /* Smaller text */
+}
+
+/* Style for the arrow button on the right */
+.combo-box .arrow-button {
+    -fx-background-image: url('../skin/drop-down-button.png');
+    -fx-background-color: transparent;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: contain; /* This ensures the image fits without being cut */
+    -fx-padding: 0 4px; /* Add some padding on the sides */
+    -fx-min-width: 24px; /* Ensure minimum width for the button */
+    -fx-pref-width: 24px; /* Set preferred width */
+    -fx-max-width: 24px; /* Set maximum width */
+}
+
+/* Adjust the text area to prevent overlap */
+.combo-box > .list-cell {
+    -fx-padding: 0 0 0 4px; /* Add left padding to the text */
+    -fx-alignment: center-left; /* Align text to the left */
+}
+
+/* Hide the default arrow */
+.combo-box .arrow {
+    -fx-background-color: transparent;
+}
+
+/* Popup styling */
+.combo-box-popup .list-view {
+    -fx-background-color: #2D2D2D;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #B4924A;
+    -fx-border-width: 1px;
+    -fx-padding: 2px;
+}
+
+/* Individual list cell styling */
+.combo-box-popup .list-cell {
+    -fx-text-fill: #B4924A;
+    -fx-background-color: transparent;
+    -fx-padding: 4px 8px;
+    -fx-font-size: 12px; /* Smaller text */
+    /* Add the underline image */
+    -fx-background-image: url('../skin/drop-down-bg1.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center bottom 5px; /* Move line up slightly */
+    -fx-background-size: 90% 1px; /* Thinner line, not full width */
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #3D3D3D;
+}
+
+/* Remove the focus highlight */
+.combo-box:focused {
+    -fx-background-color: #2D2D2D;
+    -fx-background-radius: 25px; /* Match the normal state */
+}
+
+/* Tab Pane styling */
+.tab-pane {
+    -fx-background-color: #2D2D2D;
+    -fx-font-size: 12px;
+}
+
+/* Tab header area styling */
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 0;
+}
+
+/* Individual tab styling */
+.tab-pane .tab {
+    -fx-background-color: #2D2D2D;
+    -fx-background-radius: 0;
+    -fx-padding: 2px 10px;
+}
+
+/* Selected tab styling */
+.tab-pane .tab:selected {
+    -fx-background-color: #3D3D3D;
+    /* Add the underline image similar to dropdown */
+    -fx-background-image: url('../skin/drop-down-bg1.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center bottom;
+    -fx-background-size: 90% 1px;
+}
+
+/* Tab text styling */
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #B4924A;
+    -fx-font-size: 12px;
+}
+
+/* Remove focus highlight */
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
+    -fx-border-color: transparent;
+}
+
+/* Tab content area styling */
+.tab-pane > .tab-content-area {
+    -fx-background-color: #2D2D2D;
+}
+
+/* Header background */
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #2D2D2D;
+    -fx-border-color: transparent;
+}
+
+

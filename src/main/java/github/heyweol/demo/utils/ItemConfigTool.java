@@ -147,8 +147,8 @@ public class ItemConfigTool extends Application {
       // Position the grid over the image
       gridOffsetX = imageOffsetX;
       gridOffsetY = imageOffsetY;
-      gridScale = Math.min(imageView.getFitWidth() / (currentItem.getWidth() * CELL_WIDTH),
-              imageView.getFitHeight() / (currentItem.getLength() * CELL_HEIGHT));
+      gridScale = Math.min(imageView.getFitWidth() / (currentItem.getNumTileWidth() * CELL_WIDTH),
+              imageView.getFitHeight() / (currentItem.getNumTileHeight() * CELL_HEIGHT));
       scaleSlider.setValue(gridScale);
       
       updateGrid();
@@ -161,8 +161,8 @@ public class ItemConfigTool extends Application {
     gridCells = new ArrayList<>();
     gridData = new ArrayList<>();
     
-    int gridWidth = currentItem.getWidth();
-    int gridLength = currentItem.getLength();
+    int gridWidth = currentItem.getNumTileWidth();
+    int gridLength = currentItem.getNumTileHeight();
     
     for (int y = 0; y < gridLength; y++) {
       List<Polygon> row = new ArrayList<>();
@@ -180,8 +180,8 @@ public class ItemConfigTool extends Application {
     updateGridCenterDisplay();
   }
   private Point2D getGridCenter() {
-    int gridWidth = currentItem.getWidth();
-    int gridLength = currentItem.getLength();
+    int gridWidth = currentItem.getNumTileWidth();
+    int gridLength = currentItem.getNumTileHeight();
     
     return gridToImageCoordinates((int) (gridWidth / 2.0), (int) (gridLength / 2.0));
   }
@@ -276,7 +276,7 @@ public class ItemConfigTool extends Application {
     
     itemNode.put("filename", currentItem.getFilename());
     itemNode.put("name", currentItem.getName());
-    itemNode.put("size", "[" + currentItem.getWidth() + "," + currentItem.getLength() + "]");
+    itemNode.put("size", "[" + currentItem.getNumTileWidth() + "," + currentItem.getNumTileHeight() + "]");
     itemNode.put("outside", currentItem.canBePlacedOutside() ? "Y" : "N");
     
     ArrayNode materialList = mapper.createArrayNode();

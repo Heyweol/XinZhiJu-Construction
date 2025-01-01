@@ -7,36 +7,28 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.almasb.fxgl.entity.Entity;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import github.heyweol.demo.utils.ApiClient;
-import github.heyweol.demo.utils.MachineIdentifier;
-import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
-import javafx.stage.FileChooser;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.Map;
-import java.util.function.Supplier;
-import github.heyweol.demo.EntityType;
-
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.entity.Entity;
 
-import github.heyweol.demo.utils.SceneManager;
-import github.heyweol.demo.components.InteractiveItemComponent;
+import github.heyweol.demo.EntityType;
 import github.heyweol.demo.IsometricGrid;
-
+import github.heyweol.demo.components.InteractiveItemComponent;
+import github.heyweol.demo.utils.MachineIdentifier;
+import github.heyweol.demo.utils.SceneManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
@@ -113,21 +105,21 @@ public class RadialMenu extends Pane {
         Map<String, Integer> materials = materialListSupplier.get();
         
         try {
-          ApiClient.getInstance().shareScreenshot(
-                  screenshotFile,
-                  shareData.nickname,
-                  shareData.description,
-                  machineId,
-                  materials,
-                  response -> {
-                    if (response.isSuccess()) {
-                      FXGL.getNotificationService().pushNotification("Screenshot shared successfully!");
-                    } else {
-                      FXGL.getNotificationService().pushNotification("Failed to share screenshot: " + response.getErrorMessage());
-                      System.out.println("Failed to share screenshot 1: " + response.getErrorMessage());
-                    }
-                  }
-          );
+//          ApiClient.getInstance().shareScreenshot(
+//                  screenshotFile,
+//                  shareData.nickname,
+//                  shareData.description,
+//                  machineId,
+//                  materials,
+//                  response -> {
+//                    if (response.isSuccess()) {
+//                      FXGL.getNotificationService().pushNotification("Screenshot shared successfully!");
+//                    } else {
+//                      FXGL.getNotificationService().pushNotification("Failed to share screenshot: " + response.getErrorMessage());
+//                      System.out.println("Failed to share screenshot 1: " + response.getErrorMessage());
+//                    }
+//                  }
+//          );
         } catch (Exception e) {
           FXGL.getNotificationService().pushNotification("Failed to share screenshot 2: " + e.getMessage());
           System.out.println("Failed to share screenshot 3: " + e.getMessage());
@@ -163,39 +155,32 @@ public class RadialMenu extends Pane {
   }
 
   private void clearScene() {
-    // Clear all entities from the game world
-//    FXGL.getGameWorld().getEntities().forEach(entity -> {
-//      // Remove the entity from the isometric grid
-//      // only TYPE==FLOOR_ITEM and TYPE==WALL_ITEM
-//      if (entity.getType() == EntityType.FLOOR_ITEM || entity.getType() == EntityType.WALL_ITEM)
-//      {
-//        isometricGrid.removeEntity(entity);
-//
-//        // Remove the entity from the game world
-//        entity.removeFromWorld();
-//      }
-//    });
-    
-    List<Entity> entitiesToRemove = new ArrayList<>();
-    FXGL.getGameWorld().getEntities().forEach(entity -> {
-      // Remove the entity from the isometric grid
-      // only TYPE==FLOOR_ITEM and TYPE==WALL_ITEM
-      if (entity.getType() == EntityType.FLOOR_ITEM || entity.getType() == EntityType.WALL_ITEM) {
-        isometricGrid.removeEntity(entity);
-        entitiesToRemove.add(entity);
-      }
-    });
-    entitiesToRemove.forEach(Entity::removeFromWorld);
-    // Clear the selection
-    InteractiveItemComponent.deselectAll();
+    // Show confirmation dialog
+    Alert alert = new Alert(AlertType.CONFIRMATION);
+    alert.setTitle("Clear Scene");
+    alert.setHeaderText("Are you sure you want to clear the scene?");
+    alert.setContentText("This action cannot be undone.");
 
-    // Clear any remaining UI elements (if necessary)
-//    FXGL.getGameScene().clearUINodes();
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+        // Proceed with clearing only if user confirms
+        List<Entity> entitiesToRemove = new ArrayList<>();
+        FXGL.getGameWorld().getEntities().forEach(entity -> {
+            if (entity.getType() == EntityType.FLOOR_ITEM || entity.getType() == EntityType.WALL_ITEM) {
+                isometricGrid.removeEntity(entity);
+                entitiesToRemove.add(entity);
+            }
+        });
+        entitiesToRemove.forEach(Entity::removeFromWorld);
+        
+        // Clear the selection
+        InteractiveItemComponent.deselectAll();
 
-    // Notify listeners that the materials have been updated
-    InteractiveItemComponent.addMaterialUpdateListener(() -> {});
+        // Notify listeners that the materials have been updated
+        InteractiveItemComponent.addMaterialUpdateListener(() -> {});
 
-    FXGL.getNotificationService().pushNotification("Scene cleared");
+        FXGL.getNotificationService().pushNotification("Scene cleared");
+    }
   }
 
   private void addMenuItem(String text, FontAwesomeSolid icon, Runnable action) {
@@ -211,10 +196,30 @@ public class RadialMenu extends Pane {
   }
   
   private Button createButton(String text, FontIcon icon) {
-    Button button = new Button(text, icon);
+    Button button = new Button();
+    
+    // For the center button, use your custom image
+    if (text.isEmpty()) {  // This is the center button
+        Image buttonImage = new Image(getClass().getResourceAsStream("/assets/textures/radial-menu-button.png"));
+        ImageView buttonImageView = new ImageView(buttonImage);
+        buttonImageView.setFitHeight(50);  // Adjust size as needed
+        buttonImageView.setFitWidth(50);   // Adjust size as needed
+        buttonImageView.setPreserveRatio(true);
+        button.setGraphic(buttonImageView);
+    } else {
+        // For other menu items, keep the icon
+        button.setGraphic(icon);
+    }
+    
+    button.setStyle("-fx-background-color: transparent;"); // Makes button background transparent
     button.setShape(new Circle(20));
     button.setMinSize(40, 40);
     button.setMaxSize(40, 40);
+    
+    // Add hover effect
+    button.setOnMouseEntered(e -> button.setOpacity(0.8));
+    button.setOnMouseExited(e -> button.setOpacity(1.0));
+    
     return button;
   }
   

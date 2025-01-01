@@ -36,15 +36,15 @@ public class ItemBar extends VBox {
   private VBox selectedCard;
   
   private static final Map<String, String> SEASON_NAMES = Map.of(
-          "s2", "ErTongJie",
-          "s3", "HaiDiLao");
+          "s2", "儿童劫",
+          "s3", "海底捞");
   
   private static final Map<String, String> CHARACTER_NAMES = Map.of(
-          "fr", "FuRong",
-          "lb", "LiuBian",
-          "sc", "SunCe",
-          "yj", "YuanJi",
-          "zc", "ZuoCi"
+          "fr", "傅融",
+          "lb", "刘辩",
+          "sc", "孙策",
+          "yj", "袁基",
+          "zc", "左慈"
   );
   
   public ItemBar(double width, double height) {
@@ -54,10 +54,16 @@ public class ItemBar extends VBox {
     seasonSelector = new ComboBox<>();
     seasonSelector.setPromptText("Season");
     seasonSelector.setOnAction(e -> updateCharacterSelector());
+    seasonSelector.getStyleClass().add("combo-box");
     
     characterSelector = new ComboBox<>();
     characterSelector.setPromptText("Character");
     characterSelector.setOnAction(e -> updateItemDisplay());
+    characterSelector.getStyleClass().add("combo-box");
+
+    // Load the CSS file
+    String cssPath = getClass().getResource("/assets/ui/css/drop-down.css").toExternalForm();
+    this.getStylesheets().add(cssPath);
     
     // Create an HBox to hold the selectors side by side
     HBox selectorBox = new HBox(10); // 10 is the spacing between elements
@@ -196,8 +202,8 @@ public class ItemBar extends VBox {
     materialsText.setFont(Font.font("System", 8));
     materialsText.setWrappingWidth(60);
     
-//    card.getChildren().addAll(imageView, nameLabel, materialsText);
-    card.getChildren().addAll(imageView);
+   card.getChildren().addAll(imageView, nameLabel, materialsText);
+    // card.getChildren().addAll(imageView);
     
     // Set up drag-and-drop
     card.setOnDragDetected(event -> {

@@ -1,23 +1,22 @@
 package github.heyweol.demo.ui;
 
-import javafx.scene.layout.VBox;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.control.Button;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Font;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.InnerShadow;
-
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.stream.Collectors;
+import javafx.scene.text.Font;
 
 public class MaterialSummaryWindow extends VBox {
   private VBox contentBox;
@@ -55,7 +54,7 @@ public class MaterialSummaryWindow extends VBox {
     header.setPadding(new Insets(0, 0, 3, 0));
     header.setStyle("-fx-border-color: #cccccc; -fx-border-width: 0 0 1 0;");
     
-    Label titleLabel = new Label("Materials Summary");
+    Label titleLabel = new Label("材料总览");
     titleLabel.setFont(Font.font("SimSun", 12));
     titleLabel.setStyle("-fx-font-weight: bold;");
     

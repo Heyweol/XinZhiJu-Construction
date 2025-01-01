@@ -6,8 +6,6 @@ import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.Spawns;
-import com.almasb.fxgl.physics.BoundingShape;
-import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.texture.Texture;
 
 import github.heyweol.demo.components.GridVisualizerComponent;
@@ -96,7 +94,7 @@ public class MyGameFactory implements EntityFactory {
     
     // Calculate the width based on the item's dimensions and the grid's tile width
     double tileWidth = isometricGrid.getTileWidth();
-    double itemWidth = tileWidth + (item.getWidth() - 1 + item.getLength() - 1) * (tileWidth / 2);
+    double itemWidth = tileWidth + (item.getNumTileWidth() - 1 + item.getNumTileHeight() - 1) * (tileWidth / 2);
     
     // Apply scaling
     double scaledWidth = itemWidth;
@@ -122,6 +120,7 @@ public class MyGameFactory implements EntityFactory {
             .with("scale", item.getScale())
             .with("textureFitWidth", texture.getFitWidth())
             .with("textureFitHeight", texture.getFitHeight())
+            .with("grid", isometricGrid)
             .with(new InteractiveItemComponent(isometricGrid, leftWallGrid, rightWallGrid, gridVisualizerComponent))
             .with(new ZIndexComponent())
             .build();

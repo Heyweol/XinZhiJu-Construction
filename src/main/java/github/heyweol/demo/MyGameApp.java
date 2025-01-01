@@ -33,6 +33,7 @@ import github.heyweol.demo.ui.ItemBar;
 import github.heyweol.demo.ui.MainGameScene;
 import github.heyweol.demo.ui.MaterialSummaryWindow;
 import github.heyweol.demo.ui.RadialMenu;
+import github.heyweol.demo.ui.StartScene;
 import github.heyweol.demo.ui.TutorialWindow;
 import github.heyweol.demo.utils.ResourceManager;
 import github.heyweol.demo.utils.SceneManager;
@@ -50,6 +51,10 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
@@ -99,13 +104,14 @@ public class MyGameApp extends GameApplication {
   private Supplier<File> screenshotSupplier = this::takeCustomScreenshot;
   private TutorialWindow tutorialWindow;
 
+  private StartScene startScene;
   
   @Override
   protected void initSettings(GameSettings settings) {
     settings.setHeight(game_height);
     settings.setWidth(game_width);
     settings.setTitle("心纸居");
-    settings.setVersion("0.1");
+    settings.setVersion("0.1.2");
     
     settings.setGameMenuEnabled(false);
     
@@ -114,6 +120,18 @@ public class MyGameApp extends GameApplication {
     settings.setSceneFactory(new SceneFactory() {
       @Override
       public LoadingScene newLoadingScene() {
+        // Create gradient background (same as StartScene)
+        LinearGradient gradient = new LinearGradient(
+            0, 0,    // start point
+            0, 1,    // end point
+            true,    // proportional
+            CycleMethod.NO_CYCLE,
+            new Stop(0, javafx.scene.paint.Color.web("#b4c8df")),   // top color
+            new Stop(1, javafx.scene.paint.Color.web("#f4f6fc"))    // bottom color
+        );
+        
+        Rectangle background = new Rectangle(game_width, game_height, gradient);
+        
         Image loadingImage = new Image(getClass().getResourceAsStream("/assets/textures/loading.png"));
         ImageView imageView = new ImageView(loadingImage);
         imageView.setFitWidth(game_width);
@@ -123,7 +141,14 @@ public class MyGameApp extends GameApplication {
         return new LoadingScene() {
             @Override
             public void onCreate() {
-                getContentRoot().getChildren().add(imageView);
+                // Center the image if needed
+                double x = (game_width - imageView.getBoundsInLocal().getWidth()) / 2;
+                double y = (game_height - imageView.getBoundsInLocal().getHeight()) / 2;
+                imageView.setTranslateX(x);
+                imageView.setTranslateY(y);
+                
+                // Add both background and image
+                getContentRoot().getChildren().addAll(background, imageView);
             }
         };
       }
@@ -133,6 +158,18 @@ public class MyGameApp extends GameApplication {
 
   @Override
   protected void initGame() {
+    // Create and show start scene
+    FXGL.runOnce(() -> {
+        startScene = new StartScene(game_width, game_height);
+        startScene.setOnStartAction(() -> {
+            FXGL.getSceneService().popSubScene();
+            initializeGameContent();
+        });
+        FXGL.getSceneService().pushSubScene(startScene);
+    }, Duration.ZERO);
+  }
+  
+  private void initializeGameContent() {
     // Register a scene load listener to update the material list
     SceneManager.addSceneLoadListener(this::updateMaterialSummary);
     
@@ -187,10 +224,10 @@ public class MyGameApp extends GameApplication {
                             item -> item.getFilename().split("_")[1], // Character
                             Collectors.groupingBy(item -> {
                               String filename = item.getFilename();
-                              if (filename.contains("guajian")) return "Wall";
-                              if (filename.contains("qiju")) return "Furniture";
-                              if (filename.contains("zhiwu")) return "Misc";
-                              if (filename.contains("zhuangshi")) return "Decor";
+                              if (filename.contains("guajian")) return "挂件";
+                              if (filename.contains("qiju")) return "起居";
+                              if (filename.contains("zhiwu")) return "置物";
+                              if (filename.contains("zhuangshi")) return "装饰";
                               return "其他";
                             })
                     )
@@ -258,10 +295,10 @@ public class MyGameApp extends GameApplication {
               gridPos.getX(), gridPos.getY()));
     });
     
-    tutorialWindow = new TutorialWindow();
-    FXGL.addUINode(tutorialWindow);
-    
-    showTutorial();
+//    tutorialWindow = new TutorialWindow();
+//    FXGL.addUINode(tutorialWindow);
+//
+//    showTutorial();
   }
   
   @Override
@@ -298,7 +335,7 @@ public class MyGameApp extends GameApplication {
             Point2D gridPos = isometricGrid.getGridPosition(mousePos.getX(), mousePos.getY());
             System.out.println("gridPos: " + gridPos);
 //            System.out.println("Can place item: " + isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength()));
-            if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getWidth(), selectedItem.getLength())) {
+            if (isometricGrid.canPlaceItem((int) gridPos.getX(), (int) gridPos.getY(), selectedItem.getNumTileWidth(), selectedItem.getNumTileHeight())) {
               Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
               spawnItem(selectedItem, isoPos, EntityType.FLOOR_ITEM);
             }
@@ -357,11 +394,14 @@ public class MyGameApp extends GameApplication {
   @Override
   protected void onUpdate(double tpf) {
     super.onUpdate(tpf);
-    if (isDevMode && ! positionText.isVisible()) {
-      positionText.setVisible(true);
-    }
-    if (!isDevMode && positionText.isVisible()) {
-      positionText.setVisible(false);
+    // Only check position text visibility if it has been initialized
+    if (positionText != null) {
+        if (isDevMode && !positionText.isVisible()) {
+            positionText.setVisible(true);
+        }
+        if (!isDevMode && positionText.isVisible()) {
+            positionText.setVisible(false);
+        }
     }
   }
   
@@ -427,7 +467,9 @@ public class MyGameApp extends GameApplication {
                 .put("item", selectedItem)
                 .put("type", type)
                 .put("wallGrid", wallNow)
-                .put("isLeftWall", wallNow == leftWallGrid));
+                .put("isLeftWall", wallNow == leftWallGrid)
+                .put("gridX", (int)wallGridPos.getX())
+                .put("gridY", (int)wallGridPos.getY()));
         
 //        Point2D wallTextureOffset = new Point2D(-placedWallItem.getDouble("textureFitWidth")/2,-placedWallItem.getDouble("textureFitHeight"));
         Point2D wallIsoPos = wallNow.getWallPosition((int) wallGridPos.getX(), (int) wallGridPos.getY());
@@ -443,7 +485,9 @@ public class MyGameApp extends GameApplication {
         }
         Entity placedItem = spawn(entityType, new SpawnData(position.getX(), position.getY())
                 .put("item", selectedItem)
-                .put("type", type));
+                .put("type", type)
+                .put("gridX", (int)gridPos.getX())
+                .put("gridY", (int)gridPos.getY()));
         
         Point2D textureOffset = new Point2D(-placedItem.getDouble("textureFitWidth")/2,-placedItem.getDouble("textureFitHeight"));
         Point2D isoPos = isometricGrid.getIsometricPosition((int) gridPos.getX(), (int) gridPos.getY());
@@ -531,11 +575,11 @@ public class MyGameApp extends GameApplication {
     pauseMenu.setTranslateY(FXGL.getAppHeight() / 2 - 50);
     
     // Tutorial Button
-    Button tutorialButton = new Button("Show Tutorial");
-    tutorialButton.setOnAction(e -> {
-      hidePauseMenu();
-      showTutorial();
-    });
+    // Button tutorialButton = new Button("Show Tutorial");
+    // tutorialButton.setOnAction(e -> {
+    //   hidePauseMenu();
+    //   showTutorial();
+    // });
     
     // Dev Mode Toggle
     CheckBox devModeCheckBox = new CheckBox("Enable Dev Mode");
@@ -554,7 +598,8 @@ public class MyGameApp extends GameApplication {
     Button closeButton = new Button("Close");
     closeButton.setOnAction(e -> hidePauseMenu());
     
-    pauseMenu.getChildren().addAll(tutorialButton, devModeCheckBox, closeButton);
+    // pauseMenu.getChildren().addAll(tutorialButton, devModeCheckBox, closeButton);
+    pauseMenu.getChildren().addAll(devModeCheckBox, closeButton);
     FXGL.addUINode(pauseMenu);
   }
   
